@@ -50,12 +50,26 @@
       const mobileMapMode=window.matchMedia('(max-width:700px),(pointer:coarse)').matches;
       const areaGeometryCache=new Map();
       const esc=v=>String(v??'–').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-      const typeOf=x=>x.camera_categories?.name||'รอจัดประเภท';
       const projectOf=x=>x.project||x.ownership_category||'ไม่ระบุโครงการ';
+      /* Imported records use project + camera_type as their source of truth.
+         Derive the visual category when a legacy record has no category_id. */
+      const typeOf=x=>{
+        const assigned=String(x.camera_categories?.name||'').trim();
+        if(assigned&&assigned!=='รอระบุประเภทย่อย')return assigned;
+        const text=`${projectOf(x)} ${x.camera_type||''}`.toLowerCase();
+        if(text.includes('กอ.รมน')||text.includes('6เมือง')||text.includes('6 เมือง'))return 'กอ.รมน.(6เมืองหลัก)';
+        if(text.includes('มหาดไทย')||text.includes('สป.มท'))return 'มหาดไทย (สป.มท)';
+        if(text.includes('เอกชน')||text.includes('private'))return 'เอกชน';
+        if(/ยุทธ|tactical/.test(text))return 'ยุทธวิธี';
+        if(/4\s*g/.test(text))return '4G';
+        if(/wi\s*-?\s*fi|wifi/.test(text))return 'WI-FI';
+        return assigned||'รอระบุประเภทย่อย';
+      };
       const usesDashFields=x=>['กล้อง กอ.รมน. (6เมืองหลัก)','มหาดไทย (สป.มท.)'].includes(projectOf(x));
       const markerUid=x=>usesDashFields(x)?'':String(x.uid||'').trim();
       const markerText=x=>markerDetailsVisible&&markerLabelsActive?[`UID: ${String(x.uid||'-').trim()||'-'}`,x.camera_name||x.name||'กล้อง CCTV',stationOf(x)]:'';
-      const iconOf=x=>{const c=x.camera_categories||{},options={color:c.marker_color||undefined,symbol:c.marker_icon||undefined,text:markerText(x),subtype:x.camera_type};if(window.CCTVMarkerSystem?.icon)return window.CCTVMarkerSystem.icon('camera',options);return L.divIcon({className:'cctv-unified-marker-host',html:`<span style="display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;background:${esc(c.marker_color||'#0ea5e9')};color:#fff;font:700 16px/1 system-ui;transform:rotate(-45deg)"><b style="transform:rotate(45deg)">📹</b></span>`,iconSize:[34,38],iconAnchor:[17,34],popupAnchor:[0,-34]})};
+      const categoryOf=x=>categories.find(category=>category.name===typeOf(x))||x.camera_categories||{};
+      const iconOf=x=>{const c=categoryOf(x),options={color:c.marker_color||'#64748b',symbol:c.marker_icon||undefined,text:markerText(x),subtype:typeOf(x)};if(window.CCTVMarkerSystem?.icon)return window.CCTVMarkerSystem.icon('camera',options);return L.divIcon({className:'cctv-unified-marker-host',html:`<span style="display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;background:${esc(c.marker_color||'#64748b')};color:#fff;font:700 16px/1 system-ui;transform:rotate(-45deg)"><b style="transform:rotate(45deg)">📹</b></span>`,iconSize:[34,38],iconAnchor:[17,34],popupAnchor:[0,-34]})};
 async function loadAdministrativeBoundaries(){
   try{
     let geojson=window.NARATHIWAT_BOUNDARIES;
