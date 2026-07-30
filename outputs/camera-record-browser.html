@@ -32,7 +32,7 @@
       if(!session)return;
       const db=session.client,rows=[];
       for(let from=0;;from+=500){
-        const r=await db.from('cctv_locations').select('id,camera_name,name,uid,camera_type,ownership_category,area,station,lat,lng,status').order('camera_name').range(from,from+499);
+        const r=await db.from('cctv_locations').select('id,camera_name,name,uid,camera_type,ownership_category,area,lat,lng,status').order('camera_name').range(from,from+499);
         if(r.error){$('summary').textContent='โหลดข้อมูลไม่สำเร็จ: '+r.error.message;return}
         rows.push(...(r.data||[]));
         if((r.data||[]).length<500)break;
@@ -41,7 +41,7 @@
       all=rows.map(row=>({...row,area:[row.station,row.area].filter((value,index,values)=>value&&values.indexOf(value)===index).join(' · ')}));
       const owners=[...new Set(all.map(x=>x.ownership_category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
       $('owner').innerHTML='<option value="">ทุกหน่วยงานเจ้าของ</option>'+owners.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
-      const totals=all.reduce((out,row)=>{const station=row.station||'ไม่ระบุ สภ.';out[station]=(out[station]||0)+1;return out},{});
+      const totals=all.reduce((out,row)=>{const station=row.area||'ไม่ระบุ สภ.';out[station]=(out[station]||0)+1;return out},{});
       $('station').innerHTML='<option value="">ทุก สภ.</option>'+Object.keys(totals).sort((a,b)=>a.localeCompare(b,'th')).map(name=>`<option value="${esc(name)}">${esc(name)} (${totals[name].toLocaleString()} กล้อง)</option>`).join('');
       render();
     }
