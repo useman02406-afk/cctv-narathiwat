@@ -441,6 +441,33 @@
     fix();
   }
 
+  // Maintenance and inspection forms historically loaded only 2,000 camera
+  // options.  Keep their native CRUD code intact, then replace the selector
+  // with the complete paged result once authentication is ready.
+  async function hydrateFullCameraSelect(session) {
+    if (!/\/(camera-maintenance|camera-inspections)\.html$/i.test(location.pathname)) return;
+    const select = document.getElementById('camera');
+    if (!select) return;
+    const rows = [];
+    for (let from = 0; ; from += 500) {
+      const result = await session.client
+        .from('cctv_locations')
+        .select('id,uid,camera_name,name,area')
+        .order('id')
+        .range(from, from + 499);
+      if (result.error) return;
+      rows.push(...(result.data || []));
+      if ((result.data || []).length < 500) break;
+    }
+    const current = select.value;
+    const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const label = camera => [camera.uid, camera.camera_name || camera.name, camera.area].filter(Boolean).join(' · ') || `กล้อง #${camera.id}`;
+    select.innerHTML = '<option value="">เลือกจุดกล้อง</option>' + rows.map(camera => `<option value="${camera.id}">${escape(label(camera))}</option>`).join('');
+    select.value = current;
+    const notice = document.getElementById('notice');
+    if (notice) notice.textContent = `${notice.textContent.replace(/ · จุดกล้องที่เลือกได้ \d+ จุด$/, '')} · เลือกจุดกล้องได้ ${rows.length.toLocaleString()} จุด`;
+  }
+
   // The auth check is asynchronous, so DOMContentLoaded may already have fired
   // by the time it completes. Bind now and also retry after the DOM is ready.
   if (!bindLogout()) document.addEventListener('DOMContentLoaded', bindLogout, { once: true });
@@ -484,6 +511,7 @@
     normalizeCameraOwnerOptions();
     enableRiskPersonPdfPrint();
     repairDashboardRecentCameraOwners(window.cctvSession);
+    hydrateFullCameraSelect(window.cctvSession);
   }
 
   function showAccessError() {
