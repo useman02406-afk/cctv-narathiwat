@@ -46,14 +46,15 @@
     (()=>{
       let db,items=[],categories=[],map,layer,boundaryLayer,selectedAreaLayer,hasFitted=false,markerDetailsVisible=true;
       const $=id=>document.getElementById(id);
-      let areaGeometry=null,areaLookupToken=0,renderToken=0;
+      let areaGeometry=null,areaLookupToken=0,renderToken=0,markerLabelsActive=false;
+      const mobileMapMode=window.matchMedia('(max-width:700px),(pointer:coarse)').matches;
       const areaGeometryCache=new Map();
       const esc=v=>String(v??'–').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
       const typeOf=x=>x.camera_categories?.name||'รอจัดประเภท';
       const projectOf=x=>x.project||x.ownership_category||'ไม่ระบุโครงการ';
       const usesDashFields=x=>['กล้อง กอ.รมน. (6เมืองหลัก)','มหาดไทย (สป.มท.)'].includes(projectOf(x));
       const markerUid=x=>usesDashFields(x)?'':String(x.uid||'').trim();
-      const markerText=x=>markerDetailsVisible?[`UID: ${String(x.uid||'-').trim()||'-'}`,x.camera_name||x.name||'กล้อง CCTV',stationOf(x)]:'';
+      const markerText=x=>markerDetailsVisible&&markerLabelsActive?[`UID: ${String(x.uid||'-').trim()||'-'}`,x.camera_name||x.name||'กล้อง CCTV',stationOf(x)]:'';
       const iconOf=x=>{const c=x.camera_categories||{},options={color:c.marker_color||undefined,symbol:c.marker_icon||undefined,text:markerText(x),subtype:x.camera_type};if(window.CCTVMarkerSystem?.icon)return window.CCTVMarkerSystem.icon('camera',options);return L.divIcon({className:'cctv-unified-marker-host',html:`<span style="display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;background:${esc(c.marker_color||'#0ea5e9')};color:#fff;font:700 16px/1 system-ui;transform:rotate(-45deg)"><b style="transform:rotate(45deg)">📹</b></span>`,iconSize:[34,38],iconAnchor:[17,34],popupAnchor:[0,-34]})};
 async function loadAdministrativeBoundaries(){
   try{
@@ -133,6 +134,8 @@ async function loadAdministrativeBoundaries(){
         }
         const visible=visibleItems(),query=$('search').value.trim();
         const hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value||$('station')?.value);
+        const markerLimit=mobileMapMode?(hasFilter?1200:700):visible.length;
+        const renderItems=visible.slice(0,markerLimit);
         const points=[];
         layer.clearLayers();
         if(selectedAreaLayer){map.removeLayer(selectedAreaLayer);selectedAreaLayer=null}
@@ -148,17 +151,18 @@ async function loadAdministrativeBoundaries(){
         $('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;render()});
         const drawFrom=start=>{
           if(token!==renderToken)return;
-          const end=Math.min(start+120,visible.length);
+          const end=Math.min(start+80,renderItems.length);
           for(let index=start;index<end;index++){
-            const x=visible[index],lat=Number(x.lat),lng=Number(x.lng);
+            const x=renderItems[index],lat=Number(x.lat),lng=Number(x.lng);
             if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)continue;
             L.marker([lat,lng],{icon:iconOf(x)}).bindPopup(popup(x)).addTo(layer);
             points.push([lat,lng]);
           }
           $('shown').textContent=points.length.toLocaleString();
-          if(end<visible.length){requestAnimationFrame(()=>drawFrom(end));return}
+          if(end<renderItems.length){requestAnimationFrame(()=>drawFrom(end));return}
           const spatialNote=areaGeometry&&areaGeometry.query===query?' · กรองตามขอบเขตพื้นที่จริง':'';
-          $('notice').textContent=`พบ ${visible.length.toLocaleString()} รายการ · แสดงหมุด ${points.length.toLocaleString()} จุด${query?` · ค้นหา “${query}” แล้ว`:''}${spatialNote}`;
+          const limitNote=renderItems.length<visible.length?` · โหมดมือถือแสดง ${renderItems.length.toLocaleString()} จุดเพื่อความลื่นไหล — เลือก สภ. หรือค้นหาเพื่อดูจุดอื่น`:'';
+          $('notice').textContent=`พบ ${visible.length.toLocaleString()} รายการ · แสดงหมุด ${points.length.toLocaleString()} จุด${query?` · ค้นหา “${query}” แล้ว`:''}${spatialNote}${limitNote}`;
           if(points.length&&(!hasFitted||hasFilter)){map.fitBounds(points,{padding:[28,28],maxZoom:14});hasFitted=true}
         };
         requestAnimationFrame(()=>drawFrom(0));
@@ -183,6 +187,8 @@ async function loadAdministrativeBoundaries(){
       const initialStart=start;
       start=event=>{
         initialStart(event);
+        markerLabelsActive=!mobileMapMode&&map?.getZoom()>=14;
+        map?.on('zoomend',()=>{const next=!mobileMapMode&&map.getZoom()>=14;if(next!==markerLabelsActive){markerLabelsActive=next;render()}});
         $('cameraMarkerEye')?.remove();
         const applyButton=$('applyAreaFilter');
         if(applyButton)applyButton.addEventListener('click',applyAreaFilter);
