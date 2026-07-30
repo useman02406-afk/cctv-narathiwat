@@ -1,4 +1,4 @@
-﻿(function () {
+﻿﻿(function () {
   'use strict';
   const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
   const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
@@ -64,7 +64,7 @@
       loader.id = 'auth-loading';
       loader.setAttribute('role', 'status');
       loader.setAttribute('aria-live', 'polite');
-      loader.innerHTML = '<span><i aria-hidden="true"></i>เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธดเธ—เธเธดเนเธเธฒเธฃเนเธเนเธเธฒเธโ€ฆ</span>';
+      loader.innerHTML = '<span><i aria-hidden="true"></i>กำลังตรวจสอบสิทธิ์การใช้งาน…</span>';
       document.body.appendChild(loader);
     };
     if (document.body) render(); else document.addEventListener('DOMContentLoaded', render, { once: true });
@@ -109,7 +109,7 @@
       const message = document.createElement('span');
       const retry = document.createElement('button');
       retry.type = 'button';
-      retry.textContent = 'เธฅเธญเธเน€เธเธทเนเธญเธกเธ•เนเธญเนเธซเธกเน';
+      retry.textContent = 'ลองเชื่อมต่อใหม่';
       retry.addEventListener('click', async () => {
         retry.disabled = true;
         try { await client.auth.getSession(); } finally { retry.disabled = false; }
@@ -120,7 +120,7 @@
       const update = () => {
         const offline = !navigator.onLine;
         status.hidden = !offline;
-        message.textContent = offline ? 'เธเธ“เธฐเธเธตเนเธญเธญเธเนเธฅเธเน โ€” เธเนเธญเธกเธนเธฅเนเธซเธกเนเธญเธฒเธเธขเธฑเธเนเธกเนเธ–เธนเธเธเธฑเธเธ—เธถเธ' : '';
+        message.textContent = offline ? 'ขณะนี้ออฟไลน์ — ข้อมูลใหม่อาจยังไม่ถูกบันทึก' : '';
       };
       window.addEventListener('online', update);
       window.addEventListener('offline', update);
@@ -140,7 +140,7 @@
       const link = document.createElement('a');
       link.id = 'skip-to-content';
       link.href = '#' + content.id;
-      link.textContent = 'เธเนเธฒเธกเนเธเธขเธฑเธเน€เธเธทเนเธญเธซเธฒเธซเธฅเธฑเธ';
+      link.textContent = 'ข้ามไปยังเนื้อหาหลัก';
       document.body.insertBefore(link, document.body.firstChild);
     };
     if (document.body) render(); else document.addEventListener('DOMContentLoaded', render, { once: true });
@@ -154,8 +154,8 @@
       button.id = 'back-to-top';
       button.type = 'button';
       button.className = 'back-to-top';
-      button.setAttribute('aria-label', 'เธเธฅเธฑเธเธเธถเนเธเธ”เนเธฒเธเธเธ');
-      button.innerHTML = '<span aria-hidden="true">โ‘</span><span>เธเธเธชเธธเธ”</span>';
+      button.setAttribute('aria-label', 'กลับขึ้นด้านบน');
+      button.innerHTML = '<span aria-hidden="true">โ‘</span><span>บนสุด</span>';
       button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
       const update = () => { button.hidden = window.scrollY < 420; };
       window.addEventListener('scroll', update, { passive: true });
@@ -214,8 +214,8 @@
       const link = document.createElement('a');
       link.id = 'camera-duplicate-shortcut';
       link.href = 'camera-duplicate-review.html';
-      link.textContent = '๐” เธ•เธฃเธงเธเธเนเธญเธกเธนเธฅเธเนเธณ';
-      link.setAttribute('aria-label', 'เน€เธเธดเธ”เธซเธเนเธฒเธ•เธฃเธงเธเธชเธญเธเธเนเธญเธกเธนเธฅเธเธฅเนเธญเธเธเนเธณ');
+      link.textContent = '๐” ตรวจข้อมูลซ้ำ';
+      link.setAttribute('aria-label', 'เปิดหน้าตรวจสอบข้อมูลกล้องซ้ำ');
       link.style.cssText = 'position:fixed;right:18px;bottom:114px;z-index:99999;padding:10px 14px;border-radius:999px;background:#7c3aed;color:#fff;text-decoration:none;font:700 13px/1.2 system-ui,sans-serif;box-shadow:0 5px 18px #5b21b666;border:1px solid #ffffff66';
       document.body.appendChild(link);
     };
@@ -225,12 +225,12 @@
   function decorateUserIdentity(session) {
     const profile = session?.profile;
     if (!profile) return;
-    const roleLabels = { ADMIN: 'เธเธนเนเธ”เธนเนเธฅเธฃเธฐเธเธ', OFFICER: 'เน€เธเนเธฒเธซเธเนเธฒเธ—เธตเน', VIEWER: 'เธเธนเนเนเธเนเธเธฒเธ' };
-    const name = profile.full_name || session.user?.email || 'เธเธนเนเนเธเนเธเธฒเธ';
+    const roleLabels = { ADMIN: 'ผู้ดูแลระบบ', OFFICER: 'เจ้าหน้าที่', VIEWER: 'ผู้ใช้งาน' };
+    const name = profile.full_name || session.user?.email || 'ผู้ใช้งาน';
     document.querySelectorAll('.user').forEach((node) => {
       node.dataset.role = profile.role || 'VIEWER';
-      node.textContent = `${name} ยท ${roleLabels[profile.role] || 'เธเธนเนเนเธเนเธเธฒเธ'}`;
-      node.setAttribute('aria-label', `เธเธฑเธเธเธต ${name}, เธชเธดเธ—เธเธดเน ${roleLabels[profile.role] || 'เธเธนเนเนเธเนเธเธฒเธ'}`);
+      node.textContent = `${name} · ${roleLabels[profile.role] || 'ผู้ใช้งาน'}`;
+      node.setAttribute('aria-label', `บัญชี ${name}, สิทธิ์ ${roleLabels[profile.role] || 'ผู้ใช้งาน'}`);
     });
   }
 
@@ -247,14 +247,14 @@
     const dialog = document.createElement('dialog');
     dialog.id = 'quick-help-dialog';
     dialog.className = 'quick-help-dialog';
-    dialog.innerHTML = '<form method="dialog"><button class="quick-help-close" aria-label="เธเธดเธ”">ร—</button><h2>เธเธตเธขเนเธฅเธฑเธ”เธเธฒเธฃเนเธเนเธเธฒเธ</h2><dl><dt>Esc</dt><dd>เธเธดเธ”เน€เธกเธเธนเธกเธทเธญเธ–เธทเธญเธ—เธตเนเน€เธเธดเธ”เธญเธขเธนเน</dd><dt>Tab</dt><dd>เน€เธเนเธฒเธ–เธถเธเธเธธเนเธกเธเนเธฒเธกเนเธเธขเธฑเธเน€เธเธทเนเธญเธซเธฒเธซเธฅเธฑเธ</dd></dl><button class="quick-help-done" value="close">เน€เธเนเธฒเนเธเนเธฅเนเธง</button></form>';
+    dialog.innerHTML = '<form method="dialog"><button class="quick-help-close" aria-label="ปิด">×</button><h2>คีย์ลัดการใช้งาน</h2><dl><dt>Esc</dt><dd>ปิดเมนูมือถือที่เปิดอยู่</dd><dt>Tab</dt><dd>เข้าถึงปุ่มข้ามไปยังเนื้อหาหลัก</dd></dl><button class="quick-help-done" value="close">เข้าใจแล้ว</button></form>';
     document.body.appendChild(dialog);
     const button = document.createElement('button');
     button.id = 'header-help-button';
     button.type = 'button';
     button.className = 'header-help-button';
-    button.title = 'เธงเธดเธเธตเนเธเนเธเธฒเธเนเธฅเธฐเธเธตเธขเนเธฅเธฑเธ”';
-    button.setAttribute('aria-label', 'เน€เธเธดเธ”เธงเธดเธเธตเนเธเนเธเธฒเธเนเธฅเธฐเธเธตเธขเนเธฅเธฑเธ”');
+    button.title = 'วิธีใช้งานและคีย์ลัด';
+    button.setAttribute('aria-label', 'เปิดวิธีใช้งานและคีย์ลัด');
     button.textContent = '?';
     button.addEventListener('click', () => dialog.showModal());
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
@@ -285,20 +285,20 @@
     toggle.id = 'mobile-nav-toggle';
     toggle.type = 'button';
     toggle.className = 'mobile-nav-toggle';
-    toggle.setAttribute('aria-label', 'เน€เธเธดเธ”เน€เธกเธเธนเธซเธฅเธฑเธ');
+    toggle.setAttribute('aria-label', 'เปิดเมนูหลัก');
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i><span>เน€เธกเธเธน</span>';
+    toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i><span>เมนู</span>';
     toggle.addEventListener('click', () => {
       const open = document.body.classList.toggle('mobile-nav-open');
       toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'เธเธดเธ”เน€เธกเธเธนเธซเธฅเธฑเธ' : 'เน€เธเธดเธ”เน€เธกเธเธนเธซเธฅเธฑเธ');
+      toggle.setAttribute('aria-label', open ? 'ปิดเมนูหลัก' : 'เปิดเมนูหลัก');
       refreshMapLayouts();
     });
     nav.addEventListener('click', (event) => {
       if (event.target.closest('button, a')) {
         document.body.classList.remove('mobile-nav-open');
         toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', 'เน€เธเธดเธ”เน€เธกเธเธนเธซเธฅเธฑเธ');
+        toggle.setAttribute('aria-label', 'เปิดเมนูหลัก');
         refreshMapLayouts();
       }
     });
@@ -306,7 +306,7 @@
       if (event.key !== 'Escape' || !document.body.classList.contains('mobile-nav-open')) return;
       document.body.classList.remove('mobile-nav-open');
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.setAttribute('aria-label', 'เน€เธเธดเธ”เน€เธกเธเธนเธซเธฅเธฑเธ');
+      toggle.setAttribute('aria-label', 'เปิดเมนูหลัก');
       toggle.focus();
       refreshMapLayouts();
     });
@@ -319,13 +319,13 @@
     if (!location.pathname.toLowerCase().endsWith('/command-center.html')) return;
     const add = () => {
       if (document.getElementById('home-search-nav')) return;
-      const group = [...document.querySelectorAll('.nav-group')].find(node => node.textContent.includes('เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธทเนเธเธ—เธตเน'));
+      const group = [...document.querySelectorAll('.nav-group')].find(node => node.textContent.includes('วิเคราะห์พื้นที่'));
       const target = group?.querySelector('.group-items');
       if (!target) return;
       const button = document.createElement('button');
       button.id = 'home-search-nav';
       button.type = 'button';
-      button.innerHTML = '<i class="fa-solid fa-house-chimney"></i><span>เธเนเธเธซเธฒเธเนเธฒเธ</span>';
+      button.innerHTML = '<i class="fa-solid fa-house-chimney"></i><span>ค้นหาบ้าน</span>';
       button.addEventListener('click', () => location.href = 'home-search.html');
       target.appendChild(button);
     };
@@ -343,7 +343,7 @@
       card.id = 'home-search-summary';
       card.className = 'overview-card';
       card.dataset.go = 'home-search.html';
-      card.innerHTML = '<i class="fa-solid fa-house-chimney"></i>เธเธฒเธเธเนเธญเธกเธนเธฅเธเนเธเธซเธฒเธเนเธฒเธ<b>' + total.toLocaleString('th-TH') + '</b><small>เธเนเธเธซเธฒเธ”เนเธงเธข PEANO เธเธทเนเธญ เธ—เธตเนเธญเธขเธนเน เธซเธฃเธทเธญเธเธดเธเธฑเธ”</small>';
+      card.innerHTML = '<i class="fa-solid fa-house-chimney"></i>ฐานข้อมูลค้นหาบ้าน<b>' + total.toLocaleString('th-TH') + '</b><small>ค้นหาด้วย PEANO ชื่อ ที่อยู่ หรือพิกัด</small>';
       card.addEventListener('click', () => location.href = 'home-search.html');
       grid.appendChild(card);
     };
@@ -380,8 +380,8 @@
   function normalizeCameraOwnerOptions() {
     if (!location.pathname.toLowerCase().endsWith('/camera-management.html')) return;
     const replacements = new Map([
-      ['เธเธฅเนเธญเธ เธเธเธ.เธ 9', 'เธเธฅเนเธญเธ เธเธเธ.เธ .9'],
-      ['เธเธฅเนเธญเธ เน€เธญเธเธเธ', 'เธเธฅเนเธญเธเน€เธญเธเธเธ']
+      ['กล้อง ผบช.ภ9', 'กล้อง ผบช.ภ.9'],
+      ['กล้อง เอกชน', 'กล้องเอกชน']
     ]);
     const normalize = () => document.querySelectorAll('#ownershipCategory option, #filterOwner option').forEach(option => {
       const corrected = replacements.get(option.value) || replacements.get(option.textContent.trim());
@@ -424,13 +424,13 @@
       rows.push(...(result.data || []));
       if ((result.data || []).length < 500) break;
     }
-    const byUid = new Map(rows.filter(row => row.uid).map(row => [String(row.uid).trim(), row.ownership_category || 'เนเธกเนเธฃเธฐเธเธธ']));
-    const byName = new Map(rows.filter(row => row.camera_name || row.name).map(row => [String(row.camera_name || row.name).trim(), row.ownership_category || 'เนเธกเนเธฃเธฐเธเธธ']));
+    const byUid = new Map(rows.filter(row => row.uid).map(row => [String(row.uid).trim(), row.ownership_category || 'ไม่ระบุ']));
+    const byName = new Map(rows.filter(row => row.camera_name || row.name).map(row => [String(row.camera_name || row.name).trim(), row.ownership_category || 'ไม่ระบุ']));
     const fix = () => document.querySelectorAll('#recentCameras tr').forEach(row => {
       if (row.dataset.ownerInserted === 'true') return;
       const cells = row.querySelectorAll('td');
       if (cells.length !== 5) return;
-      const owner = byUid.get(cells[1].textContent.trim()) || byName.get(cells[0].textContent.trim()) || 'เนเธกเนเธฃเธฐเธเธธ';
+      const owner = byUid.get(cells[1].textContent.trim()) || byName.get(cells[0].textContent.trim()) || 'ไม่ระบุ';
       const cell = document.createElement('td');
       cell.textContent = owner;
       row.insertBefore(cell, cells[3]);
@@ -454,13 +454,13 @@
       return location.replace('login.html?error=access');
     }
     document.querySelectorAll('select option').forEach((option) => {
-      if (option.value === 'เธเธฅเนเธญเธ เธเธเธ.เธ 9' || option.textContent === 'เธเธฅเนเธญเธ เธเธเธ.เธ 9') {
-        option.value = 'เธเธฅเนเธญเธ เธเธเธ.เธ .9';
-        option.textContent = 'เธเธฅเนเธญเธ เธเธเธ.เธ .9';
+      if (option.value === 'กล้อง ผบช.ภ9' || option.textContent === 'กล้อง ผบช.ภ9') {
+        option.value = 'กล้อง ผบช.ภ.9';
+        option.textContent = 'กล้อง ผบช.ภ.9';
       }
-      if (option.value === 'เธเธฅเนเธญเธ เน€เธญเธเธเธ' || option.textContent === 'เธเธฅเนเธญเธ เน€เธญเธเธเธ') {
-        option.value = 'เธเธฅเนเธญเธเน€เธญเธเธเธ';
-        option.textContent = 'เธเธฅเนเธญเธเน€เธญเธเธเธ';
+      if (option.value === 'กล้อง เอกชน' || option.textContent === 'กล้อง เอกชน') {
+        option.value = 'กล้องเอกชน';
+        option.textContent = 'กล้องเอกชน';
       }
     });
     window.cctvSession = { user: session.user, profile, client };
@@ -494,7 +494,7 @@
       const card = document.createElement('main');
       card.id = 'auth-connection-error';
       card.setAttribute('role', 'alert');
-      card.innerHTML = '<h1>เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเธดเธ”เธฃเธฐเธเธเนเธ”เน</h1><p>เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเน€เธเธทเนเธญเธกเธ•เนเธญเธซเธฃเธทเธญเธชเธดเธ—เธเธดเนเธเธฒเธฃเนเธเนเธเธฒเธเนเธ”เนเนเธเธเธ“เธฐเธเธตเน</p><div><button type="button" id="auth-retry">เธฅเธญเธเนเธซเธกเน</button><a href="login.html">เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเนเธซเธกเน</a></div>';
+      card.innerHTML = '<h1>ไม่สามารถเปิดระบบได้</h1><p>ไม่สามารถตรวจสอบการเชื่อมต่อหรือสิทธิ์การใช้งานได้ในขณะนี้</p><div><button type="button" id="auth-retry">ลองใหม่</button><a href="login.html">เข้าสู่ระบบใหม่</a></div>';
       card.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:grid;place-content:center;gap:12px;padding:28px;background:#071126;color:#fff;font:500 16px/1.5 Sarabun,system-ui,sans-serif;text-align:center';
       card.querySelector('h1').style.cssText = 'margin:0;color:#f2b62f;font-size:25px';
       card.querySelector('p').style.margin = '0';
