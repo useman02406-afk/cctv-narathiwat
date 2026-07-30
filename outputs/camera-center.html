@@ -46,12 +46,21 @@
       const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===location.hash.slice(1))||document.querySelector('.tab.active');if(selected)openTab(selected);
       overview.addEventListener('click',event=>{if(!event.target.closest('[data-open-quality]'))return;const tab=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src==='camera-data-quality.html');if(tab)openTab(tab)});
       const officialOwners=['กล้องมหาดไทย','กล้อง กอ.รมน. (6 เมืองหลัก)','กล้อง ผบช.ภ.9','กล้องเอกชน'];
-      const ownerOf=camera=>{const text=`${camera.ownership_category||''} ${camera.camera_type||''}`.toLowerCase();if(text.includes('มหาดไทย')||text.includes('สป.มท'))return officialOwners[0];if(text.includes('กอ.รมน')||text.includes('6 เมือง')||text.includes('6เมือง'))return officialOwners[1];if(text.includes('เอกชน')||text.includes('private'))return officialOwners[3];return officialOwners[2]};
+      const ownerOf=camera=>{const text=`${camera.project||''} ${camera.ownership_category||''} ${camera.camera_type||''}`.toLowerCase();if(text.includes('มหาดไทย')||text.includes('สป.มท'))return officialOwners[0];if(text.includes('กอ.รมน')||text.includes('6 เมือง')||text.includes('6เมือง'))return officialOwners[1];if(text.includes('เอกชน')||text.includes('private'))return officialOwners[3];return officialOwners[2]};
+      async function fetchAllCameras(db){
+        const rows=[];const pageSize=500;
+        for(let from=0;;from+=pageSize){
+          const result=await db.from('cctv_locations').select('camera_category_id,camera_type,status,ownership_category,project,lat,lng').range(from,from+pageSize-1);
+          if(result.error)return result;
+          rows.push(...(result.data||[]));
+          if((result.data||[]).length<pageSize)return {data:rows,error:null};
+        }
+      }
       async function loadSummary(event){
         const session=event.detail||window.cctvSession;if(!session)return;const db=session.client;
         const [categories,cameras,repairs]=await Promise.all([
           db.from('camera_categories').select('id,name,marker_color').eq('is_active',true).order('sort_order').order('name'),
-          db.from('cctv_locations').select('camera_category_id,camera_type,status,ownership_category,lat,lng'),
+          fetchAllCameras(db),
           db.from('camera_maintenance_tickets').select('*',{count:'exact',head:true}).not('status','in','("แก้ไขแล้ว","ยกเลิก")')
         ]);
         if(categories.error||cameras.error){overview.innerHTML='<article class="metric warn"><span>โหลดข้อมูลภาพรวมไม่สำเร็จ</span><b>–</b></article>';return}
