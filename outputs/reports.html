@@ -1,0 +1,83 @@
+﻿<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>เธจเธนเธเธขเนเธฃเธฒเธขเธเธฒเธ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-guard.js"></script>
+  <style>
+    :root{--blue:#0e7490;--ink:#172033;--muted:#64748b;--line:#dbeafe}*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:var(--ink);font-family:'Noto Sans Thai',sans-serif}.top{padding:14px clamp(18px,4vw,52px);background:linear-gradient(120deg,#0f4c5c,#0e7490);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px}.top h1{font-size:19px;margin:0}.top p{font-size:13px;margin:2px 0;color:#cffafe}.wrap{max-width:1250px;margin:26px auto;padding:0 18px}.back,.btn{border:0;border-radius:9px;padding:10px 13px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}.back{display:inline-block;background:#fff;color:#0e7490;margin-bottom:18px}.notice{background:#ecfeff;color:#0e7490;border-radius:10px;padding:11px 13px;margin-bottom:18px;font-size:13px}.notice.error{background:#fff1f2;color:#b42335}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:0 4px 16px #0f172a0c}.card .icon{font-size:22px;color:#0891b2}.card h2{font-size:16px;margin:8px 0 2px}.count{font-size:28px;font-weight:700}.muted{color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{background:#0e7490;color:#fff;font-size:13px}.btn.secondary{background:#334155}.btn.map{background:#1769e0}.btn:disabled{opacity:.6;cursor:wait}.tools{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.tools .btn{margin:0}.panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px;margin-top:18px}.panel h2{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left}th{color:#64748b;background:#f8fafc}.empty{color:var(--muted);padding:16px;text-align:center}@media(max-width:750px){.top{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.wrap{padding:0 12px}}@media print{.back,.tools,.actions{display:none!important}.top{background:#fff;color:#172033;border-bottom:1px solid #cbd5e1}.top p{color:#475569}.wrap{max-width:none;margin:14px}.card{box-shadow:none}.notice{border:1px solid #bae6fd}}
+  </style>
+</head>
+<body>
+  <header class="top"><div><h1><i class="fa-solid fa-chart-column"></i> เธจเธนเธเธขเนเธฃเธฒเธขเธเธฒเธ</h1><p>เธชเธฃเธธเธเธเนเธญเธกเธนเธฅเธ•เธฒเธกเธซเธกเธงเธ”เธ—เธตเนเนเธเนเธเธฒเธเธเธฃเธดเธ เธเธฃเนเธญเธกเธชเนเธเธญเธญเธ CSV เนเธฅเธฐเธเธดเธกเธเนเน€เธเนเธ PDF</p></div><div id="user">เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธดเธ—เธเธดเนโ€ฆ</div></header>
+  <main class="wrap">
+    <a class="back" href="home.html"><i class="fa-solid fa-arrow-left"></i> เธเธฅเธฑเธเธจเธนเธเธขเนเธเธฑเธเธเธฒเธเธฒเธฃ</a>
+    <div class="notice" id="notice">เธเธณเธฅเธฑเธเนเธซเธฅเธ”เธชเธฃเธธเธเธเนเธญเธกเธนเธฅโ€ฆ</div>
+    <section class="grid" id="cards"></section>
+    <section class="tools"><button class="btn secondary" id="print"><i class="fa-solid fa-print"></i> เธเธดเธกเธเนเธฃเธฒเธขเธเธฒเธ / PDF</button><button class="btn" id="exportAll"><i class="fa-solid fa-file-csv"></i> เธชเนเธเธญเธญเธเธชเธฃเธธเธ CSV</button></section>
+    <section class="panel"><h2>เธฃเธฒเธขเธเธฒเธฃเธชเนเธเธญเธญเธเธ•เธฒเธกเนเธกเธ”เธนเธฅ</h2><table><thead><tr><th>เนเธกเธ”เธนเธฅ</th><th>เธเธณเธเธงเธ</th><th>เธชเนเธเธญเธญเธ / เนเธเธเธ—เธตเน</th></tr></thead><tbody id="rows"></tbody></table></section>
+  </main>
+  <script>
+  (()=>{
+    let db,sets={}; const $=id=>document.getElementById(id);
+    const csv=value=>'"'+String(value??'').replaceAll('"','""')+'"';
+    const configs=[
+      ['cameras','เธเธฅเนเธญเธ CCTV','fa-video','cctv_locations','cctv','id,uid,camera_name,name,camera_type,ownership_category,area,status'],
+      ['cameraquality','เธ•เธฃเธงเธเธเธธเธ“เธ เธฒเธเธเนเธญเธกเธนเธฅเธเธฅเนเธญเธ','fa-shield-halved',null,'quality','id,uid,camera_name,name,camera_type,ownership_category,area,status'],
+      ['economic','เธเธทเนเธเธ—เธตเนเน€เธจเธฃเธฉเธเธเธดเธ','fa-building-columns','economic_data','economy','id,name,type,risk_level,score,cctv'],
+      ['incidents','เธเธฑเธเธ—เธถเธเน€เธซเธ•เธธเธเธฒเธฃเธ“เน','fa-triangle-exclamation','incidents','security','id,case_no,incident_category,incident_subcategory,incident_type,location,status,occurred_at'],
+      ['riskareas','เธเธธเธ”เน€เธชเธตเนเธขเธ / เธเธทเนเธเธ—เธตเนเน€เธเนเธฒเธฃเธฐเธงเธฑเธ','fa-draw-polygon','risk_areas','security','id,name,area_code,risk_category,risk_level,zone_kind,status,updated_at'],
+      ['riskpeople','เธเธธเธเธเธฅเธเธฅเธธเนเธกเน€เธชเธตเนเธขเธ','fa-user-shield','risk_person_records','security','id,risk_category,first_name,last_name,latitude,longitude'],
+      ['vehicles','เธฃเธ–เนเธเนเธเน€เธ•เธทเธญเธ','fa-car-burst','vehicle_alerts','cctv','id,plate_number,province,vehicle_type,alert_type,status,last_location'],
+      ['alerts','Smart Alert','fa-bell','smart_alerts','security','id,agency,datetime,mission,location,result,team'],
+      ['maintenance','เนเธเนเธเธเนเธญเธกเธเธฅเนเธญเธ','fa-screwdriver-wrench','camera_maintenance_tickets','cctv','id,issue_type,priority,status,reported_at'],
+      ['inspections','เธ•เธฃเธงเธเธชเธ เธฒเธเธเธฅเนเธญเธ','fa-clipboard-check','camera_inspections','cctv','id,connectivity,image_quality,power_status,inspected_at'],
+    ];
+    function download(name,data){if(!data.length){alert('เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅเธชเธณเธซเธฃเธฑเธเธชเนเธเธญเธญเธ');return}const fields=Object.keys(data[0]);const text='\ufeff'+[fields.join(','),...data.map(row=>fields.map(field=>csv(row[field])).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download=name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)}
+    function count(key){return (sets[key]||[]).length.toLocaleString('th-TH')}
+    function draw(){
+      const total=configs.filter(([key])=>key!=='cameraquality').reduce((sum,[key])=>sum+(sets[key]||[]).length,0);
+      const pendingSubtype=(sets.cameras||[]).filter(camera=>camera.camera_type==='เธฃเธญเธฃเธฐเธเธธเธเธฃเธฐเน€เธ เธ—เธขเนเธญเธข').length;
+      const unknownStatus=(sets.cameras||[]).filter(camera=>camera.status==='เนเธกเนเธฃเธฐเธเธธ').length;
+      const qualityHint=`เธฃเธญเธฃเธฐเธเธธเธเธฃเธฐเน€เธ เธ—เธขเนเธญเธข ${pendingSubtype.toLocaleString('th-TH')} ยท เธชเธ–เธฒเธเธฐเนเธกเนเธฃเธฐเธเธธ ${unknownStatus.toLocaleString('th-TH')}`;
+      const openLink=view=>view==='quality'?'<a class="btn map" href="camera-data-quality.html"><i class="fa-solid fa-shield-halved"></i> เธ•เธฃเธงเธเธชเธญเธ</a>':`<a class="btn map" href="${mapLink(view)}"><i class="fa-solid fa-map"></i> เนเธเธเธ—เธตเน</a>`;
+      $('cards').innerHTML=configs.map(([key,label,icon,,view])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">${key==='cameraquality'?qualityHint:'เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธฐเธเธ'}</div><div class="actions"><button class="btn" data-export="${key}"><i class="fa-solid fa-download"></i> CSV</button>${openLink(view)}</div></article>`).join('');
+      $('rows').innerHTML=configs.map(([key,label,,,view])=>`<tr><td>${label}</td><td>${count(key)}</td><td><button class="btn" data-export="${key}">CSV</button> ${openLink(view)}</td></tr>`).join('');
+      document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>download('report-'+button.dataset.export,sets[button.dataset.export]||[]));
+      $('exportAll').onclick=()=>download('command-center-summary',configs.map(([key,label])=>({module:label,total:(sets[key]||[]).length,exported_at:new Date().toISOString()})));
+      $('notice').textContent=`เธญเธฑเธเน€เธ”เธ•เน€เธกเธทเนเธญ ${new Date().toLocaleString('th-TH')} ยท เธฃเธงเธก ${total.toLocaleString('th-TH')} เธฃเธฒเธขเธเธฒเธฃ`;
+    }
+    async function readInQueue(table,columns,max=5000){
+      const all=[];
+      for(let from=0;from<max;from+=500){
+        const {data,error}=await db.from(table).select(columns).order('id',{ascending:true}).range(from,Math.min(from+499,max-1));
+        if(error)throw error;
+        all.push(...(data||[]));
+        if(!data||data.length<500)break;
+        await new Promise(resolve=>setTimeout(resolve,25));
+      }
+      return all;
+    }
+    async function load(){
+      sets={};$('notice').className='notice';const failed=[];
+      for(let index=0;index<configs.length;index++){
+        const row=configs[index],key=row[0],label=row[1],table=row[3],columns=row[5];
+        if(key==='cameraquality'){
+          sets[key]=(sets.cameras||[]).filter(camera=>camera.camera_type==='เธฃเธญเธฃเธฐเธเธธเธเธฃเธฐเน€เธ เธ—เธขเนเธญเธข'||camera.status==='เนเธกเนเธฃเธฐเธเธธ');
+          continue;
+        }
+        $('notice').textContent=`เธเธณเธฅเธฑเธเนเธซเธฅเธ” ${label} (${index+1}/${configs.length})โ€ฆ`;
+        try{sets[key]=await readInQueue(table,columns)}catch(error){console.warn('Report module skipped:',key,error);sets[key]=[];failed.push(label)}
+      }
+      draw();
+      if(failed.length){$('notice').textContent='เธชเธฃเธธเธเธเนเธญเธกเธนเธฅเธชเนเธงเธเธ—เธตเนเธญเนเธฒเธเนเธ”เนเนเธฅเนเธง ยท เธขเธฑเธเนเธซเธฅเธ”เนเธกเนเนเธ”เน: '+failed.join(', ');$('notice').className='notice error'}
+    }
+    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return;if(!['ADMIN','OFFICER'].includes(session.profile?.role)){alert('เธเธฑเธเธเธตเธเธตเนเนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเน€เธเนเธฒเธ–เธถเธเธจเธนเธเธขเนเธฃเธฒเธขเธเธฒเธ');location.replace('home.html');return}db=session.client;$('user').textContent=`${session.profile.full_name||session.user.email} ยท ${session.profile.role}`;$('print').onclick=()=>window.print();load()}
+    window.addEventListener('cctv-auth-ready',start,{once:true});if(window.cctvSession)start();
+  })();
+  </script>
+</body>
+</html>
+

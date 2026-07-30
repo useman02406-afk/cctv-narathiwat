@@ -1,0 +1,245 @@
+﻿<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>เธซเธเนเธฒเธซเธฅเธฑเธ | เธจเธนเธเธขเนเธเนเธญเธกเธนเธฅ CCTV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-guard.js"></script>
+  <style>
+    :root{--navy:#0c2340;--blue:#1769e0;--aqua:#10b9a6;--bg:#edf4fb;--ink:#163047;--muted:#66798e;--line:#d9e5f0;--card:#fff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#e7f1fc,#f4f6f7 60%,#f3ede3);color:var(--ink);font-family:'Noto Sans Thai',system-ui,sans-serif;min-height:100vh}header{background:linear-gradient(110deg,#0b2342,#123d67);color:#fff;padding:16px clamp(16px,4vw,42px);display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;gap:12px;align-items:center}.brand i{font-size:28px;color:#63e9d8}.brand h1{font-size:20px;margin:0}.brand p{margin:2px 0 0;color:#c8deef;font-size:12px}.header-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.user{font-size:13px;color:#dceaff}.header-tools button,.header-tools a{border:1px solid #ffffff55;background:#ffffff14;color:#fff;border-radius:8px;padding:8px 10px;text-decoration:none;font:600 12px 'Noto Sans Thai',sans-serif;cursor:pointer}.header-tools button:hover,.header-tools a:hover{background:#ffffff2b}.header-tools #logout{background:#c83d50;border-color:#e77885}.shell{max-width:1450px;margin:auto;padding:22px}.notice{border:1px solid #bad8ff;border-radius:12px;background:#f6fbff;color:#245f9e;padding:12px 15px;margin-bottom:17px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.stat{background:var(--card);border:1px solid #fff;border-radius:13px;padding:16px;box-shadow:0 8px 22px #1d3a5a12;border-left:5px solid var(--blue)}.stat:nth-child(2){border-left-color:#e58f12}.stat:nth-child(3){border-left-color:#da4357}.stat:nth-child(4){border-left-color:var(--aqua)}.stat span{font-size:13px;color:#55708b;font-weight:700}.stat b{display:block;margin-top:4px;font-size:29px}.panel{margin-top:18px;border:1px solid #fff;border-radius:14px;background:#ffffffdd;box-shadow:0 8px 22px #1d3a5a12;overflow:hidden}.panel h2{margin:0;padding:15px 18px;border-bottom:1px solid var(--line);font-size:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;padding:16px}.card{min-height:125px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:14px;cursor:pointer;transition:.15s}.card:hover{transform:translateY(-2px);border-color:#79aaf1;box-shadow:0 8px 16px #1b4f8920}.card i{color:#1769e0;margin-right:7px}.card b{display:block;color:#133f65;font-size:25px;margin:6px 0 1px}.card small{color:var(--muted);display:block;line-height:1.45}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.status-list{list-style:none;margin:0;padding:6px 18px 14px}.status-list li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.badge{border-radius:99px;background:#e3f2ff;color:#1459bd;padding:2px 9px;font-size:12px;font-weight:700}.quick{display:flex;gap:9px;flex-wrap:wrap;padding:16px}.quick a{padding:10px 12px;border-radius:9px;background:#e8f2ff;color:#1459bd;text-decoration:none;font-size:13px;font-weight:700}.quick a:hover{background:#1769e0;color:#fff}.error{color:#a32c39;background:#fff4f5;border-color:#fac8ce}@media(max-width:960px){.summary,.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}@media(max-width:560px){header{align-items:flex-start;flex-direction:column}.shell{padding:13px}.summary,.grid{grid-template-columns:1fr}.brand h1{font-size:17px}.header-tools{justify-content:flex-start}}
+  </style>
+</head>
+<body>
+  <header><div class="brand"><i class="fa-solid fa-video"></i><div><h1>เธจเธนเธเธขเนเธเนเธญเธกเธนเธฅเธเธฅเนเธญเธ CCTV เนเธฅเธฐเธเธทเนเธเธ—เธตเนเธเธเธดเธเธฑเธ•เธดเธเธฒเธฃ</h1><p>เธชเธ .เน€เธกเธทเธญเธเธเธฃเธฒเธเธดเธงเธฒเธช ยท เธ .เธเธง.เธเธฃเธฒเธเธดเธงเธฒเธช</p></div></div><div class="header-tools"><span class="user" id="userName">เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธเธนเนเนเธเนเธเธฒเธโ€ฆ</span><button type="button" id="refreshHome"><i class="fa-solid fa-rotate"></i> เธฃเธตเน€เธเธฃเธเธเนเธญเธกเธนเธฅ</button><a href="account-settings.html"><i class="fa-solid fa-user-gear"></i> เธเธฑเธเธเธตเธเธญเธเธเธฑเธ</a><button type="button" id="logout"><i class="fa-solid fa-right-from-bracket"></i> เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</button></div></header>
+  <main class="shell"><div class="notice" id="notice">เธเธณเธฅเธฑเธเน€เธเธทเนเธญเธกเธ•เนเธญเธเนเธญเธกเธนเธฅเธ เธฒเธเธฃเธงเธกโ€ฆ</div>
+    <section class="summary"><article class="stat"><span>เธเธฅเนเธญเธ CCTV</span><b id="cameraCount">โ€“</b></article><article class="stat"><span>เธเธทเนเธเธ—เธตเนเน€เธจเธฃเธฉเธเธเธดเธ</span><b id="economicCount">โ€“</b></article><article class="stat"><span>เธเธฑเธเธ—เธถเธเน€เธซเธ•เธธเธเธฒเธฃเธ“เน</span><b id="incidentCount">โ€“</b></article><article class="stat"><span>เธเธทเนเธเธ—เธตเนเน€เธชเธตเนเธขเธ / เน€เธเนเธฒเธฃเธฐเธงเธฑเธ</span><b id="riskCount">โ€“</b></article></section>
+    <section class="panel"><h2><i class="fa-solid fa-layer-group"></i> เธ เธฒเธเธฃเธงเธกเธเธฑเนเธเธเนเธญเธกเธนเธฅเนเธฅเธฐเนเธกเธ”เธนเธฅ</h2><div class="grid" id="cards"></div></section>
+    <section class="two"><article class="panel"><h2><i class="fa-solid fa-building-shield"></i> เธชเธฃเธธเธเธ•เธฒเธกเธซเธเนเธงเธขเธเธฒเธเน€เธเนเธฒเธเธญเธเธเธฅเนเธญเธ</h2><ul class="status-list" id="ownerSummary"><li>เธเธณเธฅเธฑเธเนเธซเธฅเธ”โ€ฆ</li></ul></article><article class="panel"><h2><i class="fa-solid fa-location-dot"></i> เธชเธฃเธธเธเธ•เธฒเธกเธเธทเนเธเธ—เธตเน</h2><ul class="status-list" id="areaSummary"><li>เธเธณเธฅเธฑเธเนเธซเธฅเธ”โ€ฆ</li></ul></article></section>
+<section class="panel"><h2><i class="fa-solid fa-bolt"></i> เน€เธกเธเธนเธเธฒเธฃเธ—เธณเธเธฒเธเธ”เนเธงเธ</h2><div class="quick"><a href="camera-center.html">เธจเธนเธเธขเนเธเธฑเธ”เธเธฒเธฃเธเธฅเนเธญเธ CCTV</a><a href="investigations.html">เธเธฑเธเธ—เธถเธเน€เธซเธ•เธธเธเธฒเธฃเธ“เน</a><a href="critical-infrastructure.html">เธเธทเนเธเธ—เธตเนเน€เธจเธฃเธฉเธเธเธดเธ</a><a href="risk-areas.html">เธเธทเนเธเธ—เธตเนเน€เธชเธตเนเธขเธเนเธฅเธฐเน€เธเนเธฒเธฃเธฐเธงเธฑเธ</a><a href="risk-persons.html"><i class="fa-solid fa-user-shield"></i> เธเธธเธเธเธฅเธเธฅเธธเนเธกเน€เธชเธตเนเธขเธ</a><a href="vehicle-alerts.html"><i class="fa-solid fa-car-on"></i> เธฃเธ–เนเธเนเธเน€เธ•เธทเธญเธ</a><a href="mission-planner.html"><i class="fa-solid fa-bullseye"></i> เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธทเนเธเธ—เธตเนเธ เธฒเธฃเธเธดเธ</a><a href="home-search.html"><i class="fa-solid fa-house-chimney"></i> เธเนเธเธซเธฒเธเนเธฒเธ</a><a href="reports.html">เธจเธนเธเธขเนเธฃเธฒเธขเธเธฒเธ</a></div></section>
+    <section class="panel"><h2><i class="fa-solid fa-video"></i> สรุปความพร้อมกล้อง CCTV</h2><ul class="status-list" id="cameraReadiness"><li>กำลังโหลดสรุปสถานะกล้อง…</li></ul></section>
+    <section class="panel"><h2><i class="fa-solid fa-tags"></i> สรุปตามประเภทกล้อง</h2><ul class="status-list" id="cameraTypeSummary"><li>กำลังโหลดสรุปประเภทกล้อง…</li></ul></section>
+  </main>
+  <script>
+  (()=>{const URL='https://rbahodbdbxfvftfxeipe.supabase.co',KEY='sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4',$=id=>document.getElementById(id);let started=false;
+    const safe=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+const card=(icon,title,count,detail,href)=>{const display=typeof count==='number'?Number(count).toLocaleString():safe(count),metric=display?`<b>${display}</b>`:'';return `<article class="card" tabindex="0" data-go="${href}"><i class="fa-solid ${icon}"></i>${title}${metric}<small>${detail}</small></article>`};
+    async function all(client,table){const out=[];for(let from=0;from<5000;from+=500){const result=await Promise.race([client.from(table).select('*').range(from,from+499),new Promise((_,reject)=>setTimeout(()=>reject(new Error('เธซเธกเธ”เน€เธงเธฅเธฒเธฃเธญเธเนเธญเธกเธนเธฅ')),10000))]);if(result.error)throw result.error;out.push(...(result.data||[]));if(!result.data||result.data.length<500)return out}return out}
+    async function load(event){if(started)return;started=true;try{const session=event?.detail||window.cctvSession||null,client=session?.client||window.supabase?.createClient(URL,KEY);if(!client)throw new Error('เนเธกเนเธเธเธ•เธฑเธงเน€เธเธทเนเธญเธกเธ•เนเธญเธเนเธญเธกเธนเธฅ');$('userName').textContent=session?.profile?.full_name||'เธจเธนเธเธขเนเธเนเธญเธกเธนเธฅ CCTV';const [cameras,economic,incidents,areas,vehicles,riskPeople,vehicleSightings]=await Promise.all([all(client,'cctv_locations'),all(client,'economic_data'),all(client,'incidents'),all(client,'risk_areas'),all(client,'vehicle_alerts'),all(client,'risk_person_records').catch(()=>[]),all(client,'vehicle_sightings').catch(()=>[])]);const checkpoints=economic.filter(x=>x.type==='เธเธธเธ”เธ•เธฃเธงเธ').length,surveillance=areas.filter(x=>x.zone_kind==='SURVEILLANCE_ZONE').length,underpasses=areas.filter(x=>[x.name,x.risk_category,x.main_category,x.sub_category].join(' ').includes('เธ—เนเธญเธฅเธญเธ”')||[x.name,x.risk_category,x.main_category,x.sub_category].join(' ').includes('เธเธญเธชเธฐเธเธฒเธ')).length,security=incidents.filter(x=>x.incident_category==='SECURITY').length,summary=(get,fallback)=>Object.entries(cameras.reduce((out,row)=>{const key=row[get]||fallback;out[key]=(out[key]||0)+1;return out},{})).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>'<li><span>'+safe(name)+'</span><b class="badge">'+count.toLocaleString()+' เธเธฅเนเธญเธ</b></li>').join('');$('cameraCount').textContent=cameras.length.toLocaleString();$('economicCount').textContent=(economic.length-checkpoints).toLocaleString();$('incidentCount').textContent=incidents.length.toLocaleString();$('riskCount').textContent=areas.length.toLocaleString();$('ownerSummary').innerHTML=summary('ownership_category','เธขเธฑเธเนเธกเนเธเธฑเธ”เธเธฃเธฐเน€เธ เธ—');$('areaSummary').innerHTML=summary('area','เนเธกเนเธฃเธฐเธเธธเธเธทเนเธเธ—เธตเน');$('cards').innerHTML=[card('fa-road-barrier','เธเธธเธ”เธ•เธฃเธงเธ',checkpoints,'เธเธธเธ”เธ•เธฃเธงเธเธเธเนเธเธเธ—เธตเน','camera-center.html'),card('fa-eye','เธเธทเนเธเธ—เธตเนเน€เธเนเธฒเธฃเธฐเธงเธฑเธ',surveillance,'เธเธทเนเธเธ—เธตเนเธ•เธดเธ”เธ•เธฒเธกเน€เธเนเธเธเธดเน€เธจเธฉ','risk-areas.html'),card('fa-road','เธ—เนเธญเธฅเธญเธ” / เธเธญเธชเธฐเธเธฒเธ',underpasses,'เธเธธเธ”เธ—เนเธญเธฅเธญเธ”เนเธฅเธฐเธเธญเธชเธฐเธเธฒเธ','camera-center.html'),card('fa-shield-halved','เน€เธซเธ•เธธเธเธฒเธฃเธ“เนเธเธงเธฒเธกเธกเธฑเนเธเธเธ',security,'เธเธฒเธเธเธฑเธเธ—เธถเธเน€เธซเธ•เธธเธเธฒเธฃเธ“เน','investigations.html'),card('fa-car-burst','เธฃเธ–เนเธเนเธเน€เธ•เธทเธญเธ',vehicles.length,'เธ—เธฐเน€เธเธตเธขเธเน€เธเนเธฒเธฃเธฐเธงเธฑเธ','vehicle-alerts.html'),card('fa-user-shield',document.querySelector('a[href="risk-persons.html"]')?.textContent.trim()||'Risk Persons',riskPeople.length,'9 เธเธฃเธฐเน€เธ เธ—','risk-persons.html'),card('fa-binoculars','เธเธฑเธเธ—เธถเธเธเธเธฃเธ–',vehicleSightings.length,'เธฃเธฒเธขเธเธฒเธฃเธ—เธตเนเธเธฑเธเธ—เธถเธ','vehicle-sightings.html')].join('');$('cards').querySelectorAll('[data-go]').forEach(x=>{x.onclick=()=>location.href=x.dataset.go;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});$('notice').textContent=`เธญเธฑเธเน€เธ”เธ•เธเนเธญเธกเธนเธฅเนเธฅเนเธง: เธเธฅเนเธญเธ ${cameras.length.toLocaleString()} เธเธธเธ” ยท เน€เธซเธ•เธธเธเธฒเธฃเธ“เน ${incidents.length.toLocaleString()} เธฃเธฒเธขเธเธฒเธฃ ยท เธเธทเนเธเธ—เธตเนเน€เธจเธฃเธฉเธเธเธดเธ ${economic.length.toLocaleString()} เธเธธเธ”`;}catch(error){$('notice').classList.add('error');$('notice').textContent='เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธซเธฅเธฑเธเนเธกเนเธชเธณเน€เธฃเนเธ: '+error.message+' โ€” เธเธฃเธธเธ“เธฒเธฃเธตเน€เธเธฃเธเธญเธตเธเธเธฃเธฑเนเธ';started=false}}
+    document.getElementById('refreshHome').addEventListener('click',()=>location.reload());window.addEventListener('cctv-auth-ready',load,{once:true});setTimeout(load,1800);
+  })();
+  </script>
+  <script>
+  /* Normalize legacy camera labels into the four official owner groups. */
+  (() => {
+    const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
+    const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+    const groups = ['เธเธฅเนเธญเธเธกเธซเธฒเธ”เนเธ—เธข', 'เธเธฅเนเธญเธ เธเธญ.เธฃเธกเธ. (6 เน€เธกเธทเธญเธเธซเธฅเธฑเธ)', 'เธเธฅเนเธญเธ เธเธเธ.เธ .9', 'เธเธฅเนเธญเธเน€เธญเธเธเธ'];
+    const ownerOf = row => {
+      const text = Object.values(row || {}).join(' ').toLowerCase();
+      if (text.includes('เธกเธซเธฒเธ”เนเธ—เธข') || text.includes('เธชเธ.เธกเธ—')) return groups[0];
+      if (text.includes('เธเธญ.เธฃเธกเธ') || text.includes('6 เน€เธกเธทเธญเธ') || text.includes('6เน€เธกเธทเธญเธ')) return groups[1];
+      if (text.includes('เน€เธญเธเธเธ') || text.includes('private')) return groups[3];
+      return groups[2];
+    };
+    async function loadOwnerSummary() {
+      if (!window.supabase) return;
+      const client = window.cctvSession?.client || window.supabase.createClient(URL, KEY);
+      const rows = [];
+      for (let from = 0; from < 5000; from += 500) {
+        const { data, error } = await client.from('cctv_locations').select('*').range(from, from + 499);
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < 500) break;
+      }
+      const counts = Object.fromEntries(groups.map(group => [group, 0]));
+      rows.forEach(row => { counts[ownerOf(row)] += 1; });
+      const list = document.getElementById('ownerSummary');
+      if (!list) return;
+      list.replaceChildren(...groups.map(group => {
+        const item = document.createElement('li');
+        const name = document.createElement('span');
+        const total = document.createElement('b');
+        name.textContent = group;
+        total.className = 'badge';
+        total.textContent = `${counts[group].toLocaleString()} เธเธฅเนเธญเธ`;
+        item.append(name, total);
+        return item;
+      }));
+    }
+    window.setTimeout(() => loadOwnerSummary().catch(() => {}), 6200);
+  })();
+  </script>
+  <script>
+  /* Lightweight fallback: keep the home summary usable if one optional data layer is slow. */
+  (() => {
+    const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
+    const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+    const metrics = [
+      ['cctv_locations', 'cameraCount'],
+      ['economic_data', 'economicCount'],
+      ['incidents', 'incidentCount'],
+      ['risk_areas', 'riskCount']
+    ];
+    const setText = (id, value) => {
+      const node = document.getElementById(id);
+      if (node && (node.textContent.trim() === 'โ€“' || node.textContent.trim() === '-')) {
+        node.textContent = Number(value || 0).toLocaleString();
+      }
+    };
+    async function recoverSummary() {
+      if (!window.supabase) return;
+      const client = window.cctvSession?.client || window.supabase.createClient(URL, KEY);
+      const jobs = metrics.map(async ([table, id]) => {
+        const { count, error } = await client.from(table).select('id', { count: 'exact', head: true });
+        if (!error) setText(id, count);
+      });
+      await Promise.allSettled(jobs);
+    }
+    window.setTimeout(recoverSummary, 5500);
+  })();
+  </script>
+  <script>
+  (() => {
+    const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
+    const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+    const makeItem = (label, total) => {
+      const item = document.createElement('li');
+      const name = document.createElement('span');
+      const count = document.createElement('b');
+      name.textContent = label;
+      count.className = 'badge';
+      count.textContent = `${Number(total || 0).toLocaleString()} จุด`;
+      item.append(name, count);
+      return item;
+    };
+    async function loadCameraReadiness() {
+      if (!window.supabase) return;
+      const client = window.cctvSession?.client || window.supabase.createClient(URL, KEY);
+      const count = async apply => {
+        let query = client.from('cctv_locations').select('id', { count: 'exact', head: true });
+        if (apply) query = apply(query);
+        const result = await query;
+        return result.error ? 0 : result.count || 0;
+      };
+      const [total, online, offline, unknown, coordinatesPending] = await Promise.all([
+        count(),
+        count(query => query.eq('status', 'ออนไลน์')),
+        count(query => query.eq('status', 'ออฟไลน์')),
+        count(query => query.eq('status', 'ไม่ระบุ')),
+        count(query => query.or('lat.is.null,lng.is.null'))
+      ]);
+      const list = document.getElementById('cameraReadiness');
+      if (!list) return;
+      list.replaceChildren(
+        makeItem('กล้องทั้งหมด', total),
+        makeItem('ออนไลน์', online),
+        makeItem('ออฟไลน์', offline),
+        makeItem('สถานะไม่ระบุ', unknown),
+        makeItem('รอเติมพิกัด', coordinatesPending)
+      );
+    }
+    const start = () => loadCameraReadiness().catch(() => {});
+    if (window.cctvSession) start(); else window.addEventListener('cctv-auth-ready', start, { once: true });
+  })();
+  </script>
+  <script>
+  (() => {
+    const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
+    const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+    const addCounts = (rows, field, fallback) => rows.reduce((counts, row) => {
+      const key = String(row[field] || fallback).trim() || fallback;
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {});
+    const renderCounts = (target, counts) => {
+      const list = document.getElementById(target);
+      if (!list) return;
+      const entries = Object.entries(counts).sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], 'th'));
+      list.replaceChildren(...entries.map(([name, total]) => {
+        const item = document.createElement('li');
+        const label = document.createElement('span');
+        const badge = document.createElement('b');
+        label.textContent = name;
+        badge.className = 'badge';
+        badge.textContent = `${total.toLocaleString()} กล้อง`;
+        item.append(label, badge);
+        return item;
+      }));
+    };
+    const renderTypeReadiness = rows => {
+      const list = document.getElementById('cameraTypeSummary');
+      if (!list) return;
+      const counts = rows.reduce((out, row) => {
+        const type = String(row.camera_type || 'รอระบุประเภทย่อย').trim() || 'รอระบุประเภทย่อย';
+        if (!out[type]) out[type] = { total: 0, online: 0, offline: 0, unknown: 0 };
+        out[type].total += 1;
+        if (row.status === 'ออนไลน์') out[type].online += 1;
+        else if (row.status === 'ออฟไลน์') out[type].offline += 1;
+        else out[type].unknown += 1;
+        return out;
+      }, {});
+      const entries = Object.entries(counts).sort((left, right) => right[1].total - left[1].total || left[0].localeCompare(right[0], 'th'));
+      list.replaceChildren(...entries.map(([type, value]) => {
+        const item = document.createElement('li');
+        const label = document.createElement('span');
+        const badge = document.createElement('b');
+        label.textContent = `${type} · ออนไลน์ ${value.online.toLocaleString()} / ออฟไลน์ ${value.offline.toLocaleString()} / ไม่ระบุ ${value.unknown.toLocaleString()}`;
+        badge.className = 'badge';
+        badge.textContent = `${value.total.toLocaleString()} กล้อง`;
+        item.append(label, badge);
+        return item;
+      }));
+    };
+    const renderStationReadiness = rows => {
+      const list = document.getElementById('areaSummary');
+      if (!list) return;
+      const counts = rows.reduce((out, row) => {
+        const station = String(row.area || 'ไม่ระบุ สภ.').trim() || 'ไม่ระบุ สภ.';
+        if (!out[station]) out[station] = { total: 0, online: 0, offline: 0, unknown: 0, noCoordinates: 0 };
+        out[station].total += 1;
+        if (row.status === 'ออนไลน์') out[station].online += 1;
+        else if (row.status === 'ออฟไลน์') out[station].offline += 1;
+        else out[station].unknown += 1;
+        if (row.lat === null || row.lng === null || row.lat === '' || row.lng === '') out[station].noCoordinates += 1;
+        return out;
+      }, {});
+      const entries = Object.entries(counts).sort((left, right) => right[1].total - left[1].total || left[0].localeCompare(right[0], 'th'));
+      list.replaceChildren(...entries.map(([station, value]) => {
+        const item = document.createElement('li');
+        const label = document.createElement('span');
+        const badge = document.createElement('b');
+        const pendingText = value.noCoordinates ? ` · รอพิกัด ${value.noCoordinates.toLocaleString()}` : '';
+        label.textContent = `${station} · ออนไลน์ ${value.online.toLocaleString()} / ออฟไลน์ ${value.offline.toLocaleString()}${pendingText}`;
+        badge.className = 'badge';
+        badge.textContent = `${value.total.toLocaleString()} กล้อง`;
+        item.append(label, badge);
+        return item;
+      }));
+    };
+    async function loadCameraBreakdowns() {
+      if (!window.supabase) return;
+      const client = window.cctvSession?.client || window.supabase.createClient(URL, KEY);
+      const rows = [];
+      for (let from = 0; from < 5000; from += 500) {
+        const result = await client.from('cctv_locations').select('area,camera_type,status,lat,lng').order('area').range(from, from + 499);
+        if (result.error) return;
+        rows.push(...(result.data || []));
+        if (!result.data || result.data.length < 500) break;
+      }
+      const areaList = document.getElementById('areaSummary');
+      if (areaList) {
+        areaList.closest('.panel').querySelector('h2').innerHTML = '<i class="fa-solid fa-building-shield"></i> สรุปตาม สภ.';
+      }
+      renderStationReadiness(rows);
+      renderTypeReadiness(rows);
+    }
+    const start = () => window.setTimeout(() => loadCameraBreakdowns().catch(() => {}), 7000);
+    if (window.cctvSession) start(); else window.addEventListener('cctv-auth-ready', start, { once: true });
+  })();
+  </script>
+</body></html>
+
+
+
