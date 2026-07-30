@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ศูนย์จัดการกล้อง CCTV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth-guard.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#eef6ff;color:#15283d;font-family:'Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;-webkit-font-smoothing:antialiased}.top{padding:18px clamp(18px,4vw,52px);color:#fff;background:linear-gradient(120deg,#0f4c81,#0284c7);display:flex;align-items:center;justify-content:space-between;gap:16px}.top h1{font-size:22px;margin:0}.top p{margin:3px 0 0;color:#dbeafe;font-size:13px}.header-actions{display:flex;gap:8px;align-items:center}.back,.refresh{border:1px solid #ffffff80;color:#fff;background:#ffffff12;border-radius:9px;padding:9px 12px;font:inherit;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer}.refresh:hover{background:#ffffff26}.wrap{max-width:1500px;margin:22px auto;padding:0 18px}.overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}.metric{padding:12px;border-radius:11px;background:#fff;border:1px solid #c8e0f0;box-shadow:0 3px 12px #0f172a0c}.metric span{font-size:12px;color:#5d7482}.metric b{display:block;font-size:22px;color:#075e8b;margin-top:3px}.metric.warn b{color:#b45309}.metric.actionable{cursor:pointer;transition:transform .15s,box-shadow .15s}.metric.actionable:hover{transform:translateY(-2px);box-shadow:0 7px 18px #0f172a24}.type-card{border-left:5px solid var(--marker,#2563eb)}.tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.tab{border:1px solid #bcd8ee;background:#fff;border-radius:9px;padding:10px 13px;font:inherit;font-weight:700;color:#27536e;cursor:pointer}.tab.active{background:#087db8;color:#fff;border-color:#087db8;box-shadow:0 4px 12px #087db83b}.stage{overflow:hidden;background:#fff;border:1px solid #c8e0f0;border-radius:14px;box-shadow:0 5px 20px #0f172a14}.stage iframe{display:block;border:0;width:100%;height:calc(100vh - 342px);min-height:620px;background:#fff}body.camera-map-active{overflow:hidden}body.camera-map-active .wrap{height:calc(100vh - 102px);margin:10px auto;display:flex;flex-direction:column}body.camera-map-active .overview{display:none}body.camera-map-active .tabs{margin-bottom:10px}body.camera-map-active .stage{flex:1;min-height:0}body.camera-map-active .stage iframe{height:100%;min-height:0}@media(max-width:1000px){.overview{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.top{align-items:flex-start;flex-direction:column;padding:12px}.wrap{padding:0 10px}.overview{grid-template-columns:repeat(2,1fr)}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tab{font-size:12px;padding:9px}.stage iframe{height:calc(100vh - 560px);min-height:560px}body.camera-map-active .wrap{height:calc(100vh - 146px);margin:7px auto}body.camera-map-active .stage iframe{height:100%;min-height:0}}
+  </style>
+</head>
+<body>
+  <header class="top"><div><h1><i class="fa-solid fa-video"></i> ศูนย์จัดการกล้อง CCTV</h1><p>ข้อมูลจุดติดตั้ง การจัดการกล้อง หมวดหมู่ การซ่อมบำรุง และการตรวจสภาพ</p></div><div class="header-actions"><button class="refresh" id="refresh" type="button"><i class="fa-solid fa-rotate"></i> รีเฟรชข้อมูล</button><a class="back" href="home.html"><i class="fa-solid fa-arrow-left"></i> กลับหน้าหลัก</a></div></header>
+  <main class="wrap">
+    <section class="overview" id="overview" aria-label="ภาพรวมกล้อง CCTV"><article class="metric"><span>กำลังโหลดภาพรวม…</span><b>–</b></article></section>
+    <nav class="tabs" aria-label="เมนูจัดการกล้อง">
+      <button class="tab active" data-src="camera-locations-map.html"><i class="fa-solid fa-map-location-dot"></i> ข้อมูลและจุดติดตั้ง</button>
+      <button class="tab" data-src="camera-management.html"><i class="fa-solid fa-sliders"></i> จัดการข้อมูลกล้อง</button>
+      <button class="tab" data-src="camera-record-browser.html"><i class="fa-solid fa-table-list"></i> ดูข้อมูลทั้งหมด</button>
+      <button class="tab" data-src="camera-data-quality.html"><i class="fa-solid fa-shield-halved"></i> ตรวจคุณภาพข้อมูล</button>
+      <button class="tab" data-src="camera-duplicate-review.html"><i class="fa-solid fa-copy"></i> ตรวจข้อมูลซ้ำ</button>
+      <button class="tab" data-src="camera-categories.html"><i class="fa-solid fa-tags"></i> จัดการหมวดหมู่กล้อง</button>
+      <button class="tab" data-src="camera-maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> แจ้งซ่อมและบำรุงรักษา</button>
+      <button class="tab" data-src="camera-inspections.html"><i class="fa-solid fa-clipboard-check"></i> บันทึกตรวจสภาพกล้อง</button>
+    </nav>
+    <section class="stage"><iframe id="workspace" title="พื้นที่ทำงานจัดการกล้อง" src="camera-locations-map.html"></iframe></section>
+  </main>
+  <style>
+    /* Keep the map workspace tall even when this page is embedded by another module. */
+    body.camera-map-active{overflow-y:auto!important}
+    body.camera-map-active .stage{height:calc(100vh - 190px)!important;min-height:520px!important;flex:none!important}
+    body.camera-map-active .stage iframe{height:100%!important;min-height:520px!important}
+    @supports(height:100dvh){body.camera-map-active .stage{height:calc(100dvh - 190px)!important}}
+    @media(max-width:650px){body.camera-map-active .stage{height:calc(100vh - 170px)!important;min-height:420px!important}body.camera-map-active .stage iframe{min-height:420px!important}}
+  </style>
+  <script>
+    (()=>{
+      const frame=document.getElementById('workspace'),overview=document.getElementById('overview'),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      frame.addEventListener('load',()=>[80,300,800].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}},delay)));
+      const openTab=btn=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',btn.dataset.src==='camera-locations-map.html');frame.src=btn.dataset.src;history.replaceState(null,'',`#${btn.dataset.src}`)};
+      document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
+      document.getElementById('refresh').addEventListener('click',()=>location.reload());
+      const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===location.hash.slice(1))||document.querySelector('.tab.active');if(selected)openTab(selected);
+      overview.addEventListener('click',event=>{if(!event.target.closest('[data-open-quality]'))return;const tab=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src==='camera-data-quality.html');if(tab)openTab(tab)});
+      const officialOwners=['กล้องมหาดไทย','กล้อง กอ.รมน. (6 เมืองหลัก)','กล้อง ผบช.ภ.9','กล้องเอกชน'];
+      const ownerOf=camera=>{const text=`${camera.ownership_category||''} ${camera.camera_type||''}`.toLowerCase();if(text.includes('มหาดไทย')||text.includes('สป.มท'))return officialOwners[0];if(text.includes('กอ.รมน')||text.includes('6 เมือง')||text.includes('6เมือง'))return officialOwners[1];if(text.includes('เอกชน')||text.includes('private'))return officialOwners[3];return officialOwners[2]};
+      async function loadSummary(event){
+        const session=event.detail||window.cctvSession;if(!session)return;const db=session.client;
+        const [categories,cameras,repairs]=await Promise.all([
+          db.from('camera_categories').select('id,name,marker_color').eq('is_active',true).order('sort_order').order('name'),
+          db.from('cctv_locations').select('camera_category_id,camera_type,status,ownership_category,lat,lng'),
+          db.from('camera_maintenance_tickets').select('*',{count:'exact',head:true}).not('status','in','("แก้ไขแล้ว","ยกเลิก")')
+        ]);
+        if(categories.error||cameras.error){overview.innerHTML='<article class="metric warn"><span>โหลดข้อมูลภาพรวมไม่สำเร็จ</span><b>–</b></article>';return}
+        const counts={};(cameras.data||[]).forEach(x=>counts[x.camera_category_id]=(counts[x.camera_category_id]||0)+1);
+        const pendingSubtype=(cameras.data||[]).filter(x=>x.camera_type==='รอระบุประเภทย่อย').length;
+        const unknownStatus=(cameras.data||[]).filter(x=>!String(x.status||'').trim()||x.status==='ไม่ระบุ').length;
+        const pendingCoordinates=(cameras.data||[]).filter(x=>x.lat===null||x.lng===null||x.lat===''||x.lng==='').length;
+        const categoryCards=(categories.data||[]).map(x=>`<article class="metric type-card" style="--marker:${esc(x.marker_color||'#2563eb')}"><span>${esc(x.name)}</span><b>${(counts[x.id]||0).toLocaleString()}</b></article>`).join('');
+        const ownerCounts=Object.fromEntries(officialOwners.map(owner=>[owner,0]));(cameras.data||[]).forEach(camera=>{ownerCounts[ownerOf(camera)]+=1});
+        const ownerCards=officialOwners.map(owner=>`<article class="metric type-card" style="--marker:#0f766e"><span>${esc(owner)}</span><b>${ownerCounts[owner].toLocaleString()}</b></article>`).join('');
+        overview.innerHTML=`<article class="metric"><span>กล้องทั้งหมด</span><b>${(cameras.data||[]).length.toLocaleString()}</b></article>${ownerCards}${categoryCards}<article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>รอระบุประเภทย่อย · กดเพื่อตรวจสอบ</span><b>${pendingSubtype.toLocaleString()}</b></article><article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>สถานะไม่ระบุ · กดเพื่อตรวจสอบ</span><b>${unknownStatus.toLocaleString()}</b></article><article class="metric warn"><span>งานซ่อมที่ยังเปิด</span><b>${repairs.error?'–':(repairs.count||0).toLocaleString()}</b></article>`;
+        overview.insertAdjacentHTML('beforeend',`<article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>รอเติมพิกัด · กดเพื่อตรวจสอบ</span><b>${pendingCoordinates.toLocaleString()}</b></article>`);
+      }
+      if(window.cctvSession)loadSummary({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',loadSummary,{once:true});
+    })();
+  </script>
+</body>
+</html>

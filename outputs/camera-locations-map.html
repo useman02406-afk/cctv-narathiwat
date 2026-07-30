@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ…เน€เธเธเน€เธยเน€เธเธเน€เธโ€เน€เธโ€ขเน€เธเธ”เน€เธโ€เน€เธโ€ขเน€เธเธ‘เน€เธยเน€เธย</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth-guard.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f5fbff;color:#19364a;font-family:'Noto Sans Thai',sans-serif}.head{padding:15px 20px;background:#fff;border-bottom:1px solid #d4e8f3}.head h2{font-size:18px;margin:0}.head p{font-size:13px;margin:3px 0 0;color:#5c7180}.layout{display:grid;grid-template-columns:325px 1fr;min-height:calc(100vh - 82px)}.side{padding:16px;background:#fff;border-right:1px solid #d4e8f3;overflow:auto}.side label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}.side input,.side select{width:100%;font:inherit;padding:9px;border:1px solid #c9dde9;border-radius:8px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.stats div{border-radius:8px;background:#e9f6ff;padding:9px;font-size:12px}.stats b{display:block;color:#056a9f;font-size:18px;margin-top:2px}.owner-summary{margin-top:10px;border:1px solid #d6e7f3;border-radius:8px;overflow:hidden}.owner-summary h3{margin:0;padding:8px 9px;background:#eff8ff;font-size:12px}.owner-summary button{display:flex;width:100%;justify-content:space-between;gap:8px;padding:6px 9px;border:0;border-top:1px solid #e4eff6;background:#fff;color:#19364a;font:inherit;font-size:12px;text-align:left;cursor:pointer}.owner-summary button:hover{background:#edf7ff}.owner-summary b{color:#056a9f}.export{width:100%;margin-top:10px;border:0;border-radius:8px;padding:9px;background:#16785d;color:#fff;font:700 13px 'Noto Sans Thai',sans-serif;cursor:pointer}.print{width:100%;margin-top:8px;border:1px solid #1d4ed8;border-radius:8px;padding:9px;background:#fff;color:#1d4ed8;font:700 13px 'Noto Sans Thai',sans-serif;cursor:pointer}.clear{width:100%;margin-top:8px;border:1px solid #9caec0;border-radius:8px;padding:8px;background:#f8fafc;color:#38516a;font:700 13px 'Noto Sans Thai',sans-serif;cursor:pointer}.marker-eye-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;padding:9px;border:1px solid #0ea5e9;border-radius:8px;background:#effaff;color:#0369a1;font:700 13px 'Noto Sans Thai',sans-serif;cursor:pointer}.marker-eye-toggle.is-visible{background:#0ea5e9;color:#fff}.notice{margin-top:14px;font-size:12px;color:#4d6472;line-height:1.45}.legend{margin-top:14px;border-top:1px solid #e1edf4;padding-top:11px}.legend h3{font-size:13px;margin:0 0 7px}.legend-row{display:flex;gap:7px;align-items:center;font-size:12px;margin:5px 0}.dot{width:12px;height:12px;border-radius:50%;display:inline-block}.mapwrap{min-width:0}.map{height:calc(100vh - 82px);min-height:600px}.camera-marker{position:relative;width:112px;height:53px;display:flex;flex-direction:column;align-items:center}.camera-pin{width:29px;height:29px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 7px #0007;font-size:13px;z-index:1}.camera-uid{display:block;max-width:112px;margin-top:2px;padding:1px 4px;border-radius:4px;background:#fff;color:#173247;border:1px solid #c7dbe8;box-shadow:0 1px 3px #0004;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:9px;font-weight:800;line-height:12px;text-align:center;word-break:break-all}.hide-camera-uids .camera-uid{display:none}.popup h3{font-size:15px;margin:0 0 8px}.popup p{font-size:12px;margin:4px 0}.popup b{color:#2563eb}.copy-uid{margin-left:5px;border:1px solid #93c5fd;border-radius:5px;background:#eff6ff;color:#1d4ed8;padding:1px 5px;font:700 10px 'Noto Sans Thai',sans-serif;cursor:pointer}.open-camera{display:inline-block;margin-top:7px;border-radius:6px;background:#1769e0;color:#fff;padding:4px 7px;text-decoration:none;font-size:11px;font-weight:700}@media(max-width:760px){.layout{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #d4e8f3}.map{height:560px;min-height:560px}.side label{margin-top:8px}.camera-marker{transform:scale(.9);transform-origin:bottom center}}@media print{.side{display:none}.layout{display:block;min-height:0}.map{height:calc(100vh - 82px);min-height:0}.head{padding:8px 12px}.leaflet-control-container{display:none!important}}
+  </style>
+  <style>.marker-eye-toggle{display:none!important}</style>
+</head>
+<body>
+  <header class="head"><h2><i class="fa-solid fa-map-location-dot"></i> เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ…เน€เธเธเน€เธยเน€เธเธเน€เธโ€เน€เธโ€ขเน€เธเธ”เน€เธโ€เน€เธโ€ขเน€เธเธ‘เน€เธยเน€เธย</h2><p>เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’ เน€เธยเน€เธเธเน€เธเธเน€เธย เน€เธยเน€เธเธ…เน€เธเธเน€เธโฌเน€เธเธ…เน€เธเธ—เน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€เน€เธโฌเน€เธยเน€เธเธ—เน€เธยเน€เธเธเน€เธโ€เน€เธเธเน€เธเธเน€เธเธ’เน€เธเธเน€เธเธ…เน€เธเธเน€เธโฌเน€เธเธเน€เธเธ•เน€เธเธเน€เธโ€เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย</p></header>
+  <main class="layout">
+    <aside class="side">
+      <label>เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธเธ—เน€เธเธเน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย<input id="search" placeholder="เน€เธยเน€เธเธ—เน€เธยเน€เธเธเน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย UID เน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€” เน€เธเธเน€เธเธเน€เธเธ—เน€เธเธเน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย/เน€เธเธเน€เธโ€“เน€เธเธ’เน€เธยเน€เธเธ•"></label>
+      <label>เน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย<select id="type"><option value="">เน€เธโ€”เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”</option></select></label>
+      <label>เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ’เน€เธยเน€เธโฌเน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย<select id="owner"><option value="">เน€เธโ€”เน€เธเธเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ’เน€เธย</option></select></label>
+      <label>เน€เธเธเน€เธโ€“เน€เธเธ’เน€เธยเน€เธเธ<select id="status"><option value="">เน€เธโ€”เน€เธเธเน€เธยเน€เธเธเน€เธโ€“เน€เธเธ’เน€เธยเน€เธเธ</option></select></label><label><input id="toggleCameraUids" type="checkbox"> เน€เธยเน€เธเธเน€เธโ€เน€เธย UID เน€เธยเน€เธเธเน€เธเธ”เน€เธยเน€เธยเน€เธโ€ขเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย</label>
+      <div class="stats"><div>เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธโ€”เน€เธเธ‘เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธโ€<b id="total">เนโฌโ€</b></div><div>เน€เธยเน€เธเธเน€เธโ€เน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย<b id="shown">เนโฌโ€</b></div></div><section class="owner-summary" id="ownerSummary"></section><button id="zoomVisible" class="clear"><i class="fa-solid fa-expand"></i> เน€เธยเน€เธเธเน€เธเธเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธเธเน€เธเธเน€เธเธเน€เธโ€เน€เธโ€”เน€เธเธ•เน€เธยเน€เธยเน€เธเธเน€เธโ€เน€เธย</button><button id="clearFilters" class="clear"><i class="fa-solid fa-filter-circle-xmark"></i> เน€เธเธ…เน€เธยเน€เธเธ’เน€เธยเน€เธโ€ขเน€เธเธ‘เน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธย</button><button id="exportCsv" class="export"><i class="fa-solid fa-file-csv"></i> เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธย CSV เน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธโ€ขเน€เธเธ‘เน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธย</button><button id="printMap" class="print"><i class="fa-solid fa-print"></i> เน€เธยเน€เธเธ”เน€เธเธเน€เธยเน€เธย / เน€เธยเน€เธเธ‘เน€เธยเน€เธโ€”เน€เธเธ–เน€เธย PDF</button>
+      <p class="notice" id="notice">เน€เธยเน€เธเธ“เน€เธเธ…เน€เธเธ‘เน€เธยเน€เธยเน€เธเธเน€เธเธ…เน€เธโ€เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เนโฌเธ</p>
+      <section class="legend" id="legend"></section>
+      <button id="applyAreaFilter" class="clear" type="button"><i class="fa-solid fa-location-crosshairs"></i> เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’เน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธยเน€เธเธเน€เธยเน€เธโฌเน€เธยเน€เธโ€ขเน€เธโ€ขเน€เธเธ“เน€เธยเน€เธเธ… / เน€เธเธเน€เธเธ“เน€เธโฌเน€เธย เน€เธเธ</button>
+      <label>เน€เธเธเน€เธย . / เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธยเน€เธเธเน€เธเธ‘เน€เธยเน€เธยเน€เธเธ”เน€เธโ€เน€เธยเน€เธเธเน€เธย<select id="station"><option value="">เน€เธโ€”เน€เธเธเน€เธย เน€เธเธเน€เธย .</option></select></label>
+    </aside>
+    <section class="mapwrap"><div id="map" class="map"></div></section>
+  </main>
+  <style>
+    /* This page runs inside the CCTV center iframe.  Use the iframe's actual
+       viewport height so Leaflet cannot retain the small size it had at boot. */
+    @media (min-width:761px){
+      html,body{height:100%;overflow:hidden}
+      .layout{position:fixed;inset:82px 0 0;height:auto!important;min-height:0!important}
+      .side,.mapwrap{height:auto!important;min-height:0!important}
+      .mapwrap{position:relative}
+      .map{position:absolute;inset:0;height:auto!important;min-height:0!important}
+    }
+  </style>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="marker-system.js"></script><script src="data/narathiwat-boundaries.js"></script>
+  <script>
+    (()=>{
+      let db,items=[],categories=[],map,layer,boundaryLayer,selectedAreaLayer,hasFitted=false,markerDetailsVisible=true;
+      const $=id=>document.getElementById(id);
+      let areaGeometry=null,areaLookupToken=0,renderToken=0;
+      const areaGeometryCache=new Map();
+      const esc=v=>String(v??'เนโฌโ€').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      const typeOf=x=>x.camera_categories?.name||'เน€เธเธเน€เธเธเน€เธยเน€เธเธ‘เน€เธโ€เน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”';
+      const projectOf=x=>x.project||x.ownership_category||'เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธเธ';
+      const usesDashFields=x=>['เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย เน€เธยเน€เธเธ.เน€เธเธเน€เธเธเน€เธย. (6เน€เธโฌเน€เธเธเน€เธเธ—เน€เธเธเน€เธยเน€เธเธเน€เธเธ…เน€เธเธ‘เน€เธย)','เน€เธเธเน€เธเธเน€เธเธ’เน€เธโ€เน€เธยเน€เธโ€”เน€เธเธ (เน€เธเธเน€เธย.เน€เธเธเน€เธโ€”.)'].includes(projectOf(x));
+      const markerUid=x=>usesDashFields(x)?'':String(x.uid||'').trim();
+      const markerText=x=>markerDetailsVisible?[`UID: ${String(x.uid||'-').trim()||'-'}`,x.camera_name||x.name||'เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย CCTV',stationOf(x)]:'';
+      const iconOf=x=>{const c=x.camera_categories||{},options={color:c.marker_color||undefined,symbol:c.marker_icon||undefined,text:markerText(x),subtype:x.camera_type};if(window.CCTVMarkerSystem?.icon)return window.CCTVMarkerSystem.icon('camera',options);return L.divIcon({className:'cctv-unified-marker-host',html:`<span style="display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;background:${esc(c.marker_color||'#0ea5e9')};color:#fff;font:700 16px/1 system-ui;transform:rotate(-45deg)"><b style="transform:rotate(45deg)">เนยโ€เธ</b></span>`,iconSize:[34,38],iconAnchor:[17,34],popupAnchor:[0,-34]})};
+async function loadAdministrativeBoundaries(){
+  try{
+    let geojson=window.NARATHIWAT_BOUNDARIES;
+    if(!geojson){
+      const response=await fetch('data/narathiwat-boundaries.geojson');
+      if(!response.ok)throw new Error('boundary unavailable');
+      geojson=await response.json();
+    }
+          boundaryLayer=L.geoJSON(geojson,{style:feature=>feature.properties.level==='amphoe'?{color:'#1459bd',weight:2,fill:false}:{color:'#38a169',weight:1,fill:false,dashArray:'3 4'},onEachFeature:(feature,featureLayer)=>featureLayer.bindTooltip(`${feature.properties.level==='amphoe'?'เน€เธเธเน€เธเธ“เน€เธโฌเน€เธย เน€เธเธ':'เน€เธโ€ขเน€เธเธ“เน€เธยเน€เธเธ…'}: ${feature.properties.name}`,{sticky:true})});
+          if($('toggleBoundaries')?.checked!==false)boundaryLayer.addTo(map);
+        }catch(error){console.warn('Administrative boundary layer is unavailable',error)}
+      }
+      const setOptions=(id,values,label)=>{$(id).innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')};
+      function renderLegend(source=items){const rows=categories.map(c=>{const count=source.filter(x=>typeOf(x)===c.name).length;return `<div class="legend-row"><i class="dot" style="background:${esc(c.marker_color||'#64748b')}"></i><span>${esc(c.name)}</span><b style="margin-left:auto;color:#056a9f">${count.toLocaleString()}</b></div>`}).join('');$('legend').innerHTML=`<h3>เน€เธเธเน€เธเธ‘เน€เธยเน€เธเธ…เน€เธเธ‘เน€เธยเน€เธเธเน€เธโ€เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย</h3>${rows}`}
+      const stationOf=x=>x.station||x.area||'เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธโ€“เน€เธเธ’เน€เธยเน€เธเธ• / เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย';
+      function popup(x){const rawUid=String(x.uid||'').trim(),isDashProject=usesDashFields(x),uid=isDashProject?'-':rawUid,cameraType=isDashProject?'-':(x.camera_type||typeOf(x)),credentialText=isDashProject?'-':'เนยโ€โ€ เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธเธ‘เน€เธยเน€เธยเน€เธเธ•เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธโ€“เน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธ”เน€เธโ€';return `<div class="popup"><h3>${esc(x.camera_name||x.name||'เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย CCTV')}</h3><p><b>camera_name:</b> ${esc(x.camera_name||x.name||'เนโฌโ€')}</p><p><b>uid:</b> ${esc(uid)}${rawUid&&!isDashProject?`<button type="button" class="copy-uid" data-uid="${esc(rawUid)}">เน€เธยเน€เธเธ‘เน€เธโ€เน€เธเธ…เน€เธเธเน€เธย</button>`:''}</p><p><b>camera_type:</b> ${esc(cameraType)}</p><p><b>user:</b> ${credentialText}</p><p><b>password:</b> ${isDashProject?'-':'เนยโ€โ€ เน€เธยเน€เธยเน€เธยเน€เธเธ”เน€เธโ€เน€เธโฌเน€เธยเน€เธเธ—เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ’เน€เธเธเน€เธยเน€เธเธ…เน€เธเธเน€เธโ€เน€เธย เน€เธเธ‘เน€เธเธ'}</p><p><b>station:</b> ${esc(stationOf(x))}</p><p><b>project:</b> ${esc(projectOf(x))}</p><p><b>lat:</b> ${esc(x.lat)}</p><p><b>lng:</b> ${esc(x.lng)}</p><p><b>status:</b> ${esc(x.status||'เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ')}</p>${rawUid&&!isDashProject?`<a class="open-camera" href="camera-record-browser.html?search=${encodeURIComponent(rawUid)}">เน€เธโฌเน€เธยเน€เธเธ”เน€เธโ€เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย</a>`:''}</div>`}
+      function visibleItems(){const q=$('search').value.trim().toLowerCase(),type=$('type').value,owner=$('owner').value,status=$('status').value;return items.filter(x=>(!q||[x.camera_name,x.name,x.uid,x.camera_type,x.area,stationOf(x),projectOf(x),x.ownership_category].some(v=>String(v||'').toLowerCase().includes(q)))&&(!type||typeOf(x)===type)&&(!owner||projectOf(x)===owner)&&(!status||x.status===status))}
+      function render(){const hasCoordinates=x=>x.lat!==null&&x.lng!==null&&x.lat!==''&&x.lng!=='';const visible=visibleItems(),query=$('search').value.trim(),hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value);layer.clearLayers();const points=[];visible.forEach(x=>{if(!hasCoordinates(x))return;const lat=Number(x.lat),lng=Number(x.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)return;L.marker([lat,lng],{icon:iconOf(x)}).bindPopup(popup(x)).addTo(layer);points.push([lat,lng])});const projects=visible.reduce((out,x)=>{const project=projectOf(x);out[project]=(out[project]||0)+1;return out},{}),projectNames=[...new Set(items.map(projectOf))].sort((a,b)=>a.localeCompare(b,'th'));$('ownerSummary').innerHTML='<h3>เน€เธเธเน€เธเธเน€เธเธเน€เธยเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธเธ / เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ’เน€เธยเน€เธโฌเน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธเธเน€เธย</h3>'+projectNames.map(name=>`<button type="button" data-owner-summary="${esc(name)}"><span>${esc(name)}</span><b>${(projects[name]||0).toLocaleString()} เน€เธยเน€เธเธเน€เธโ€</b></button>`).join('')||'<h3>เน€เธเธเน€เธเธเน€เธเธเน€เธยเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธเธ / เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ’เน€เธยเน€เธโฌเน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธเธเน€เธย</h3><div>เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…</div>';$('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;render()});renderLegend(visible);$('total').textContent=items.length.toLocaleString();$('shown').textContent=points.length.toLocaleString();$('notice').textContent=`เน€เธยเน€เธย ${visible.length.toLocaleString()} เน€เธเธเน€เธเธ’เน€เธเธเน€เธยเน€เธเธ’เน€เธเธ เธขเธ— เน€เธยเน€เธเธเน€เธโ€เน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€ ${points.length.toLocaleString()} เน€เธยเน€เธเธเน€เธโ€${query?` เธขเธ— เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’ เนโฌย${query}เนโฌย เน€เธยเน€เธเธ…เน€เธยเน€เธเธ`:''} เธขเธ— เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธเธเน€เธเธเน€เธเธ‘เน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธ”เน€เธโ€เน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย`;if(points.length&&(!hasFitted||hasFilter)){map.fitBounds(points,{padding:[28,28],maxZoom:14});hasFitted=true}}
+      function zoomVisible(){const hasCoordinates=x=>x.lat!==null&&x.lng!==null&&x.lat!==''&&x.lng!=='';const points=visibleItems().filter(x=>hasCoordinates(x)).map(x=>[Number(x.lat),Number(x.lng)]).filter(([lat,lng])=>Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=5&&lat<=7.5&&lng>=100&&lng<=102.5);if(points.length)map.fitBounds(points,{padding:[28,28],maxZoom:14})}
+      function exportCsv(){const rows=visibleItems().map(x=>({uid:x.uid||'',camera_name:x.camera_name||x.name||'',camera_type:typeOf(x),project:projectOf(x),owner:x.ownership_category||'',area:x.area||'',status:x.status||'',latitude:x.lat??'',longitude:x.lng??''}));if(!rows.length){$('notice').textContent='เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ•เน€เธเธเน€เธเธ’เน€เธเธเน€เธยเน€เธเธ’เน€เธเธเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธโ€ขเน€เธเธ‘เน€เธเธเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธเน€เธเธ“เน€เธเธเน€เธเธเน€เธเธ‘เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธย';return}const fields=Object.keys(rows[0]),quote=v=>'"'+String(v??'').replaceAll('"','""')+'"',content='\ufeff'+[fields.join(','),...rows.map(row=>fields.map(f=>quote(row[f])).join(','))].join('\r\n'),link=document.createElement('a');link.href=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));link.download='cctv-map-'+new Date().toISOString().slice(0,10)+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),0)}
+      /* Spatial administrative filtering.  A resolved area is tested against
+         every camera coordinate, so it cannot accidentally exclude cameras
+         whose station/name text does not contain the selected area. */
+      const pointInRing=(point,ring)=>{let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j],crosses=((yi>point[1])!==(yj>point[1]))&&(point[0]<(xj-xi)*(point[1]-yi)/(yj-yi)+xi);if(crosses)inside=!inside}return inside};
+      const pointInGeometry=(lat,lng,geometry)=>{if(!geometry)return false;const inPolygon=polygon=>pointInRing([lng,lat],polygon[0]||[])&&!polygon.slice(1).some(hole=>pointInRing([lng,lat],hole));return geometry.type==='Polygon'?inPolygon(geometry.coordinates||[]):geometry.type==='MultiPolygon'?(geometry.coordinates||[]).some(inPolygon):false};
+      const inBounds=(lat,lng,bounds)=>Array.isArray(bounds)&&bounds.length===4&&lat>=bounds[0]&&lat<=bounds[1]&&lng>=bounds[2]&&lng<=bounds[3];
+      const normalizeAreaQuery=value=>String(value||'').trim().replace(/^(เน€เธโ€ขเน€เธเธ“เน€เธยเน€เธเธ…|เน€เธโ€ข\.|เน€เธเธเน€เธเธ“เน€เธโฌเน€เธย เน€เธเธ|เน€เธเธ\.|เน€เธยเน€เธเธ‘เน€เธยเน€เธเธเน€เธเธเน€เธเธ‘เน€เธโ€|เน€เธย\.)\s*/,'').trim();
+      async function applyAreaFilter(){
+        const raw=$('search').value.trim(),query=normalizeAreaQuery(raw),token=++areaLookupToken;
+        areaGeometry=null;
+        if(query.length<2){render();return}
+        if(areaGeometryCache.has(query)){
+          areaGeometry={query:raw,...areaGeometryCache.get(query)};
+          render();
+          return;
+        }
+        $('notice').textContent='เน€เธยเน€เธเธ“เน€เธเธ…เน€เธเธ‘เน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’เน€เธยเน€เธเธเน€เธยเน€เธโฌเน€เธยเน€เธโ€ขเน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธยเน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธยเนโฌเธ';
+        try{
+          const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&polygon_geojson=1&countrycodes=th&q='+encodeURIComponent(query+', เน€เธยเน€เธเธเน€เธเธ’เน€เธยเน€เธเธ”เน€เธเธเน€เธเธ’เน€เธเธ, เน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธโ€”เน€เธเธเน€เธยเน€เธโ€”เน€เธเธ');
+          const controller=new AbortController();
+          const timeout=window.setTimeout(()=>controller.abort(),7000);
+          const response=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});
+          window.clearTimeout(timeout);
+          if(!response.ok)throw new Error('area lookup unavailable');
+          const results=await response.json();
+          if(token!==areaLookupToken)return;
+          const result=(results||[]).find(row=>row.geojson&&(row.geojson.type==='Polygon'||row.geojson.type==='MultiPolygon'))||(results||[])[0];
+          if(result){
+            const resolved={geometry:result.geojson||null,bounds:(result.boundingbox||[]).map(Number),label:result.display_name||raw};
+            areaGeometryCache.set(query,resolved);
+            areaGeometry={query:raw,...resolved};
+          }
+        }catch(error){console.warn('Area boundary lookup failed; falling back to text search.',error)}
+        if(token===areaLookupToken)render();
+      }
+      function visibleItems(){
+        const raw=$('search').value.trim(),q=raw.toLowerCase(),type=$('type').value,owner=$('owner').value,status=$('status').value;
+        const activeArea=areaGeometry&&areaGeometry.query===raw?areaGeometry:null;
+        return items.filter(x=>{
+          const textMatch=!q||[x.camera_name,x.name,x.uid,x.camera_type,x.area,stationOf(x),projectOf(x),x.ownership_category].some(value=>String(value||'').toLowerCase().includes(q));
+          const lat=Number(x.lat),lng=Number(x.lng);
+          const areaMatch=activeArea&&Number.isFinite(lat)&&Number.isFinite(lng)&&(activeArea.geometry?pointInGeometry(lat,lng,activeArea.geometry):inBounds(lat,lng,activeArea.bounds));
+          return (activeArea?areaMatch:textMatch)&&(!type||typeOf(x)===type)&&(!owner||projectOf(x)===owner)&&(!status||x.status===status);
+        });
+      }
+      /* Render in small frames: a province-wide result can contain thousands
+         of cameras and must never block the page while Leaflet creates pins. */
+      function render(){
+        const token=++renderToken;
+        const stationSelect=$('station');
+        if(stationSelect&&!stationSelect.dataset.ready&&items.length){
+          const stationTotals=items.reduce((out,item)=>{const name=stationOf(item);out[name]=(out[name]||0)+1;return out},{});
+          const stations=Object.keys(stationTotals).sort((a,b)=>a.localeCompare(b,'th'));
+          stationSelect.innerHTML='<option value="">เน€เธโ€”เน€เธเธเน€เธย เน€เธเธเน€เธย .</option>'+stations.map(name=>`<option value="${esc(name)}">${esc(name)} (${stationTotals[name].toLocaleString()} เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย)</option>`).join('');
+          stationSelect.dataset.ready='true';
+        }
+        const visible=visibleItems(),query=$('search').value.trim();
+        const hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value||$('station')?.value);
+        const points=[];
+        layer.clearLayers();
+        if(selectedAreaLayer){map.removeLayer(selectedAreaLayer);selectedAreaLayer=null}
+        if(areaGeometry&&areaGeometry.query===query&&areaGeometry.geometry){
+          selectedAreaLayer=L.geoJSON(areaGeometry.geometry,{style:{color:'#f59e0b',weight:3,fillColor:'#fbbf24',fillOpacity:.12,interactive:false}}).addTo(map);
+        }
+        renderLegend(visible);
+        $('total').textContent=items.length.toLocaleString();
+        $('shown').textContent='0';
+        const projects=visible.reduce((out,x)=>{const project=projectOf(x);out[project]=(out[project]||0)+1;return out},{});
+        const names=[...new Set(items.map(projectOf))].sort((a,b)=>a.localeCompare(b,'th'));
+        $('ownerSummary').innerHTML='<h3>เน€เธเธเน€เธเธเน€เธเธเน€เธยเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธเธ / เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธเธ’เน€เธยเน€เธโฌเน€เธยเน€เธยเน€เธเธ’เน€เธยเน€เธเธเน€เธย</h3>'+names.map(name=>`<button type="button" data-owner-summary="${esc(name)}"><span>${esc(name)}</span><b>${(projects[name]||0).toLocaleString()} เน€เธยเน€เธเธเน€เธโ€</b></button>`).join('');
+        $('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;render()});
+        const drawFrom=start=>{
+          if(token!==renderToken)return;
+          const end=Math.min(start+120,visible.length);
+          for(let index=start;index<end;index++){
+            const x=visible[index],lat=Number(x.lat),lng=Number(x.lng);
+            if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)continue;
+            L.marker([lat,lng],{icon:iconOf(x)}).bindPopup(popup(x)).addTo(layer);
+            points.push([lat,lng]);
+          }
+          $('shown').textContent=points.length.toLocaleString();
+          if(end<visible.length){requestAnimationFrame(()=>drawFrom(end));return}
+          const spatialNote=areaGeometry&&areaGeometry.query===query?' เธขเธ— เน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธโ€ขเน€เธเธ’เน€เธเธเน€เธยเน€เธเธเน€เธยเน€เธโฌเน€เธยเน€เธโ€ขเน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธยเน€เธยเน€เธเธเน€เธเธ”เน€เธย':'';
+          $('notice').textContent=`เน€เธยเน€เธย ${visible.length.toLocaleString()} เน€เธเธเน€เธเธ’เน€เธเธเน€เธยเน€เธเธ’เน€เธเธ เธขเธ— เน€เธยเน€เธเธเน€เธโ€เน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€ ${points.length.toLocaleString()} เน€เธยเน€เธเธเน€เธโ€${query?` เธขเธ— เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธ’ เนโฌย${query}เนโฌย เน€เธยเน€เธเธ…เน€เธยเน€เธเธ`:''}${spatialNote}`;
+          if(points.length&&(!hasFitted||hasFilter)){map.fitBounds(points,{padding:[28,28],maxZoom:14});hasFitted=true}
+        };
+        requestAnimationFrame(()=>drawFrom(0));
+      }
+      function visibleItems(){
+        const raw=$('search').value.trim(),q=raw.toLowerCase(),type=$('type').value,owner=$('owner').value,status=$('status').value,station=$('station')?.value||'';
+        const activeArea=areaGeometry&&areaGeometry.query===raw?areaGeometry:null;
+        return items.filter(x=>{
+          const textMatch=!q||[x.camera_name,x.name,x.uid,x.camera_type,x.area,stationOf(x),projectOf(x),x.ownership_category].some(value=>String(value||'').toLowerCase().includes(q));
+          const lat=Number(x.lat),lng=Number(x.lng);
+          const areaMatch=activeArea&&Number.isFinite(lat)&&Number.isFinite(lng)&&(activeArea.geometry?pointInGeometry(lat,lng,activeArea.geometry):inBounds(lat,lng,activeArea.bounds));
+          return (activeArea?areaMatch:textMatch)&&(!type||typeOf(x)===type)&&(!owner||projectOf(x)===owner)&&(!station||stationOf(x)===station)&&(!status||x.status===status);
+        });
+      }
+      async function load(){
+        const all=[];
+        for(let from=0;;from+=500){const r=await db.from('cctv_locations').select('id,camera_name,name,uid,area,station,camera_type,project,ownership_category,status,lat,lng,camera_categories(name,marker_color,marker_icon)').order('id').range(from,from+499);if(r.error){$('notice').textContent='เน€เธยเน€เธเธเน€เธเธ…เน€เธโ€เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ“เน€เธโฌเน€เธเธเน€เธยเน€เธย: '+r.error.message;return}all.push(...(r.data||[]));if((r.data||[]).length<500)break;await new Promise(done=>setTimeout(done,40))}
+        const c=await db.from('camera_categories').select('name,marker_color,marker_icon').eq('is_active',true).order('sort_order').order('name');if(c.error){$('notice').textContent='เน€เธยเน€เธเธเน€เธเธ…เน€เธโ€เน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ“เน€เธโฌเน€เธเธเน€เธยเน€เธย: '+c.error.message;return}
+        items=all;categories=c.data||[];setOptions('type',categories.map(x=>x.name),'เน€เธโ€”เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธโฌเน€เธย เน€เธโ€”');setOptions('owner',[...new Set(items.map(projectOf))].sort((a,b)=>a.localeCompare(b,'th')),'เน€เธโ€”เน€เธเธเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธ’เน€เธเธ');setOptions('status',[...new Set(items.map(x=>x.status).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th')),'เน€เธโ€”เน€เธเธเน€เธยเน€เธเธเน€เธโ€“เน€เธเธ’เน€เธยเน€เธเธ');renderLegend();try{render()}catch(error){console.error('Camera marker rendering failed',error);$('notice').textContent='เน€เธยเน€เธเธเน€เธโ€เน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€เน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ“เน€เธโฌเน€เธเธเน€เธยเน€เธย: '+error.message}
+      }
+      function start(event){const session=event.detail||window.cctvSession;if(!session)return;db=session.client;map=L.map('map').setView([6.425,101.825],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);layer=L.layerGroup().addTo(map);const legacyUidControl=$('toggleCameraUids')?.closest('label');if(legacyUidControl){legacyUidControl.style.display='none';const eyeButton=document.createElement('button');eyeButton.type='button';eyeButton.id='cameraMarkerEye';eyeButton.className='marker-eye-toggle';eyeButton.innerHTML='<i class="fa-solid fa-eye"></i> เน€เธยเน€เธเธเน€เธโ€เน€เธย UID / เน€เธยเน€เธเธ—เน€เธยเน€เธเธเน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย / เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย';legacyUidControl.after(eyeButton);eyeButton.onclick=()=>{markerDetailsVisible=!markerDetailsVisible;eyeButton.classList.toggle('is-visible',markerDetailsVisible);eyeButton.innerHTML=markerDetailsVisible?'<i class="fa-solid fa-eye-slash"></i> เน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธเธ…เน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธเธเน€เธโ€':'<i class="fa-solid fa-eye"></i> เน€เธยเน€เธเธเน€เธโ€เน€เธย UID / เน€เธยเน€เธเธ—เน€เธยเน€เธเธเน€เธยเน€เธเธ…เน€เธยเน€เธเธเน€เธย / เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธโ€”เน€เธเธ•เน€เธย';render()}}const boundaryControl=document.createElement('label');boundaryControl.innerHTML='<input id="toggleBoundaries" type="checkbox" checked> เน€เธยเน€เธเธเน€เธยเน€เธโฌเน€เธยเน€เธโ€ขเน€เธเธเน€เธเธ“เน€เธโฌเน€เธย เน€เธเธ / เน€เธโ€ขเน€เธเธ“เน€เธยเน€เธเธ…';$('toggleCameraUids').closest('label').after(boundaryControl);$('toggleBoundaries').onchange=event=>{if(!boundaryLayer)return;if(event.target.checked)boundaryLayer.addTo(map);else map.removeLayer(boundaryLayer)};loadAdministrativeBoundaries();document.addEventListener('click',async event=>{const button=event.target.closest('.copy-uid');if(!button)return;try{await navigator.clipboard.writeText(button.dataset.uid||'');button.textContent='เน€เธยเน€เธเธ‘เน€เธโ€เน€เธเธ…เน€เธเธเน€เธยเน€เธยเน€เธเธ…เน€เธยเน€เธเธ'}catch(error){button.textContent='เน€เธยเน€เธเธ‘เน€เธโ€เน€เธเธ…เน€เธเธเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธเธเน€เธเธ“เน€เธโฌเน€เธเธเน€เธยเน€เธย'}setTimeout(()=>button.textContent='เน€เธยเน€เธเธ‘เน€เธโ€เน€เธเธ…เน€เธเธเน€เธย',1200)});$('zoomVisible').onclick=zoomVisible;$('clearFilters').onclick=()=>{['search','type','owner','status'].forEach(id=>$(id).value='');render();zoomVisible()};$('exportCsv').onclick=exportCsv;$('printMap').onclick=()=>window.print();$('toggleCameraUids').onchange=event=>$('map').classList.toggle('hide-camera-uids',!event.target.checked);['search','type','owner','status'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));const resizeMap=()=>map?.invalidateSize({pan:false});window.addEventListener('resize',resizeMap);[0,120,450,1100].forEach(delay=>setTimeout(resizeMap,delay));load()}
+      const initialStart=start;
+      start=event=>{
+        initialStart(event);
+        $('cameraMarkerEye')?.remove();
+        const applyButton=$('applyAreaFilter');
+        if(applyButton)applyButton.addEventListener('click',applyAreaFilter);
+        $('search')?.addEventListener('change',applyAreaFilter);
+        $('search')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();applyAreaFilter()}});
+        $('search')?.addEventListener('input',()=>{areaLookupToken++;areaGeometry=null});
+        $('station')?.addEventListener('change',()=>{render();window.setTimeout(zoomVisible,40)});
+        $('clearFilters')?.addEventListener('click',()=>{areaLookupToken++;areaGeometry=null;if($('station'))$('station').value='';render()});
+      };
+      if(window.cctvSession)start({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',start,{once:true});
+    })();
+  </script>
+<script>
+(() => {
+  const setupThailandMapLookup = () => {
+    const input = document.getElementById('search');
+    const api = window.ThailandAdmin;
+    if (!input || !api) return;
+    const list = document.createElement('datalist');
+    list.id = 'thaiMapAreaChoices';
+    document.body.appendChild(list);
+    input.setAttribute('list', list.id);
+    input.addEventListener('input', () => {
+      const query = input.value.trim();
+      list.innerHTML = query.length < 2 ? '' : api.search(query, 25).map(row => `<option value="${String(row.name).replace(/[&<>\"]/g, '')}" label="${String(row.label).replace(/[&<>\"]/g, '')}">`).join('');
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupThailandMapLookup, { once:true });
+  else setupThailandMapLookup();
+})();
+</script>
+<script>
+  /* Leaflet needs a resize event after its parent iframe has been expanded. */
+  window.addEventListener('load', () => [80, 350, 1000].forEach(delay => {
+    window.setTimeout(() => window.dispatchEvent(new Event('resize')), delay);
+  }));
+</script>
+<script>
+  (() => {
+    const toggle = document.getElementById('toggleCameraUids');
+    const mapElement = document.getElementById('map');
+    if (toggle && mapElement) mapElement.classList.toggle('hide-camera-uids', !toggle.checked);
+  })();
+</script>
+</body>
+</html>

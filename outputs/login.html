@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>เข้าสู่ระบบ | CCTV POLICE9</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="jis-ui-theme.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: Sarabun, sans-serif; color: #15262b; background: linear-gradient(135deg,#102f38,#195d72 52%,#4d7e8f); }
+    .auth-shell { width: min(1040px, calc(100% - 32px)); margin: 34px auto; display: grid; grid-template-columns: minmax(0,420px) minmax(0,560px); gap: 22px; align-items: start; justify-content: center; }
+    .box { background: #ffffffef; border: 1px solid #fff; border-radius: 16px; padding: 30px; box-shadow: 0 22px 60px #001b29aa; }
+    .register-card { display: none; }
+    .register-card.is-open { display: block; }
+    .icon { width: 56px; height: 56px; display: grid; place-items: center; background: linear-gradient(135deg,#157a92,#2463df); color: #fff; border-radius: 14px; font-size: 25px; margin: auto; }
+    .title { text-align: center; }
+    .title h1 { margin: 14px 0 4px; font-size: 25px; }
+    .title p { margin: 0 0 20px; color: #60737b; }
+    h2 { margin: 0 0 4px; font-size: 23px; }
+    .intro, .note { color: #60737b; font-size: 13px; line-height: 1.5; }
+    .intro { margin: 0 0 16px; }
+    .note { text-align: center; margin: 14px 0 0; }
+    label { font-size: 14px; font-weight: 700; display: block; margin-top: 12px; }
+    input, select { width: 100%; padding: 11px 12px; border: 1px solid #ccd8dc; border-radius: 8px; font: inherit; margin-top: 5px; background: #fff; }
+    input:focus, select:focus { outline: 3px solid #b7e4ef; border-color: #157a92; }
+    button { width: 100%; border: 0; border-radius: 8px; padding: 12px; background: #2463df; color: #fff; font: 700 16px Sarabun, sans-serif; cursor: pointer; margin-top: 20px; }
+    button:disabled { cursor: wait; opacity: .65; }
+    .secondary { background: transparent; color: #2463df; margin-top: 8px; }
+    .back { width: auto; padding: 0; margin: 0 0 15px; background: transparent; color: #2463df; font-size: 14px; }
+    .message { min-height: 20px; margin: 12px 0 0; font-size: 14px; color: #b32432; text-align: center; }
+    .message.ok { color: #067c51; }
+    .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+    .hidden { display: none !important; }
+    @media (max-width: 780px) { .auth-shell { width: min(560px, calc(100% - 24px)); grid-template-columns: 1fr; margin: 12px auto 28px; } .box { padding: 24px; } }
+    @media (max-width: 430px) { .auth-shell { width: calc(100% - 18px); } .box { padding: 20px 16px; border-radius: 13px; } .two-columns { grid-template-columns: 1fr; gap: 0; } }
+  </style>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="box" aria-labelledby="login-title">
+      <div class="icon" aria-hidden="true">📹</div>
+      <div class="title">
+        <h1 id="login-title">CCTV POLICE9</h1>
+        <p>ศูนย์วิเคราะห์ข้อมูลและสั่งการ</p>
+      </div>
+      <form id="loginForm">
+        <label for="email">อีเมล
+          <input id="email" type="email" autocomplete="email" required>
+        </label>
+        <label for="password">รหัสผ่าน
+          <input id="password" type="password" autocomplete="current-password" minlength="8" required>
+        </label>
+        <button id="submit" type="submit">เข้าสู่ระบบ</button>
+      </form>
+      <button id="forgot" class="secondary" type="button">ลืมรหัสผ่าน</button>
+      <button id="showRegister" class="secondary" type="button">ลงทะเบียนผู้ใช้</button>
+      <p id="loginMessage" class="message" role="status" aria-live="polite"></p>
+      <p class="note">บัญชีใหม่จะอยู่ระหว่างรอผู้ดูแลระบบอนุมัติก่อนใช้งาน</p>
+    </section>
+
+    <section id="registerCard" class="box register-card" aria-labelledby="register-title">
+      <button id="backToLogin" class="back" type="button">← กลับเข้าสู่ระบบ</button>
+      <h2 id="register-title">ลงทะเบียนผู้ใช้</h2>
+      <p class="intro">กรอกข้อมูลเจ้าหน้าที่ให้ครบถ้วน บัญชีจะใช้งานได้หลังผู้ดูแลระบบอนุมัติ</p>
+      <form id="registerForm">
+        <div class="two-columns">
+          <label for="regFullName">ยศ ชื่อ-สกุล
+            <input id="regFullName" type="text" autocomplete="name" required>
+          </label>
+          <label for="regPosition">ตำแหน่ง
+            <input id="regPosition" type="text" required>
+          </label>
+          <label for="regDepartment">แผนกงาน
+            <select id="regDepartment" required>
+              <option value="" selected disabled>เลือกแผนกงาน</option>
+              <option>งานป้องกันปราบปราม</option>
+              <option>งานธุรการ</option>
+              <option>งานสอบสวน</option>
+              <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
+            </select>
+          </label>
+          <label id="otherDepartmentWrap" class="hidden" for="regDepartmentOther">ระบุแผนกงานอื่น
+            <input id="regDepartmentOther" type="text">
+          </label>
+          <label for="regPhone">เบอร์โทร
+            <input id="regPhone" type="tel" autocomplete="tel" inputmode="tel" required>
+          </label>
+          <label for="regEmail">อีเมล
+            <input id="regEmail" type="email" autocomplete="email" required>
+          </label>
+          <label for="regUsername">Username
+            <input id="regUsername" type="text" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]+" title="ใช้ตัวอักษรภาษาอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง" required>
+          </label>
+          <label for="regPassword">Password
+            <input id="regPassword" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <label for="regConfirmPassword">ยืนยัน Password
+            <input id="regConfirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+        </div>
+        <button id="registerSubmit" type="submit">ส่งคำขอลงทะเบียน</button>
+      </form>
+      <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
+      <p class="note">รหัสผ่านถูกจัดเก็บโดย Supabase Auth เท่านั้น และจะไม่แสดงหรือบันทึกไว้ในข้อมูลโปรไฟล์</p>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="smart-alert.js"></script>
+  <script>
+    (() => {
+      const db = supabase.createClient('https://rbahodbdbxfvftfxeipe.supabase.co', 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4');
+      const $ = (id) => document.getElementById(id);
+      const loginMessage = (text, ok = false) => { $('loginMessage').textContent = text; $('loginMessage').className = ok ? 'message ok' : 'message'; };
+      const registerMessage = (text, ok = false) => { $('registerMessage').textContent = text; $('registerMessage').className = ok ? 'message ok' : 'message'; };
+      const showRegister = (open) => {
+        $('registerCard').classList.toggle('is-open', open);
+        if (open) { $('regFullName').focus(); $('registerCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        else { $('email').focus(); }
+      };
+      const errorText = (error) => error?.message === 'Invalid login credentials'
+        ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง หรือลองกด “ลืมรหัสผ่าน”'
+        : (error?.message || 'ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง');
+
+      if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
+      $('showRegister').addEventListener('click', () => showRegister(true));
+      $('backToLogin').addEventListener('click', () => showRegister(false));
+      $('regDepartment').addEventListener('change', () => {
+        const other = $('regDepartment').value === 'อื่นๆ';
+        $('otherDepartmentWrap').classList.toggle('hidden', !other);
+        $('regDepartmentOther').required = other;
+        if (!other) $('regDepartmentOther').value = '';
+      });
+
+      $('loginForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        $('submit').disabled = true;
+        loginMessage('กำลังตรวจสอบข้อมูล…');
+        const { error } = await db.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+        $('submit').disabled = false;
+        if (error) {
+          loginMessage(errorText(error));
+          window.smartAlert?.('เข้าสู่ระบบไม่สำเร็จ', errorText(error), 'error', 3200);
+          return;
+        }
+        await window.cctvNotify?.('เข้าสู่ระบบสำเร็จ', { module: 'ระบบ CCTV POLICE9', message: 'กำลังเปิดศูนย์บัญชาการ', duration: 900 });
+        location.replace('home.html');
+      });
+
+      $('forgot').addEventListener('click', async () => {
+        const address = $('email').value.trim();
+        if (!address) return loginMessage('กรุณากรอกอีเมลก่อนกดลืมรหัสผ่าน');
+        const redirectTo = new URL('password-reset.html', location.href).href;
+        const { error } = await db.auth.resetPasswordForEmail(address, { redirectTo });
+        if (error) return loginMessage('ส่งลิงก์กู้รหัสผ่านไม่สำเร็จ: ' + errorText(error));
+        loginMessage('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว กรุณาเปิดลิงก์ล่าสุดในอีเมล', true);
+      });
+
+      $('registerForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = $('regPassword').value;
+        const confirmPassword = $('regConfirmPassword').value;
+        const department = $('regDepartment').value;
+        const departmentOther = $('regDepartmentOther').value.trim();
+        if (password !== confirmPassword) return registerMessage('ยืนยันรหัสผ่านไม่ตรงกัน');
+        if (department === 'อื่นๆ' && !departmentOther) return registerMessage('กรุณาระบุแผนกงานอื่น');
+        const username = $('regUsername').value.trim().toLowerCase();
+        if (!/^[a-z0-9._-]{3,30}$/.test(username)) return registerMessage('Username ต้องใช้ภาษาอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง ความยาว 3–30 ตัวอักษร');
+        $('registerSubmit').disabled = true;
+        registerMessage('กำลังส่งคำขอลงทะเบียน…');
+        const fullName = $('regFullName').value.trim();
+        const { data, error } = await db.auth.signUp({
+          email: $('regEmail').value.trim(),
+          password,
+          options: { data: {
+            full_name: fullName,
+            rank_full_name: fullName,
+            position: $('regPosition').value.trim(),
+            department,
+            department_other: departmentOther,
+            phone: $('regPhone').value.trim(),
+            username
+          } }
+        });
+        $('registerSubmit').disabled = false;
+        if (error) {
+          const text = error.message.includes('profiles_username_unique_ci') ? 'Username นี้ถูกใช้งานแล้ว กรุณาเลือกใหม่' : errorText(error);
+          registerMessage(text);
+          window.smartAlert?.('ลงทะเบียนไม่สำเร็จ', text, 'error', 3200);
+          return;
+        }
+        if (!data.user) {
+          registerMessage('ไม่พบข้อมูลบัญชีที่สร้าง โปรดลองอีกครั้ง');
+          window.smartAlert?.('ลงทะเบียนไม่สำเร็จ', 'ไม่พบข้อมูลบัญชีที่สร้าง โปรดลองอีกครั้ง', 'error', 3200);
+          return;
+        }
+        $('registerForm').reset();
+        $('otherDepartmentWrap').classList.add('hidden');
+        registerMessage('ส่งคำขอลงทะเบียนสำเร็จ กรุณายืนยันอีเมลหากระบบส่งลิงก์มา และรอผู้ดูแลระบบอนุมัติบัญชี', true);
+        window.smartAlert?.('ส่งคำขอลงทะเบียนแล้ว', 'ระบบแจ้งผู้ดูแลเพื่ออนุมัติบัญชีแล้ว', 'success');
+      });
+    })();
+  </script>
+</body>
+</html>
