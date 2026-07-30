@@ -139,6 +139,7 @@
       content.setAttribute('tabindex', '-1');
       const link = document.createElement('a');
       link.id = 'skip-to-content';
+      link.className = 'skip-to-content';
       link.href = '#' + content.id;
       link.textContent = 'ข้ามไปยังเนื้อหาหลัก';
       document.body.insertBefore(link, document.body.firstChild);
@@ -191,7 +192,7 @@
 
   function addCameraQualityShortcut() {
     const page = location.pathname.toLowerCase();
-    if (!/camera-(management|center)\.html$|command-center\.html$/.test(page) || document.getElementById('camera-quality-shortcut')) return;
+    if (!/camera-management\.html$|command-center\.html$/.test(page) || document.getElementById('camera-quality-shortcut')) return;
     const add = () => {
       if (document.getElementById('camera-quality-shortcut')) return;
       const link = document.createElement('a');
@@ -208,7 +209,7 @@
   function addCameraDuplicateShortcut(profile) {
     if (profile?.role !== 'ADMIN') return;
     const page = location.pathname.toLowerCase();
-    if (!/camera-(management|center)\.html$|command-center\.html$/.test(page) || document.getElementById('camera-duplicate-shortcut')) return;
+    if (!/camera-management\.html$|command-center\.html$/.test(page) || document.getElementById('camera-duplicate-shortcut')) return;
     const add = () => {
       if (document.getElementById('camera-duplicate-shortcut')) return;
       const link = document.createElement('a');
