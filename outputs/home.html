@@ -289,8 +289,9 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
       const colors = ['#19c5c5', '#ec5570', '#ffbc2f'];
       let rows = [], started = false;
       const stationName = value => String(value || '').trim() || 'ไม่ระบุ สภ.';
+      const normalizedStatus = value => { const text = String(value || '').trim().toLowerCase(); if (/ออฟไลน์|offline|ชำรุด|เสีย|ไม่ใช้งาน/.test(text)) return 'ออฟไลน์'; if (/ออนไลน์|online|ปกติ|ใช้งาน/.test(text)) return 'ออนไลน์'; return 'สถานะไม่ระบุ'; };
       const statusCounts = source => source.reduce((out, row) => {
-        const key = row.status === 'ออนไลน์' ? 'ออนไลน์' : row.status === 'ออฟไลน์' ? 'ออฟไลน์' : 'สถานะไม่ระบุ';
+        const key = normalizedStatus(row.status);
         out[key] += 1; return out;
       }, { ออนไลน์: 0, ออฟไลน์: 0, 'สถานะไม่ระบุ': 0 });
       function render(station) {
@@ -313,7 +314,7 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
         started = true;
         const client = window.cctvSession?.client || window.supabase.createClient(URL, KEY);
         for (let from = 0; from < 5000; from += 500) {
-          const { data, error } = await client.from('cctv_locations').select('area,status').range(from, from + 499);
+          const { data, error } = await client.from('cctv_locations').select('area,status,project').range(from, from + 499);
           if (error) throw error;
           rows.push(...(data || []));
           if (!data || data.length < 500) break;
@@ -324,10 +325,35 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
         });
         select.addEventListener('change', () => render(select.value));
         render(select.value);
+        window.dispatchEvent(new CustomEvent('cctv-home-camera-rows', { detail: rows }));
       }
       const start = () => loadStationChart().catch(() => { started = false; });
       if (window.cctvSession) start(); else window.addEventListener('cctv-auth-ready', start, { once: true });
       window.setTimeout(start, 2800);
+    })();
+  </script>
+  <script>
+    (() => {
+      const colors = ['#1384dc', '#f5ae24', '#1fb573', '#e7516b'];
+      const ownerOf = row => { const value = String(row.project || '').toLowerCase(); if (/กอ\.รมน|6เมือง|6 เมือง/.test(value)) return 'กล้อง กอ.รมน. (6 เมืองหลัก)'; if (/มหาดไทย|สป\.มท/.test(value)) return 'กล้องมหาดไทย (สป.มท.)'; if (/เอกชน|private/.test(value)) return 'กล้องเอกชน'; return 'กล้อง ผบช.ภ.9'; };
+      const stateOf = value => { const text = String(value || '').trim().toLowerCase(); if (/ออฟไลน์|offline|ชำรุด|เสีย|ไม่ใช้งาน/.test(text)) return 'ออฟไลน์'; if (/ออนไลน์|online|ปกติ|ใช้งาน/.test(text)) return 'ออนไลน์'; return 'สถานะไม่ระบุ'; };
+      function renderExactCameraFacts(rows) {
+        const ownerCounts = rows.reduce((out, row) => { const key = ownerOf(row); out[key] = (out[key] || 0) + 1; return out; }, {});
+        const ordered = ['กล้อง กอ.รมน. (6 เมืองหลัก)', 'กล้องมหาดไทย (สป.มท.)', 'กล้อง ผบช.ภ.9', 'กล้องเอกชน'].map(name => [name, ownerCounts[name] || 0]);
+        const maximum = Math.max(1, ...ordered.map(([, total]) => total));
+        document.getElementById('ownerChart').replaceChildren(...ordered.map(([name, total]) => {
+          const row = document.createElement('div'), label = document.createElement('span'), track = document.createElement('div'), fill = document.createElement('div'), amount = document.createElement('b');
+          row.className = 'bar-row'; label.textContent = name; track.className = 'bar-track'; fill.className = 'bar-fill'; fill.style.width = `${Math.max(total ? 3 : 0, total / maximum * 100)}%`; amount.textContent = `${total.toLocaleString()} ตัว`; track.append(fill); row.append(label, track, amount); return row;
+        }));
+        const states = rows.reduce((out, row) => { const key = stateOf(row.status); out[key] += 1; return out; }, { ออนไลน์: 0, ออฟไลน์: 0, 'สถานะไม่ระบุ': 0 });
+        const total = Math.max(1, rows.length), palette = ['#19c5c5', '#ec5570', '#ffbc2f']; let cursor = 0;
+        const stops = Object.values(states).map((value, index) => { const next = cursor + value / total * 100; const stop = `${palette[index]} ${cursor}% ${next}%`; cursor = next; return stop; });
+        document.getElementById('readinessDonut').style.background = `conic-gradient(${stops.join(',')})`;
+        document.getElementById('donutTotal').textContent = rows.length.toLocaleString();
+        const legend = document.getElementById('readinessLegend');
+        legend.replaceChildren(...Object.entries(states).map(([name, value], index) => { const line = document.createElement('div'), label = document.createElement('span'), amount = document.createElement('b'); label.style.setProperty('--legend', palette[index]); label.textContent = name; amount.textContent = `${value.toLocaleString()} ตัว`; line.append(label, amount); return line; }));
+      }
+      window.addEventListener('cctv-home-camera-rows', event => renderExactCameraFacts(event.detail || []), { once: true });
     })();
   </script>
 </body></html>
