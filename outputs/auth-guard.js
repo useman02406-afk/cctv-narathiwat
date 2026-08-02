@@ -182,39 +182,6 @@
   }
 
 
-  function addCameraQualityShortcut() {
-    const page = location.pathname.toLowerCase();
-    if (!/camera-management\.html$|command-center\.html$/.test(page) || document.getElementById('camera-quality-shortcut')) return;
-    const add = () => {
-      if (document.getElementById('camera-quality-shortcut')) return;
-      const link = document.createElement('a');
-      link.id = 'camera-quality-shortcut';
-      link.href = 'camera-data-quality.html';
-      link.textContent = '\ud83d\udee1\ufe0f \u0e15\u0e23\u0e27\u0e08\u0e04\u0e38\u0e13\u0e20\u0e32\u0e1e\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e01\u0e25\u0e49\u0e2d\u0e07';
-      link.setAttribute('aria-label', '\u0e40\u0e1b\u0e34\u0e14\u0e2b\u0e19\u0e49\u0e32\u0e15\u0e23\u0e27\u0e08\u0e04\u0e38\u0e13\u0e20\u0e32\u0e1e\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e01\u0e25\u0e49\u0e2d\u0e07 CCTV');
-      link.style.cssText = 'position:fixed;right:18px;bottom:66px;z-index:99999;padding:10px 14px;border-radius:999px;background:#0f766e;color:#fff;text-decoration:none;font:700 13px/1.2 system-ui,sans-serif;box-shadow:0 5px 18px #064e3b66;border:1px solid #ffffff66';
-      document.body.appendChild(link);
-    };
-    if (document.body) add(); else document.addEventListener('DOMContentLoaded', add, { once: true });
-  }
-
-  function addCameraDuplicateShortcut(profile) {
-    if (profile?.role !== 'ADMIN') return;
-    const page = location.pathname.toLowerCase();
-    if (!/camera-management\.html$|command-center\.html$/.test(page) || document.getElementById('camera-duplicate-shortcut')) return;
-    const add = () => {
-      if (document.getElementById('camera-duplicate-shortcut')) return;
-      const link = document.createElement('a');
-      link.id = 'camera-duplicate-shortcut';
-      link.href = 'camera-duplicate-review.html';
-      link.textContent = '🔎 ตรวจข้อมูลซ้ำ';
-      link.setAttribute('aria-label', 'เปิดหน้าตรวจสอบข้อมูลกล้องซ้ำ');
-      link.style.cssText = 'position:fixed;right:18px;bottom:114px;z-index:99999;padding:10px 14px;border-radius:999px;background:#7c3aed;color:#fff;text-decoration:none;font:700 13px/1.2 system-ui,sans-serif;box-shadow:0 5px 18px #5b21b666;border:1px solid #ffffff66';
-      document.body.appendChild(link);
-    };
-    if (document.body) add(); else document.addEventListener('DOMContentLoaded', add, { once: true });
-  }
-
   function decorateUserIdentity(session) {
     const profile = session?.profile;
     if (!profile) return;
@@ -495,8 +462,6 @@
     decorateUserIdentity(window.cctvSession);
     addQuickHelp();
     addMobileNavToggle();
-    addCameraQualityShortcut();
-    addCameraDuplicateShortcut(profile);
     addHomeSearchNavigation(profile);
     addHomeSearchDashboardSummary(window.cctvSession);
     applyCameraSearchQuery();
