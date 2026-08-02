@@ -18,7 +18,6 @@
     <nav class="tabs" aria-label="เมนูจัดการกล้อง">
       <button class="tab active" data-src="camera-locations-map.html"><i class="fa-solid fa-map-location-dot"></i> ข้อมูลและจุดติดตั้ง</button>
       <button class="tab" data-src="camera-management.html"><i class="fa-solid fa-sliders"></i> จัดการข้อมูลกล้อง</button>
-      <button class="tab" data-src="camera-record-browser.html"><i class="fa-solid fa-table-list"></i> ดูข้อมูลทั้งหมด</button>
       <button class="tab" data-src="camera-data-quality.html"><i class="fa-solid fa-shield-halved"></i> ตรวจคุณภาพข้อมูล</button>
       <button class="tab" data-src="camera-duplicate-review.html"><i class="fa-solid fa-copy"></i> ตรวจข้อมูลซ้ำ</button>
       <button class="tab" data-src="camera-categories.html"><i class="fa-solid fa-tags"></i> จัดการหมวดหมู่กล้อง</button>
@@ -42,7 +41,7 @@
       const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
       document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
       document.getElementById('refresh').addEventListener('click',()=>location.reload());
-      const requested=location.hash.slice(1),[requestedSrc,...requestedQuery]=requested.split('?');const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===requestedSrc)||document.querySelector('.tab.active');if(selected)openTab(selected,requestedQuery.join('?'));
+      const requested=location.hash.slice(1),[rawRequestedSrc,...requestedQuery]=requested.split('?'),requestedSrc=rawRequestedSrc==='camera-record-browser.html'?'camera-management.html':rawRequestedSrc;const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===requestedSrc)||document.querySelector('.tab.active');if(selected)openTab(selected,requestedQuery.join('?'));
     })();
   </script>
 </body>
