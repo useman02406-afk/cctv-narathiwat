@@ -136,6 +136,16 @@
       const errorText = (error) => error?.message === 'Invalid login credentials'
         ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง หรือลองกด “ลืมรหัสผ่าน”'
         : (error?.message || 'ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง');
+      const googleErrorText = (error) => {
+        const detail = error?.message || '';
+        if (/provider.*not.*enabled|unsupported provider|disabled/i.test(detail)) {
+          return 'ยังไม่ได้เปิดใช้งาน Google Sign-in ใน Supabase กรุณาให้ผู้ดูแลเปิด Google Provider และกำหนด Redirect URL ของเว็บไซต์';
+        }
+        if (/redirect|redirect_to/i.test(detail)) {
+          return 'URL สำหรับกลับเข้าเว็บไซต์ยังไม่ได้รับอนุญาตใน Supabase กรุณาเพิ่ม URL ของหน้า home.html ใน Redirect URLs';
+        }
+        return `ไม่สามารถเชื่อมต่อ Google ได้: ${errorText(error)}`;
+      };
 
       if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
@@ -173,7 +183,7 @@
         const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
         if (error) {
           button.disabled = false;
-          const text = 'ไม่สามารถเชื่อมต่อ Google ได้: ' + errorText(error);
+          const text = googleErrorText(error);
           loginMessage(text);
           window.smartAlert?.('เชื่อมต่อ Google ไม่สำเร็จ', text, 'error', 3600);
         }
