@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>เข้าสู่ระบบ | CCTV POLICE9</title>
+  <title>เข้าสู่ระบบ | ศูนย์ CCTV สภ.เมืองนราธิวาส</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="jis-ui-theme.css">
   <style>
     * { box-sizing: border-box; }
@@ -24,9 +25,16 @@
     label { font-size: 14px; font-weight: 700; display: block; margin-top: 12px; }
     input, select { width: 100%; padding: 11px 12px; border: 1px solid #ccd8dc; border-radius: 8px; font: inherit; margin-top: 5px; background: #fff; }
     input:focus, select:focus { outline: 3px solid #b7e4ef; border-color: #157a92; }
+    .password-wrap { position: relative; margin-top: 5px; }
+    .password-wrap input { margin-top: 0; padding-right: 48px; }
+    .toggle-password { position: absolute; inset: 0 5px 0 auto; width: 38px; min-width: 38px; padding: 0; margin: 0; border-radius: 7px; background: transparent; color: #2463df; font-size: 17px; }
+    .toggle-password:hover { background: #e7f4f8; }
     button { width: 100%; border: 0; border-radius: 8px; padding: 12px; background: #2463df; color: #fff; font: 700 16px Sarabun, sans-serif; cursor: pointer; margin-top: 20px; }
     button:disabled { cursor: wait; opacity: .65; }
     .secondary { background: transparent; color: #2463df; margin-top: 8px; }
+    .google-login { display:flex; align-items:center; justify-content:center; gap:11px; margin-top: 12px; background:#fff; color:#27364a; border:1px solid #cfd8e5; box-shadow:0 2px 7px #17355d18; }
+    .google-login:hover { background:#f7faff; border-color:#9db8df; }
+    .google-mark { font-family:Arial,sans-serif; font-size:25px; font-weight:800; color:#4285f4; line-height:1; }
     .back { width: auto; padding: 0; margin: 0 0 15px; background: transparent; color: #2463df; font-size: 14px; }
     .message { min-height: 20px; margin: 12px 0 0; font-size: 14px; color: #b32432; text-align: center; }
     .message.ok { color: #067c51; }
@@ -41,7 +49,7 @@
     <section class="box" aria-labelledby="login-title">
       <div class="icon" aria-hidden="true">📹</div>
       <div class="title">
-        <h1 id="login-title">CCTV POLICE9</h1>
+        <h1 id="login-title">ศูนย์ CCTV สภ.เมืองนราธิวาส</h1>
         <p>ศูนย์วิเคราะห์ข้อมูลและสั่งการ</p>
       </div>
       <form id="loginForm">
@@ -49,10 +57,11 @@
           <input id="email" type="email" autocomplete="email" required>
         </label>
         <label for="password">รหัสผ่าน
-          <input id="password" type="password" autocomplete="current-password" minlength="8" required>
+          <span class="password-wrap"><input id="password" type="password" autocomplete="current-password" minlength="8" required><button id="togglePassword" class="toggle-password" type="button" aria-label="แสดงรหัสผ่าน" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></span>
         </label>
         <button id="submit" type="submit">เข้าสู่ระบบ</button>
       </form>
+      <button id="googleSignIn" class="google-login" type="button"><span class="google-mark">G</span><span>Sign in with Google</span></button>
       <button id="forgot" class="secondary" type="button">ลืมรหัสผ่าน</button>
       <button id="showRegister" class="secondary" type="button">ลงทะเบียนผู้ใช้</button>
       <p id="loginMessage" class="message" role="status" aria-live="polite"></p>
@@ -125,6 +134,27 @@
       if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
       $('backToLogin').addEventListener('click', () => showRegister(false));
+      $('togglePassword').addEventListener('click', () => {
+        const visible = $('password').type === 'text';
+        $('password').type = visible ? 'password' : 'text';
+        $('togglePassword').setAttribute('aria-label', visible ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน');
+        $('togglePassword').setAttribute('aria-pressed', String(!visible));
+        $('togglePassword').innerHTML = visible ? '<i class="fa-solid fa-eye" aria-hidden="true"></i>' : '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>';
+        $('password').focus();
+      });
+      $('googleSignIn').addEventListener('click', async () => {
+        const button = $('googleSignIn');
+        button.disabled = true;
+        loginMessage('กำลังเชื่อมต่อเพื่อเข้าสู่ระบบด้วย Google…');
+        const redirectTo = new URL('home.html', location.href).href;
+        const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+        if (error) {
+          button.disabled = false;
+          const text = 'ไม่สามารถเชื่อมต่อ Google ได้: ' + errorText(error);
+          loginMessage(text);
+          window.smartAlert?.('เชื่อมต่อ Google ไม่สำเร็จ', text, 'error', 3600);
+        }
+      });
       $('regDepartment').addEventListener('change', () => {
         const other = $('regDepartment').value === 'อื่นๆ';
         $('otherDepartmentWrap').classList.toggle('hidden', !other);
@@ -143,7 +173,7 @@
           window.smartAlert?.('เข้าสู่ระบบไม่สำเร็จ', errorText(error), 'error', 3200);
           return;
         }
-        await window.cctvNotify?.('เข้าสู่ระบบสำเร็จ', { module: 'ระบบ CCTV POLICE9', message: 'กำลังเปิดศูนย์บัญชาการ', duration: 900 });
+        await window.cctvNotify?.('เข้าสู่ระบบสำเร็จ', { module: 'ศูนย์ CCTV สภ.เมืองนราธิวาส', message: 'กำลังเปิดศูนย์บัญชาการ', duration: 900 });
         location.replace('home.html');
       });
 
