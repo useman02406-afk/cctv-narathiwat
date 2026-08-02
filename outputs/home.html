@@ -389,6 +389,13 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
         return null;
       };
       const incidentType = row => {
+        const subtype = String(row?.incident_subcategory || '').trim().toUpperCase();
+        const category = String(row?.incident_category || '').trim().toUpperCase();
+        if (subtype === 'EXPLOSION') return 'ระเบิด';
+        if (subtype === 'SHOOTING') return 'ยิง';
+        if (subtype === 'ARSON') return 'เผา';
+        if (subtype === 'DISTURBANCE') return 'ก่อกวน';
+        if (category === 'GENERAL_CRIME') return 'อาญาทั่วไป';
         const text = rowText(row);
         if (/ระเบิด/.test(text)) return 'ระเบิด';
         if (/ยิง|อาวุธปืน/.test(text)) return 'ยิง';
