@@ -1,118 +1,23 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>จัดการสิทธิ์การใช้งาน | CCTV POLICE9</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="jis-ui-theme.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>จัดการสิทธิ์การใช้งาน | ศูนย์ CCTV สภ.เมืองนราธิวาส</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-guard.js"></script><script src="smart-alert.js"></script>
   <style>
-    * { box-sizing: border-box; } body { margin: 0; background: #edf4f7; color: #16343c; font-family: Sarabun, sans-serif; }
-    .top { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 24px; color:#fff; background:linear-gradient(90deg,#102f38,#21687c); }
-    .top h1 { margin:0; font-size:21px; }.top button { border:1px solid #ffffff75; color:#fff; background:transparent; border-radius:7px; padding:8px 11px; font:inherit; cursor:pointer; }
-    .wrap { max-width:1280px; margin:24px auto; padding:0 18px; }.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
-    .card,.panel { background:#fff; border-radius:10px; border:1px solid #d6e2e5; box-shadow:0 4px 14px #173b4512; }.card { padding:18px; }.card span { color:#657a81; }.card b { display:block; font-size:29px; margin-top:4px; }
-    .panel { overflow:hidden; margin-top:16px; }.panel h2 { margin:0; padding:14px 18px; font-size:18px; border-bottom:1px solid #dce6e9; }.toolbar { padding:12px 18px; display:flex; gap:10px; }.toolbar input { padding:9px 11px; border:1px solid #c9d8dc; border-radius:7px; font:inherit; min-width:300px; }
-    table { border-collapse:collapse; width:100%; font-size:14px; } th,td { padding:11px 13px; text-align:left; border-bottom:1px solid #e0e9eb; vertical-align:middle; } th { background:#f0f6f8; color:#526871; } select { border:1px solid #c9d8dc; border-radius:6px; padding:6px; font:inherit; max-width:178px; }.edit-field:disabled { opacity:.72; background:#f4f7f8; border-color:transparent; }
-    .btn { padding:7px 10px; color:#fff; background:#167a92; border:0; border-radius:6px; cursor:pointer; font:inherit; margin:2px; }.btn.detail { background:#465b80; }.btn.cancel { background:#6b7280; }.btn.delete { background:#c73842; }.btn:disabled { opacity:.55; cursor:not-allowed; }
-    .badge { display:inline-block; padding:3px 8px; border-radius:99px; font-size:12px; }.on { background:#d9f5e5; color:#087b45; }.off { background:#fee2e2; color:#a9252d; }.message { margin:0 18px 12px; padding:11px 13px; border-radius:7px; min-height:20px; display:none; }.message.show { display:block; }.message.success { background:#dcfce7; color:#166534; border:1px solid #86efac; }.message.error { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }.message.info { background:#e0f2fe; color:#075985; border:1px solid #7dd3fc; }
-    .role-guide { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:0 18px 14px; }.role-guide div { padding:10px; border-radius:8px; background:#f0f6f8; border:1px solid #dce6e9; font-size:13px; }.role-guide b { display:block; color:#167a92; margin-bottom:3px; }.help { padding:0 18px 14px; color:#60737a; font-size:13px; }.actions { white-space:nowrap; }
-    .detail-box { padding:18px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }.field { padding:12px; background:#f4f8fa; border:1px solid #dce6e9; border-radius:8px; }.field.wide { grid-column:span 3; }.field span { display:block; font-size:12px; color:#60737a; margin-bottom:4px; }.field b { word-break:break-word; }
-    @media print { .top button,.toolbar,.actions,.detail-action { display:none!important; }.top { background:#fff!important; color:#111!important; }.wrap { max-width:none; margin:0; }.panel { box-shadow:none; border:1px solid #bbb; } body { background:#fff; } }
-    @media(max-width:760px) { .cards,.role-guide { grid-template-columns:1fr; }.top { padding:12px; align-items:flex-start; flex-direction:column; }.wrap { padding:0 10px; }.toolbar input { min-width:100%; }.detail-box { grid-template-columns:1fr; }.field.wide { grid-column:span 1; } }
+  *{box-sizing:border-box}body{margin:0;background:#f3f7fb;color:#172033;font-family:'Noto Sans Thai',sans-serif}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px clamp(16px,4vw,50px);color:#fff;background:linear-gradient(120deg,#102f38,#167a92)}.top h1{margin:0;font-size:21px}.top p{margin:2px 0 0;font-size:13px;color:#d7f2f8}.top a{border:1px solid #ffffff80;color:#fff;text-decoration:none;border-radius:8px;padding:9px 12px;font-weight:700;font-size:13px}.wrap{max-width:1280px;margin:24px auto;padding:0 18px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}.card,.panel{background:#fff;border-radius:12px;border:1px solid #d6e2e5;box-shadow:0 4px 14px #173b4512}.card{padding:18px}.card span{color:#657a81;font-size:13px}.card b{display:block;font-size:29px;margin-top:4px;color:#167a92}.panel{overflow:hidden;margin-top:16px}.panel h2{margin:0;padding:14px 18px;font-size:18px;border-bottom:1px solid #dce6e9}.toolbar{padding:12px 18px;display:flex;gap:10px}.toolbar input{padding:9px 11px;border:1px solid #c9d8dc;border-radius:7px;font:inherit;min-width:min(100%,340px)}.guide{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 18px 14px}.guide div{padding:10px;border-radius:8px;background:#f0f6f8;border:1px solid #dce6e9;font-size:13px}.guide b{display:block;color:#167a92;margin-bottom:3px}.notice{margin:0 18px 12px;padding:11px 13px;border-radius:7px;font-size:13px;background:#e0f2fe;color:#075985}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:11px 13px;text-align:left;border-bottom:1px solid #e0e9eb;vertical-align:middle}th{background:#f0f6f8;color:#526871;white-space:nowrap}select{border:1px solid #c9d8dc;border-radius:6px;padding:6px;font:inherit;max-width:180px}.edit-field:disabled{opacity:.72;background:#f4f7f8;border-color:transparent}.btn{padding:7px 10px;color:#fff;background:#167a92;border:0;border-radius:6px;cursor:pointer;font:inherit;margin:2px}.btn.detail{background:#465b80}.btn.cancel{background:#6b7280}.btn.delete{background:#c73842}.btn:disabled{opacity:.55;cursor:not-allowed}.badge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:12px;font-weight:700}.on{background:#d9f5e5;color:#087b45}.off{background:#fee2e2;color:#a9252d}.actions{white-space:nowrap}.empty{text-align:center;padding:28px;color:#64748b}@media(max-width:760px){.cards,.guide{grid-template-columns:1fr}.top{padding:12px;align-items:flex-start;flex-direction:column}.wrap{padding:0 10px}.toolbar input{min-width:100%}}
   </style>
 </head>
 <body>
-  <header class="top"><h1>จัดการสิทธิ์การใช้งาน</h1><div><button onclick="location.href='home.html'">แดชบอร์ด</button> <button id="logout">ออกจากระบบ</button></div></header>
-  <main class="wrap">
-    <section class="cards"><div class="card"><span>ผู้ใช้ทั้งหมด</span><b id="total">–</b></div><div class="card"><span>บัญชีรออนุมัติ</span><b id="pending">–</b></div><div class="card"><span>ผู้ดูแลระบบ</span><b id="admins">–</b></div></section>
-    <section class="panel">
-      <h2>จัดการบัญชีผู้ใช้</h2>
-      <div class="toolbar"><input id="search" placeholder="ค้นหาชื่อ Username แผนกงาน หรือเบอร์โทร"></div>
-      <div class="role-guide"><div><b>ADMIN — ผู้ดูแลระบบ</b>จัดการบัญชีและข้อมูลทั้งหมด</div><div><b>OFFICER — เจ้าหน้าที่</b>จัดการงานตามที่ได้รับมอบหมาย</div><div><b>VIEWER — ผู้ดูข้อมูล</b>ดูข้อมูลที่ได้รับอนุญาต</div></div>
-      <div class="help">กด “รายละเอียด” เพื่อตรวจข้อมูลการลงทะเบียน และกด “แก้ไข” เพื่ออนุมัติหรือปรับสิทธิ์บัญชี</div>
-      <div id="message" class="message" role="status" aria-live="polite"></div>
-      <div style="overflow:auto"><table><thead><tr><th>ยศ ชื่อ-สกุล</th><th>Username</th><th>แผนกงาน</th><th>บทบาท</th><th>สถานะ</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="users"></tbody></table></div>
-    </section>
-    <section id="detailPanel" class="panel" hidden><h2>รายละเอียดผู้ลงทะเบียน</h2><div id="detail" class="detail-box"></div></section>
-    <section class="panel"><h2>Audit Log ล่าสุด</h2><div style="overflow:auto"><table><thead><tr><th>เวลา</th><th>การทำงาน</th><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody id="logs"></tbody></table></div></section>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="auth-guard.js"></script>
+  <header class="top"><div><h1><i class="fa-solid fa-user-shield"></i> จัดการสิทธิ์การใช้งาน</h1><p>กำหนดบทบาท อนุมัติ ระงับ และลบบัญชีผู้ใช้งาน</p></div><a href="home.html"><i class="fa-solid fa-arrow-left"></i> กลับหน้าหลัก</a></header>
+  <main class="wrap"><section class="cards"><article class="card"><span>ผู้ใช้ทั้งหมด</span><b id="total">–</b></article><article class="card"><span>รออนุมัติ / ถูกระงับ</span><b id="pending">–</b></article><article class="card"><span>ผู้ดูแลระบบ</span><b id="admins">–</b></article></section><section class="panel"><h2>บัญชีผู้ใช้งาน</h2><div class="toolbar"><input id="search" placeholder="ค้นหาชื่อ Username แผนกงาน หรือเบอร์โทร"></div><div class="guide"><div><b>ADMIN</b>จัดการบัญชีและข้อมูลทั้งหมด</div><div><b>OFFICER</b>จัดการรายการที่ได้รับมอบหมาย</div><div><b>VIEWER</b>ดูข้อมูลตามสิทธิ์ที่อนุญาต</div></div><div id="notice" class="notice">กำลังโหลดบัญชีผู้ใช้…</div><div class="table-wrap"><table><thead><tr><th>ยศ ชื่อ-สกุล</th><th>Username</th><th>แผนกงาน</th><th>บทบาท</th><th>สถานะ</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="users"></tbody></table></div></section><section class="panel"><h2>ประวัติการจัดการสิทธิ์ล่าสุด</h2><div class="table-wrap"><table><thead><tr><th>เวลา</th><th>การทำงาน</th><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody id="logs"></tbody></table></div></section></main>
   <script>
-  (() => {
-    'use strict';
-    const db = supabase.createClient('https://rbahodbdbxfvftfxeipe.supabase.co', 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4');
-    const $ = (id) => document.getElementById(id);
-    const esc = (v) => String(v ?? '–').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    const roleLabels = { ADMIN: 'ADMIN — ผู้ดูแลระบบ', OFFICER: 'OFFICER — เจ้าหน้าที่', VIEWER: 'VIEWER — ผู้ดูข้อมูล' };
-    let rows = [], editingId = null, currentUserId = null;
-    function message(text, type = 'info') { const el = $('message'); el.textContent = text; el.className = 'message show ' + type; }
-    function clearMessage() { $('message').className = 'message'; $('message').textContent = ''; }
-    function roleOptions(role) { return ['ADMIN','OFFICER','VIEWER'].map((r) => `<option value="${r}" ${role === r ? 'selected' : ''}>${roleLabels[r]}</option>`).join(''); }
-    function profileField(label, value, wide = false) { return `<div class="field ${wide ? 'wide' : ''}"><span>${label}</span><b>${esc(value)}</b></div>`; }
-    function showDetails(id) {
-      const x = rows.find((row) => row.id === id); if (!x) return;
-      $('detailPanel').hidden = false;
-      $('detail').innerHTML = [
-        profileField('ยศ ชื่อ-สกุล', x.rank_full_name || x.full_name), profileField('ตำแหน่ง', x.position), profileField('แผนกงาน', x.department === 'อื่นๆ' ? `อื่นๆ — ${x.department_other || 'ไม่ระบุ'}` : x.department),
-        profileField('เบอร์โทร', x.phone), profileField('อีเมล (ใช้เข้าสู่ระบบ)', x.email || 'ระบบไม่เปิดเผยอีเมล'), profileField('Username', x.username),
-        profileField('บทบาท', roleLabels[x.role] || x.role), profileField('สถานะ', x.active ? 'อนุมัติให้ใช้งานแล้ว' : 'รออนุมัติ / ระงับ'), profileField('User ID', x.id, true)
-      ].join('');
-      $('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    function render() {
-      const q = $('search').value.trim().toLowerCase();
-      const view = rows.filter((x) => [x.full_name,x.rank_full_name,x.username,x.department,x.department_other,x.phone].join(' ').toLowerCase().includes(q));
-      $('users').innerHTML = view.map((x) => {
-        const editing = editingId === x.id;
-        const department = x.department === 'อื่นๆ' ? `อื่นๆ (${x.department_other || 'ไม่ระบุ'})` : (x.department || 'ไม่ระบุ');
-        return `<tr><td><b>${esc(x.rank_full_name || x.full_name || 'ไม่ระบุชื่อ')}</b>${x.id === currentUserId ? '<br><small>บัญชีที่กำลังใช้งาน</small>' : ''}</td><td>${esc(x.username || '–')}</td><td>${esc(department)}</td><td><select class="edit-field" data-role="${x.id}" ${editing ? '' : 'disabled'}>${roleOptions(x.role)}</select></td><td><label><input class="edit-field" data-active="${x.id}" type="checkbox" ${x.active ? 'checked' : ''} ${editing ? '' : 'disabled'}> <span class="badge ${x.active ? 'on' : 'off'}">${x.active ? 'ใช้งาน' : 'รออนุมัติ'}</span></label></td><td>${x.created_at ? new Date(x.created_at).toLocaleString('th-TH') : '–'}</td><td class="actions"><button class="btn detail" data-detail="${x.id}">รายละเอียด</button>${editing ? `<button class="btn" data-save="${x.id}">บันทึก</button><button class="btn cancel" data-cancel="${x.id}">ยกเลิก</button>` : `<button class="btn" data-edit="${x.id}">แก้ไข</button>`}<button class="btn delete" data-delete="${x.id}" ${x.id === currentUserId ? 'disabled title="ไม่สามารถลบบัญชีที่กำลังใช้งาน"' : ''}>ลบ</button></td></tr>`;
-      }).join('') || '<tr><td colspan="7">ไม่พบข้อมูล</td></tr>';
-      document.querySelectorAll('[data-detail]').forEach((b) => b.onclick = () => showDetails(b.dataset.detail));
-      document.querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => { editingId = b.dataset.edit; clearMessage(); render(); });
-      document.querySelectorAll('[data-cancel]').forEach((b) => b.onclick = () => { editingId = null; message('ยกเลิกการแก้ไขแล้ว', 'info'); render(); });
-      document.querySelectorAll('[data-save]').forEach((b) => b.onclick = () => saveUser(b.dataset.save));
-      document.querySelectorAll('[data-delete]').forEach((b) => b.onclick = () => deleteUser(b.dataset.delete));
-    }
-    async function saveUser(id) {
-      const role = document.querySelector(`[data-role="${id}"]`).value;
-      const active = document.querySelector(`[data-active="${id}"]`).checked;
-      const target = rows.find((x) => x.id === id);
-      const approved = window.cctvConfirm ? await window.cctvConfirm('ยืนยันการบันทึกสิทธิ์', target?.rank_full_name || target?.full_name || 'บัญชีผู้ใช้', 'บันทึก') : confirm(`ยืนยันการบันทึกสิทธิ์ของ ${target?.rank_full_name || target?.full_name || 'บัญชีนี้'} ?`);
-      if (!approved) return;
-      const button = document.querySelector(`[data-save="${id}"]`); button.disabled = true; message('กำลังบันทึกการเปลี่ยนแปลง…');
-      const { error } = await db.rpc('admin_update_profile', { target_id: id, next_role: role, next_active: active });
-      if (error) { message('บันทึกไม่สำเร็จ: ' + error.message, 'error'); button.disabled = false; return; }
-      await window.cctvNotify?.('บันทึกสิทธิ์ผู้ใช้สำเร็จ', { module: 'จัดการสิทธิ์การใช้งาน', message: target?.rank_full_name || target?.full_name || 'บัญชีผู้ใช้', result: 'ปรับบทบาทหรือสถานะบัญชีผู้ใช้' });
-      editingId = null; message('บันทึกสิทธิ์การใช้งานเรียบร้อยแล้ว', 'success'); await load(false);
-    }
-    async function deleteUser(id) {
-      const target = rows.find((x) => x.id === id);
-      if (id === currentUserId) return message('ไม่สามารถลบบัญชีที่กำลังใช้งานอยู่', 'error');
-      const approved = window.cctvConfirm ? await window.cctvConfirm('ยืนยันการลบบัญชี', `${target?.rank_full_name || target?.full_name || 'บัญชีผู้ใช้'}\nการลบไม่สามารถย้อนกลับได้`, 'ลบบัญชี') : confirm(`ยืนยันการลบบัญชี “${target?.rank_full_name || target?.full_name || 'บัญชีนี้'}” ?`);
-      if (!approved) return;
-      const button = document.querySelector(`[data-delete="${id}"]`); button.disabled = true; message('กำลังลบบัญชี…');
-      const { error } = await db.rpc('admin_delete_user', { target_id: id });
-      if (error) { message('ลบบัญชีไม่สำเร็จ: ' + error.message, 'error'); button.disabled = false; return; }
-      await window.cctvNotify?.('ลบบัญชีผู้ใช้สำเร็จ', { module: 'จัดการสิทธิ์การใช้งาน', message: target?.rank_full_name || target?.full_name || 'บัญชีผู้ใช้', result: 'ลบบัญชีผู้ใช้และสิทธิ์การเข้าถึง' });
-      $('detailPanel').hidden = true; message('ลบบัญชีและสิทธิ์การเข้าถึงเรียบร้อยแล้ว', 'success'); await load(false);
-    }
-    async function load(resetMessage = true) {
-      if (resetMessage) clearMessage();
-      const { data: { session } } = await db.auth.getSession();
-      if (!session) return location.replace('login.html'); currentUserId = session.user.id;
-      const { data: me, error: meError } = await db.from('profiles').select('role,active').eq('id', currentUserId).single();
-      if (meError || !me || !me.active || me.role !== 'ADMIN') return location.replace('home.html');
-      const [profiles, logs] = await Promise.all([db.from('profiles').select('*').order('created_at', { ascending: false }), db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(20)]);
-      if (profiles.error) return message('โหลดข้อมูลผู้ใช้ไม่สำเร็จ: ' + profiles.error.message, 'error');
-      rows = profiles.data || []; $('total').textContent = rows.length; $('pending').textContent = rows.filter((x) => !x.active).length; $('admins').textContent = rows.filter((x) => x.role === 'ADMIN').length; render();
-      $('logs').innerHTML = (logs.data || []).map((x) => `<tr><td>${x.created_at ? new Date(x.created_at).toLocaleString('th-TH') : '–'}</td><td>${esc(x.action)}</td><td>${esc(x.entity_type)} ${esc(x.entity_id)}</td><td>${esc(JSON.stringify(x.details || {}))}</td></tr>`).join('') || '<tr><td colspan="4">ยังไม่มีรายการ</td></tr>';
-    }
-    $('search').oninput = render;
-    $('logout').onclick = async () => { try { await db.auth.signOut({ scope: 'local' }); } finally { location.replace('login.html'); } };
-    load();
-  })();
+  (()=>{'use strict';let db,rows=[],editingId=null,currentUserId=null;const $=id=>document.getElementById(id),esc=v=>String(v??'–').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const roles={ADMIN:'ผู้ดูแลระบบ',OFFICER:'เจ้าหน้าที่',VIEWER:'ผู้ใช้งาน'};const dept=x=>x.department==='อื่นๆ'?`อื่นๆ (${x.department_other||'ไม่ระบุ'})`:(x.department||'ไม่ระบุ');const opts=role=>Object.keys(roles).map(x=>`<option value="${x}" ${x===role?'selected':''}>${x} — ${roles[x]}</option>`).join('');
+  function render(){const q=$('search').value.trim().toLowerCase(),view=rows.filter(x=>[x.full_name,x.rank_full_name,x.username,x.department,x.department_other,x.phone].join(' ').toLowerCase().includes(q));$('users').innerHTML=view.map(x=>{const edit=editingId===x.id;return `<tr><td><b>${esc(x.rank_full_name||x.full_name||'ไม่ระบุชื่อ')}</b>${x.id===currentUserId?'<br><small>บัญชีที่ใช้งานอยู่</small>':''}</td><td>${esc(x.username)}</td><td>${esc(dept(x))}</td><td><select class="edit-field" data-role="${x.id}" ${edit?'':'disabled'}>${opts(x.role)}</select></td><td><label><input class="edit-field" data-active="${x.id}" type="checkbox" ${x.active?'checked':''} ${edit?'':'disabled'}> <span class="badge ${x.active?'on':'off'}">${x.active?'ใช้งาน':'รออนุมัติ / ระงับ'}</span></label></td><td>${x.created_at?new Date(x.created_at).toLocaleString('th-TH'):'–'}</td><td class="actions">${edit?`<button class="btn" data-save="${x.id}">บันทึก</button><button class="btn cancel" data-cancel="${x.id}">ยกเลิก</button>`:`<button class="btn" data-edit="${x.id}">แก้ไข</button>`}<button class="btn delete" data-delete="${x.id}" ${x.id===currentUserId?'disabled':''}>ลบ</button></td></tr>`}).join('')||'<tr><td class="empty" colspan="7">ไม่พบข้อมูล</td></tr>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{editingId=b.dataset.edit;render()});document.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{editingId=null;render()});document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>save(b.dataset.save));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>remove(b.dataset.delete));}
+  async function save(id){const target=rows.find(x=>x.id===id),role=document.querySelector(`[data-role="${id}"]`).value,active=document.querySelector(`[data-active="${id}"]`).checked;if(!(await (window.cctvConfirm?.('ยืนยันการบันทึกสิทธิ์',target?.rank_full_name||target?.full_name||'บัญชีผู้ใช้','บันทึก')??Promise.resolve(confirm('ยืนยันการบันทึกสิทธิ์?')))))return;const r=await db.rpc('admin_update_profile',{target_id:id,next_role:role,next_active:active});if(r.error)return window.smartAlert?.('บันทึกไม่สำเร็จ',r.error.message,'error')||alert(r.error.message);editingId=null;window.smartAlert?.('บันทึกสำเร็จ','ปรับสิทธิ์ผู้ใช้งานแล้ว','success');await load()}
+  async function remove(id){if(id===currentUserId)return;const target=rows.find(x=>x.id===id);if(!(await (window.cctvConfirm?.('ยืนยันการลบบัญชี',target?.rank_full_name||target?.full_name||'บัญชีผู้ใช้','ลบ')??Promise.resolve(confirm('การลบไม่สามารถย้อนกลับได้ ยืนยันหรือไม่?')))))return;const r=await db.rpc('admin_delete_user',{target_id:id});if(r.error)return window.smartAlert?.('ลบไม่สำเร็จ',r.error.message,'error')||alert(r.error.message);window.smartAlert?.('ลบสำเร็จ','ลบบัญชีและสิทธิ์การเข้าถึงแล้ว','success');await load()}
+  async function load(){const [{data:profiles,error:profileError},{data:logs}]=await Promise.all([db.from('profiles').select('*').order('created_at',{ascending:false}),db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(20)]);if(profileError){$('notice').textContent='โหลดข้อมูลผู้ใช้ไม่สำเร็จ: '+profileError.message;return}rows=profiles||[];$('total').textContent=rows.length.toLocaleString();$('pending').textContent=rows.filter(x=>!x.active).length.toLocaleString();$('admins').textContent=rows.filter(x=>x.role==='ADMIN').length.toLocaleString();$('notice').textContent='ADMIN สามารถแก้ไข อนุมัติ ระงับ และลบบัญชีได้';$('logs').innerHTML=(logs||[]).map(x=>`<tr><td>${x.created_at?new Date(x.created_at).toLocaleString('th-TH'):'–'}</td><td>${esc(x.action)}</td><td>${esc(x.entity_type)} ${esc(x.entity_id)}</td><td>${esc(JSON.stringify(x.details||{}))}</td></tr>`).join('')||'<tr><td class="empty" colspan="4">ยังไม่มีประวัติ</td></tr>';render()}
+  async function start(e){const session=e.detail||window.cctvSession;if(!session)return;db=session.client;currentUserId=session.user.id;if(session.profile.role!=='ADMIN'){location.replace('home.html');return}$('search').oninput=render;load()}if(window.cctvSession)start({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',start,{once:true});})();
   </script>
-</body>
-</html>
+</body></html>
