@@ -107,15 +107,7 @@
       status.setAttribute('role', 'status');
       status.setAttribute('aria-live', 'polite');
       const message = document.createElement('span');
-      const retry = document.createElement('button');
-      retry.type = 'button';
-      retry.textContent = 'ลองเชื่อมต่อใหม่';
-      retry.addEventListener('click', async () => {
-        retry.disabled = true;
-        try { await client.auth.getSession(); } finally { retry.disabled = false; }
-        update();
-      });
-      status.append(message, retry);
+      status.append(message);
       document.body.appendChild(status);
       const update = () => {
         const offline = !navigator.onLine;
