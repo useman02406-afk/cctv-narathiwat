@@ -121,6 +121,54 @@
     if (document.body) render(); else document.addEventListener('DOMContentLoaded', render, { once: true });
   }
 
+  // A lightweight health check makes a failed data connection visible as a
+  // normal page message instead of leaving the user with an empty section.
+  // It uses a small count-only query, so it does not load camera records.
+  function addSystemHealth(session) {
+    if (window.cctvHealth) return;
+    const show = (text, level = 'error') => {
+      const render = () => {
+        let banner = document.getElementById('system-health-banner');
+        if (!banner) {
+          banner = document.createElement('aside');
+          banner.id = 'system-health-banner';
+          banner.setAttribute('role', 'alert');
+          banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1280px;margin:12px auto;padding:10px 14px;border:1px solid #f59e0b;border-radius:10px;background:#fffbeb;color:#92400e;font:600 13px/1.5 "Noto Sans Thai",Sarabun,system-ui,sans-serif';
+          const main = document.querySelector('main');
+          (main?.parentElement || document.body).insertBefore(banner, main || null);
+        }
+        banner.innerHTML = `<span><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${String(text)}</span><button type="button" style="border:0;border-radius:7px;padding:6px 9px;background:#92400e;color:#fff;font:inherit;cursor:pointer">ตรวจสอบใหม่</button>`;
+        banner.querySelector('button').onclick = () => check();
+      };
+      if (document.body) render(); else document.addEventListener('DOMContentLoaded', render, { once: true });
+    };
+    const clear = () => document.getElementById('system-health-banner')?.remove();
+    const check = async () => {
+      if (!navigator.onLine) return show('ออฟไลน์อยู่ — ยังตรวจสอบฐานข้อมูลไม่ได้');
+      try {
+        const result = await session.client.from('cctv_locations').select('id', { count: 'estimated', head: true });
+        if (result.error) throw result.error;
+        clear();
+        return { ok: true, count: result.count ?? null };
+      } catch (error) {
+        const detail = String(error?.message || 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้');
+        show(`ตรวจสอบฐานข้อมูลไม่สำเร็จ: ${detail}`);
+        return { ok: false, error: detail };
+      }
+    };
+    window.cctvHealth = { check };
+    window.addEventListener('online', check);
+    window.addEventListener('error', event => {
+      if (event.target !== window || !event.message) return;
+      show(`พบปัญหาในการแสดงผล: ${event.message}`);
+    });
+    window.addEventListener('unhandledrejection', event => {
+      const message = event.reason?.message || '';
+      if (message) show(`พบปัญหาในการโหลดข้อมูล: ${message}`);
+    });
+    check();
+  }
+
   function addSkipToContent() {
     if (document.getElementById('skip-to-content')) return;
     const render = () => {
@@ -456,6 +504,7 @@
     document.documentElement.style.visibility = 'visible';
     bindLogout();
     addConnectionStatus();
+    addSystemHealth(window.cctvSession);
     addSkipToContent();
     addBackToTop();
     removeRetiredModuleLinks();
