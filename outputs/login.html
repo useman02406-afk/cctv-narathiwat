@@ -38,6 +38,9 @@
     .back { width: auto; padding: 0; margin: 0 0 15px; background: transparent; color: #2463df; font-size: 14px; }
     .message { min-height: 20px; margin: 12px 0 0; font-size: 14px; color: #b32432; text-align: center; }
     .message.ok { color: #067c51; }
+    .password-hint { min-height: 20px; margin: 10px 0 0; color: #60737b; font-size: 13px; text-align: left; }
+    .password-hint.error { color: #b32432; }
+    .password-hint.ok { color: #067c51; }
     .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
     .hidden { display: none !important; }
     @media (max-width: 780px) { .auth-shell { width: min(560px, calc(100% - 24px)); grid-template-columns: 1fr; margin: 12px auto 28px; } .box { padding: 24px; } }
@@ -110,6 +113,7 @@
             <span class="password-wrap"><input id="regConfirmPassword" type="password" autocomplete="new-password" minlength="8" required><button id="toggleRegConfirmPassword" class="toggle-password" type="button" aria-label="แสดงรหัสผ่านยืนยัน" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></span>
           </label>
         </div>
+        <p id="passwordHint" class="password-hint" role="status" aria-live="polite">รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร</p>
         <button id="registerSubmit" type="submit">ส่งคำขอลงทะเบียน</button>
       </form>
       <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
@@ -149,6 +153,18 @@
       bindPasswordToggle('password', 'togglePassword');
       bindPasswordToggle('regPassword', 'toggleRegPassword');
       bindPasswordToggle('regConfirmPassword', 'toggleRegConfirmPassword', 'แสดงรหัสผ่านยืนยัน');
+      const syncPasswordHint = () => {
+        const password = $('regPassword').value;
+        const confirm = $('regConfirmPassword').value;
+        const hint = $('passwordHint');
+        if (!password && !confirm) { hint.textContent = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'; hint.className = 'password-hint'; return; }
+        if (password.length < 8) { hint.textContent = `รหัสผ่านยังสั้นเกินไป (${password.length}/8 ตัวอักษร)`; hint.className = 'password-hint error'; return; }
+        if (confirm && password !== confirm) { hint.textContent = 'ยืนยันรหัสผ่านยังไม่ตรงกัน'; hint.className = 'password-hint error'; return; }
+        if (confirm) { hint.textContent = 'รหัสผ่านตรงกัน พร้อมส่งคำขอลงทะเบียน'; hint.className = 'password-hint ok'; return; }
+        hint.textContent = 'กรุณายืนยันรหัสผ่านอีกครั้ง'; hint.className = 'password-hint';
+      };
+      $('regPassword').addEventListener('input', syncPasswordHint);
+      $('regConfirmPassword').addEventListener('input', syncPasswordHint);
       $('googleSignIn').addEventListener('click', async () => {
         const button = $('googleSignIn');
         button.disabled = true;
