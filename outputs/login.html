@@ -32,9 +32,6 @@
     button { width: 100%; border: 0; border-radius: 8px; padding: 12px; background: #2463df; color: #fff; font: 700 16px Sarabun, sans-serif; cursor: pointer; margin-top: 20px; }
     button:disabled { cursor: wait; opacity: .65; }
     .secondary { background: transparent; color: #2463df; margin-top: 8px; }
-    .google-login { display:flex; align-items:center; justify-content:center; gap:11px; margin-top: 12px; background:#fff; color:#27364a; border:1px solid #cfd8e5; box-shadow:0 2px 7px #17355d18; }
-    .google-login:hover { background:#f7faff; border-color:#9db8df; }
-    .google-mark { font-family:Arial,sans-serif; font-size:25px; font-weight:800; color:#4285f4; line-height:1; }
     .back { width: auto; padding: 0; margin: 0 0 15px; background: transparent; color: #2463df; font-size: 14px; }
     .message { min-height: 20px; margin: 12px 0 0; font-size: 14px; color: #b32432; text-align: center; }
     .message.ok { color: #067c51; }
@@ -64,7 +61,6 @@
         </label>
         <button id="submit" type="submit">เข้าสู่ระบบ</button>
       </form>
-      <button id="googleSignIn" class="google-login" type="button"><span class="google-mark">G</span><span>Sign in with Google</span></button>
       <button id="forgot" class="secondary" type="button">ลืมรหัสผ่าน</button>
       <button id="showRegister" class="secondary" type="button">ลงทะเบียนผู้ใช้</button>
       <p id="loginMessage" class="message" role="status" aria-live="polite"></p>
@@ -136,16 +132,6 @@
       const errorText = (error) => error?.message === 'Invalid login credentials'
         ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง หรือลองกด “ลืมรหัสผ่าน”'
         : (error?.message || 'ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง');
-      const googleErrorText = (error) => {
-        const detail = error?.message || '';
-        if (/provider.*not.*enabled|unsupported provider|disabled/i.test(detail)) {
-          return 'ยังไม่ได้เปิดใช้งาน Google Sign-in ใน Supabase กรุณาให้ผู้ดูแลเปิด Google Provider และกำหนด Redirect URL ของเว็บไซต์';
-        }
-        if (/redirect|redirect_to/i.test(detail)) {
-          return 'URL สำหรับกลับเข้าเว็บไซต์ยังไม่ได้รับอนุญาตใน Supabase กรุณาเพิ่ม URL ของหน้า home.html ใน Redirect URLs';
-        }
-        return `ไม่สามารถเชื่อมต่อ Google ได้: ${errorText(error)}`;
-      };
 
       if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
@@ -175,19 +161,6 @@
       };
       $('regPassword').addEventListener('input', syncPasswordHint);
       $('regConfirmPassword').addEventListener('input', syncPasswordHint);
-      $('googleSignIn').addEventListener('click', async () => {
-        const button = $('googleSignIn');
-        button.disabled = true;
-        loginMessage('กำลังเชื่อมต่อเพื่อเข้าสู่ระบบด้วย Google…');
-        const redirectTo = new URL('home.html', location.href).href;
-        const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
-        if (error) {
-          button.disabled = false;
-          const text = googleErrorText(error);
-          loginMessage(text);
-          window.smartAlert?.('เชื่อมต่อ Google ไม่สำเร็จ', text, 'error', 3600);
-        }
-      });
       $('regDepartment').addEventListener('change', () => {
         const other = $('regDepartment').value === 'อื่นๆ';
         $('otherDepartmentWrap').classList.toggle('hidden', !other);
