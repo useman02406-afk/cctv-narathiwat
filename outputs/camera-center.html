@@ -15,7 +15,6 @@
 <body>
   <header class="top"><div><h1><i class="fa-solid fa-video"></i> ศูนย์จัดการกล้อง CCTV</h1><p>ข้อมูลจุดติดตั้ง การจัดการกล้อง หมวดหมู่ การซ่อมบำรุง และการตรวจสภาพ</p></div><div class="header-actions"><button class="refresh" id="refresh" type="button"><i class="fa-solid fa-rotate"></i> รีเฟรชข้อมูล</button><a class="back" href="home.html"><i class="fa-solid fa-arrow-left"></i> กลับหน้าหลัก</a></div></header>
   <main class="wrap">
-    <section class="overview" id="overview" aria-label="ภาพรวมกล้อง CCTV"><article class="metric"><span>กำลังโหลดภาพรวม…</span><b>–</b></article></section>
     <nav class="tabs" aria-label="เมนูจัดการกล้อง">
       <button class="tab active" data-src="camera-locations-map.html"><i class="fa-solid fa-map-location-dot"></i> ข้อมูลและจุดติดตั้ง</button>
       <button class="tab" data-src="camera-management.html"><i class="fa-solid fa-sliders"></i> จัดการข้อมูลกล้อง</button>
@@ -38,43 +37,12 @@
   </style>
   <script>
     (()=>{
-      const frame=document.getElementById('workspace'),overview=document.getElementById('overview'),cacheVersion='20260731-01',esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      const frame=document.getElementById('workspace'),cacheVersion='20260731-01';
       frame.addEventListener('load',()=>[80,300,800].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}},delay)));
       const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
       document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
       document.getElementById('refresh').addEventListener('click',()=>location.reload());
       const requested=location.hash.slice(1),[requestedSrc,...requestedQuery]=requested.split('?');const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===requestedSrc)||document.querySelector('.tab.active');if(selected)openTab(selected,requestedQuery.join('?'));
-      overview.addEventListener('click',event=>{if(!event.target.closest('[data-open-quality]'))return;const tab=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src==='camera-data-quality.html');if(tab)openTab(tab)});
-      const officialOwners=['กล้องมหาดไทย','กล้อง กอ.รมน. (6 เมืองหลัก)','กล้อง ผบช.ภ.9','กล้องเอกชน'];
-      const ownerOf=camera=>{const text=`${camera.project||''} ${camera.ownership_category||''} ${camera.camera_type||''}`.toLowerCase();if(text.includes('มหาดไทย')||text.includes('สป.มท'))return officialOwners[0];if(text.includes('กอ.รมน')||text.includes('6 เมือง')||text.includes('6เมือง'))return officialOwners[1];if(text.includes('เอกชน')||text.includes('private'))return officialOwners[3];return officialOwners[2]};
-      async function fetchAllCameras(db){
-        const rows=[];const pageSize=500;
-        for(let from=0;;from+=pageSize){
-          const result=await db.from('cctv_locations').select('camera_category_id,camera_type,status,ownership_category,project,lat,lng').range(from,from+pageSize-1);
-          if(result.error)return result;
-          rows.push(...(result.data||[]));
-          if((result.data||[]).length<pageSize)return {data:rows,error:null};
-        }
-      }
-      async function loadSummary(event){
-        const session=event.detail||window.cctvSession;if(!session)return;const db=session.client;
-        const [categories,cameras,repairs]=await Promise.all([
-          db.from('camera_categories').select('id,name,marker_color').eq('is_active',true).order('sort_order').order('name'),
-          fetchAllCameras(db),
-          db.from('camera_maintenance_tickets').select('*',{count:'exact',head:true}).not('status','in','("แก้ไขแล้ว","ยกเลิก")')
-        ]);
-        if(categories.error||cameras.error){overview.innerHTML='<article class="metric warn"><span>โหลดข้อมูลภาพรวมไม่สำเร็จ</span><b>–</b></article>';return}
-        const counts={};(cameras.data||[]).forEach(x=>counts[x.camera_category_id]=(counts[x.camera_category_id]||0)+1);
-        const pendingSubtype=(cameras.data||[]).filter(x=>x.camera_type==='รอระบุประเภทย่อย').length;
-        const unknownStatus=(cameras.data||[]).filter(x=>!String(x.status||'').trim()||x.status==='ไม่ระบุ').length;
-        const pendingCoordinates=(cameras.data||[]).filter(x=>x.lat===null||x.lng===null||x.lat===''||x.lng==='').length;
-        const categoryCards=(categories.data||[]).map(x=>`<article class="metric type-card" style="--marker:${esc(x.marker_color||'#2563eb')}"><span>${esc(x.name)}</span><b>${(counts[x.id]||0).toLocaleString()}</b></article>`).join('');
-        const ownerCounts=Object.fromEntries(officialOwners.map(owner=>[owner,0]));(cameras.data||[]).forEach(camera=>{ownerCounts[ownerOf(camera)]+=1});
-        const ownerCards=officialOwners.map(owner=>`<article class="metric type-card" style="--marker:#0f766e"><span>${esc(owner)}</span><b>${ownerCounts[owner].toLocaleString()}</b></article>`).join('');
-        overview.innerHTML=`<article class="metric"><span>กล้องทั้งหมด</span><b>${(cameras.data||[]).length.toLocaleString()}</b></article>${ownerCards}${categoryCards}<article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>รอระบุประเภทย่อย · กดเพื่อตรวจสอบ</span><b>${pendingSubtype.toLocaleString()}</b></article><article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>สถานะไม่ระบุ · กดเพื่อตรวจสอบ</span><b>${unknownStatus.toLocaleString()}</b></article><article class="metric warn"><span>งานซ่อมที่ยังเปิด</span><b>${repairs.error?'–':(repairs.count||0).toLocaleString()}</b></article>`;
-        overview.insertAdjacentHTML('beforeend',`<article class="metric warn actionable" data-open-quality title="เปิดหน้าตรวจคุณภาพข้อมูล"><span>รอเติมพิกัด · กดเพื่อตรวจสอบ</span><b>${pendingCoordinates.toLocaleString()}</b></article>`);
-      }
-      if(window.cctvSession)loadSummary({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',loadSummary,{once:true});
     })();
   </script>
 </body>
