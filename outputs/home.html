@@ -47,7 +47,6 @@
       <article class="panel station-panel"><h2><i class="fa-solid fa-building-shield"></i> สรุปสถานะกล้องตาม สภ. / โครงการ</h2><div class="station-filter"><label for="stationSelect"><i class="fa-solid fa-filter"></i> เลือก สภ.</label><select id="stationSelect" aria-label="เลือก สภ. เพื่อดูสถานะกล้อง"><option value="__all__">ทุก สภ.</option></select><label for="projectSelect"><i class="fa-solid fa-video"></i> เลือกโครงการ</label><select id="projectSelect" aria-label="เลือกโครงการกล้องเพื่อดูสถานะ"><option value="__all__">ทุกโครงการ</option><option value="กล้อง กอ.รมน. (6 เมืองหลัก)">กล้อง กอ.รมน. (6 เมืองหลัก)</option><option value="กล้องมหาดไทย (สป.มท.)">กล้องมหาดไทย (สป.มท.)</option><option value="กล้อง ผบช.ภ.9">กล้อง ผบช.ภ.9</option><option value="กล้องเอกชน">กล้องเอกชน</option></select></div><div class="station-chart"><div class="donut station-donut" id="stationDonut"><div class="donut-label"><b id="stationTotal">–</b><span id="stationDonutLabel">กล้องทั้งหมด</span></div></div><div class="legend" id="stationLegend"><span class="chart-caption">กำลังโหลด…</span></div></div></article>
       <article class="panel"><h2><i class="fa-solid fa-triangle-exclamation"></i> สรุปบันทึกเหตุการณ์</h2><p class="chart-caption" style="padding:13px 18px 0">แยกตามประเภทเหตุที่บันทึกจริงในระบบ</p><div class="donut-layout dashboard-donut-body"><div class="donut" id="incidentDonut"><div class="donut-label"><b id="incidentTotal">–</b><span>เหตุการณ์ทั้งหมด</span></div></div><div class="legend" id="incidentLegend"><span class="chart-caption">กำลังโหลด…</span></div></div></article>
     </section>
-    <section class="panel" aria-label="วิเคราะห์เหตุการณ์ตามตำบลและอำเภอ"><h2><i class="fa-solid fa-map-location-dot"></i> วิเคราะห์เหตุการณ์ตามพื้นที่</h2><div class="event-area-grid"><div class="area-controls"><label for="eventStationSelect"><i class="fa-solid fa-building-shield"></i> เลือก สภ.<select id="eventStationSelect"><option value="__all__">ทุก สภ.</option></select></label><label for="eventDistrictSelect" style="margin-top:10px"><i class="fa-solid fa-filter"></i> เลือกอำเภอ<select id="eventDistrictSelect"><option value="__all__">ทุกอำเภอ</option></select></label><p id="eventAreaHint">กำลังจัดอันดับตำบลตามจำนวนเหตุการณ์…</p></div><div class="area-analysis"><div class="donut area-donut" id="eventAreaDonut"><div class="donut-label"><b id="eventAreaTotal">–</b><span>เหตุในพื้นที่</span></div></div><ol class="area-ranking" id="eventSubdistrictRanking"><li>กำลังโหลด…</li></ol></div></div></section>
     <div class="data-compat" aria-hidden="true"><div id="cards"></div><ul id="ownerSummary"></ul><ul id="areaSummary"></ul><ul id="cameraReadiness"></ul><div id="readinessDonut"></div><b id="donutTotal"></b><div id="readinessLegend"></div><ul id="cameraTypeSummary"></ul></div>
   </main>
   </div>
@@ -432,75 +431,6 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
           return line;
         }));
       }
-      function cleanArea(value, kind) {
-        const pattern = kind === 'district' ? /^(?:อำเภอ|อ\.)\s*/ : /^(?:ตำบล|ต\.)\s*/;
-        return String(value || '').trim().replace(pattern, '').trim();
-      }
-      function stationOf(row) {
-        const direct = row?.station || row?.police_station || row?.station_name || row?.responsible_station || row?.reporting_station;
-        if (String(direct || '').trim()) return String(direct).trim();
-        const match = [row?.location, row?.details, row?.area].map(value => String(value || '')).join(' ').match(/สภ\.?\s*[^,;\n]+/i);
-        return match ? match[0].trim() : '';
-      }
-      function renderAreaAnalysis(rows) {
-        const stationSelect = document.getElementById('eventStationSelect');
-        const select = document.getElementById('eventDistrictSelect');
-        const hint = document.getElementById('eventAreaHint');
-        const ranking = document.getElementById('eventSubdistrictRanking');
-        if (!stationSelect || !select || !hint || !ranking) return;
-        const stations = [...new Set(rows.map(stationOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
-        const oldStation = stationSelect.value || '__all__';
-        stationSelect.replaceChildren(new Option('ทุก สภ.', '__all__'), ...stations.map(name => new Option(name, name)));
-        stationSelect.value = stations.includes(oldStation) ? oldStation : '__all__';
-        const render = () => {
-          const station = stationSelect.value;
-          const stationScoped = rows.filter(row => station === '__all__' || stationOf(row) === station);
-          const oldDistrict = select.value || '__all__';
-          const districts = [...new Set(stationScoped.map(row => cleanArea(row.district, 'district')).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
-          select.replaceChildren(new Option('ทุกอำเภอ', '__all__'), ...districts.map(name => new Option(`อ.${name}`, name)));
-          select.value = districts.includes(oldDistrict) ? oldDistrict : '__all__';
-          const district = select.value;
-          const scoped = stationScoped.filter(row => district === '__all__' || cleanArea(row.district, 'district') === district);
-          const incidentCounts = Object.fromEntries(INCIDENT_TYPES.map(type => [type, 0]));
-          scoped.forEach(row => { incidentCounts[incidentType(row)] += 1; });
-          renderDonut('eventAreaDonut', 'eventAreaTotal', '__unusedLegend', INCIDENT_TYPES, incidentCounts, INCIDENT_COLORS, 'เหตุ');
-          const stationCounts = Object.fromEntries(INCIDENT_TYPES.map(type => [type, 0]));
-          stationScoped.forEach(row => { stationCounts[incidentType(row)] += 1; });
-          renderDonut('incidentDonut', 'incidentTotal', 'incidentLegend', INCIDENT_TYPES, stationCounts, INCIDENT_COLORS, 'เหตุ');
-          const bySubdistrict = new Map();
-          scoped.forEach(row => {
-            const name = cleanArea(row.subdistrict, 'subdistrict');
-            if (!name) return;
-            if (!bySubdistrict.has(name)) bySubdistrict.set(name, Object.fromEntries(INCIDENT_TYPES.map(type => [type, 0])));
-            bySubdistrict.get(name)[incidentType(row)] += 1;
-          });
-          const ranked = [...bySubdistrict.entries()].map(([name, counts]) => ({ name, counts, total: Object.values(counts).reduce((sum, value) => sum + value, 0) })).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'th')).slice(0, 10);
-          const stationName = station === '__all__' ? 'ทุก สภ.' : station;
-          const locationName = district === '__all__' ? 'ทุกอำเภอ' : `อ.${district}`;
-          const countedSubdistrictEvents = ranked.reduce((sum, item) => sum + item.total, 0);
-          hint.textContent = `แสดง ${stationName} · ${locationName} · ${scoped.length.toLocaleString()} เหตุการณ์ · จัดอันดับตำบลที่มีเหตุสูงสุด`;
-          ranking.replaceChildren(...(ranked.length ? ranked.map((item, index) => {
-            const row = document.createElement('li');
-            const number = document.createElement('span');
-            const detail = document.createElement('div');
-            const name = document.createElement('div');
-            const types = document.createElement('div');
-            const total = document.createElement('b');
-            number.className = 'rank-number'; number.textContent = index + 1;
-            name.className = 'rank-name'; name.textContent = `ต.${item.name}`;
-            types.className = 'rank-detail';
-            types.textContent = INCIDENT_TYPES.filter(type => item.counts[type]).map(type => `${type} ${item.counts[type]}`).join(' · ');
-            detail.append(name, types);
-            total.className = 'rank-total'; total.textContent = `${item.total} เหตุ`;
-            row.append(number, detail, total);
-            return row;
-          }) : [Object.assign(document.createElement('li'), { textContent: 'ยังไม่มีเหตุการณ์ที่ระบุตำบลสำหรับเงื่อนไขนี้' })]));
-          if (!countedSubdistrictEvents && scoped.length) hint.textContent += ' · รายการที่ยังไม่ระบุตำบลจะไม่ถูกนำไปจัดอันดับ';
-        };
-        stationSelect.onchange = render;
-        select.onchange = render;
-        render();
-      }
       async function loadDashboardDonuts() {
         const client = window.cctvSession?.client;
         if (!client) return;
@@ -512,7 +442,6 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
           incidentRows.forEach(row => { incidentCounts[incidentType(row)] += 1; });
           renderDonut('economicDonut', 'economicTotal', 'economicLegend', ECONOMIC_TYPES, economicCounts, ECONOMIC_COLORS, 'จุด');
           renderDonut('incidentDonut', 'incidentTotal', 'incidentLegend', INCIDENT_TYPES, incidentCounts, INCIDENT_COLORS, 'เหตุ');
-          renderAreaAnalysis(incidentRows);
         } catch (error) {
           console.warn('ไม่สามารถโหลดกราฟสรุปพื้นที่เศรษฐกิจและเหตุการณ์', error);
           ['economicLegend', 'incidentLegend'].forEach(id => {
