@@ -102,10 +102,10 @@
             <input id="regUsername" type="text" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]+" title="ใช้ตัวอักษรภาษาอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง" required>
           </label>
           <label for="regPassword">Password
-            <input id="regPassword" type="password" autocomplete="new-password" minlength="8" required>
+            <span class="password-wrap"><input id="regPassword" type="password" autocomplete="new-password" minlength="8" required><button id="toggleRegPassword" class="toggle-password" type="button" aria-label="แสดงรหัสผ่าน" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></span>
           </label>
           <label for="regConfirmPassword">ยืนยัน Password
-            <input id="regConfirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+            <span class="password-wrap"><input id="regConfirmPassword" type="password" autocomplete="new-password" minlength="8" required><button id="toggleRegConfirmPassword" class="toggle-password" type="button" aria-label="แสดงรหัสผ่านยืนยัน" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></span>
           </label>
         </div>
         <button id="registerSubmit" type="submit">ส่งคำขอลงทะเบียน</button>
@@ -134,14 +134,19 @@
       if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
       $('backToLogin').addEventListener('click', () => showRegister(false));
-      $('togglePassword').addEventListener('click', () => {
-        const visible = $('password').type === 'text';
-        $('password').type = visible ? 'password' : 'text';
-        $('togglePassword').setAttribute('aria-label', visible ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน');
-        $('togglePassword').setAttribute('aria-pressed', String(!visible));
-        $('togglePassword').innerHTML = visible ? '<i class="fa-solid fa-eye" aria-hidden="true"></i>' : '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>';
-        $('password').focus();
-      });
+      const bindPasswordToggle = (inputId, buttonId, showLabel = 'แสดงรหัสผ่าน') => {
+        $(buttonId).addEventListener('click', () => {
+          const input = $(inputId), button = $(buttonId), visible = input.type === 'text';
+          input.type = visible ? 'password' : 'text';
+          button.setAttribute('aria-label', visible ? showLabel : 'ซ่อนรหัสผ่าน');
+          button.setAttribute('aria-pressed', String(!visible));
+          button.innerHTML = visible ? '<i class="fa-solid fa-eye" aria-hidden="true"></i>' : '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>';
+          input.focus();
+        });
+      };
+      bindPasswordToggle('password', 'togglePassword');
+      bindPasswordToggle('regPassword', 'toggleRegPassword');
+      bindPasswordToggle('regConfirmPassword', 'toggleRegConfirmPassword', 'แสดงรหัสผ่านยืนยัน');
       $('googleSignIn').addEventListener('click', async () => {
         const button = $('googleSignIn');
         button.disabled = true;
