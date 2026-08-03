@@ -86,6 +86,15 @@
       return exact?query.eq(field,value):query.ilike(field,`${prefix?'':'%'}${value}%`);
     }
     function isHouseNumber(value){return /^\d+[\d\s\/-]*$/.test(value)}
+    function areaQueryField(term){
+      const value=clean(term);
+      if(/^(จังหวัด|จ\.)/i.test(value))return ['province',canonicalArea(value,'province')];
+      if(/^(อำเภอ|อ\.)/i.test(value))return ['amphoe',canonicalArea(value,'amphoe')];
+      if(/^(ตำบล|ต\.)/i.test(value))return ['tambon',canonicalArea(value,'tambon')];
+      const moo=value.match(/^(?:หมู่|ม\.)\s*(\d+)/i);
+      if(moo)return ['moo',`ม.${moo[1]}`,true];
+      return null;
+    }
     function applyQuery(query){
       let filtered=query;
       if(areaFilters.province)filtered=filtered.eq('province',canonicalArea(areaFilters.province,'province'));
@@ -97,8 +106,8 @@
       // อย่าใช้ OR + ILIKE หลายคอลัมน์กับฐานข้อมูลขนาดใหญ่ เพราะทำให้ query timeout
       // เลือกคอลัมน์ตามชนิดของคำค้นหาโดยตรง เพื่อให้ใช้ดัชนีจริงของ Supabase ได้
       if(activeMode==='place'){
-        if(/^(จังหวัด|จ\.)/i.test(term))return textFilter(filtered,'province',canonicalArea(term,'province'));
-        if(/^(อำเภอ|อ\.)/i.test(term))return textFilter(filtered,'amphoe',canonicalArea(term,'amphoe'));
+        const areaField=areaQueryField(term);
+        if(areaField)return textFilter(filtered,areaField[0],areaField[1],{exact:areaField[2]});
         return textFilter(filtered,'tambon',canonicalArea(term,'tambon'));
       }
       if(activeMode==='address'){
@@ -109,6 +118,8 @@
       if(/^\d{6,}$/.test(term))return textFilter(filtered,'peano',term,{exact:true});
       if(/^\d/.test(term))return textFilter(filtered,'house_no',term.split(/\s+/)[0],{prefix:true});
       if(isHouseNumber(term))return textFilter(filtered,'house_no',term,{prefix:true});
+      const areaField=areaQueryField(term);
+      if(areaField)return textFilter(filtered,areaField[0],areaField[1],{exact:areaField[2]});
       return textFilter(filtered,'person_name',term);
     }
     async function loadPage(fit=false){if(!db)return;const from=(page-1)*state.size,to=from+state.size-1;$('notice').textContent='กำลังค้นหาข้อมูล…';let q=db.from(TABLE).select(COLUMNS,{count:'planned'});q=applyQuery(q);const result=await q.order('id',{ascending:true}).range(from,to);if(result.error)throw result.error;rows=result.data||[];total=result.count||0;if(!activeQuery&&activeMode==='all')overallTotal=total;renderRows();updateSummary();drawMap(fit);$('notice').textContent=total?'พร้อมค้นหา':'รอไฟล์ฐานข้อมูลสำหรับนำเข้า'}
