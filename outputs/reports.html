@@ -24,7 +24,7 @@
     let db,sets={}; const $=id=>document.getElementById(id);
     const csv=value=>'"'+String(value??'').replaceAll('"','""')+'"';
     const configs=[
-      ['cameras','กล้อง CCTV','fa-video','cctv_locations','cctv','id,uid,camera_name,name,camera_type,ownership_category,area,status'],
+      ['cameras','กล้อง CCTV','fa-video','cctv_locations','cctv','id,uid,camera_name,name,camera_type,ownership_category,project,area,lat,lng,status,created_at,updated_at'],
       ['cameraquality','ตรวจคุณภาพข้อมูลกล้อง','fa-shield-halved',null,'quality','id,uid,camera_name,name,camera_type,ownership_category,area,status'],
       ['economic','พื้นที่เศรษฐกิจ','fa-building-columns','economic_data','economy','id,name,type,risk_level,score,cctv'],
       ['incidents','บันทึกเหตุการณ์','fa-triangle-exclamation','incidents','security','id,case_no,incident_category,incident_subcategory,incident_type,location,status,occurred_at'],
