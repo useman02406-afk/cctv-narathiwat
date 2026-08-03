@@ -90,7 +90,39 @@ async function loadAdministrativeBoundaries(){
       const stationOf=x=>x.station||x.area||'ไม่ระบุสถานี / พื้นที่';
       function popup(x){const rawUid=String(x.uid||'').trim(),isDashProject=usesDashFields(x),uid=isDashProject?'-':rawUid,cameraType=isDashProject?'-':(x.camera_type||typeOf(x)),credentialText=isDashProject?'-':'🔒 ข้อมูลบัญชีควบคุมถูกปกปิด';return `<div class="popup"><h3>${esc(x.camera_name||x.name||'กล้อง CCTV')}</h3><p><b>camera_name:</b> ${esc(x.camera_name||x.name||'–')}</p><p><b>uid:</b> ${esc(uid)}${rawUid&&!isDashProject?`<button type="button" class="copy-uid" data-uid="${esc(rawUid)}">คัดลอก</button>`:''}</p><p><b>camera_type:</b> ${esc(cameraType)}</p><p><b>user:</b> ${credentialText}</p><p><b>password:</b> ${isDashProject?'-':'🔒 ปกปิดเพื่อความปลอดภัย'}</p><p><b>station:</b> ${esc(stationOf(x))}</p><p><b>project:</b> ${esc(projectOf(x))}</p><p><b>lat:</b> ${esc(x.lat)}</p><p><b>lng:</b> ${esc(x.lng)}</p><p><b>status:</b> ${esc(x.status||'ไม่ระบุ')}</p>${rawUid&&!isDashProject?`<a class="open-camera" href="camera-record-browser.html?search=${encodeURIComponent(rawUid)}">เปิดข้อมูลกล้อง</a>`:''}</div>`}
       function visibleItems(){const q=$('search').value.trim().toLowerCase(),type=$('type').value,owner=$('owner').value,status=$('status').value;return items.filter(x=>(!q||[x.camera_name,x.name,x.uid,x.camera_type,x.area,stationOf(x),projectOf(x),x.ownership_category].some(v=>String(v||'').toLowerCase().includes(q)))&&(!type||typeOf(x)===type)&&(!owner||projectOf(x)===owner)&&(!status||x.status===status))}
-      function render(){const hasCoordinates=x=>x.lat!==null&&x.lng!==null&&x.lat!==''&&x.lng!=='';const visible=visibleItems(),query=$('search').value.trim(),hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value);layer.clearLayers();const points=[];visible.forEach(x=>{if(!hasCoordinates(x))return;const lat=Number(x.lat),lng=Number(x.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)return;L.marker([lat,lng],{icon:iconOf(x)}).bindPopup(popup(x)).addTo(layer);points.push([lat,lng])});const projects=visible.reduce((out,x)=>{const project=projectOf(x);out[project]=(out[project]||0)+1;return out},{}),projectNames=[...new Set(items.map(projectOf))].sort((a,b)=>a.localeCompare(b,'th'));$('ownerSummary').innerHTML='<h3>สรุปตามโครงการ / หน่วยงานเจ้าของ</h3>'+projectNames.map(name=>`<button type="button" data-owner-summary="${esc(name)}"><span>${esc(name)}</span><b>${(projects[name]||0).toLocaleString()} จุด</b></button>`).join('')||'<h3>สรุปตามโครงการ / หน่วยงานเจ้าของ</h3><div>ไม่พบข้อมูล</div>';$('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;render()});renderLegend(visible);$('total').textContent=items.length.toLocaleString();$('shown').textContent=points.length.toLocaleString();$('notice').textContent=`พบ ${visible.length.toLocaleString()} รายการ · แสดงหมุด ${points.length.toLocaleString()} จุด${query?` · ค้นหา “${query}” แล้ว`:''} · ข้อมูลรหัสผ่านปกปิดบนแผนที่`;if(points.length&&(!hasFitted||hasFilter)){map.fitBounds(points,{padding:[28,28],maxZoom:14});hasFitted=true}}
+      /* Cameras may legitimately share one physical installation point.  Group
+         only their visual marker; keep every underlying record and UID. */
+      const groupByCoordinate=source=>{
+        const groups=new Map();
+        source.forEach(x=>{
+          const lat=Number(x.lat),lng=Number(x.lng);
+          if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)return;
+          const key=`${lat.toFixed(7)},${lng.toFixed(7)}`;
+          if(!groups.has(key))groups.set(key,{lat,lng,items:[]});
+          groups.get(key).items.push(x);
+        });
+        return [...groups.values()];
+      };
+      const groupMarkerText=group=>{
+        const name=group.items[0]?.camera_name||group.items[0]?.name||'กล้อง CCTV';
+        return group.items.length>1?`${name} (+${group.items.length-1} กล้อง)`:name;
+      };
+      const groupIcon=group=>{
+        const first=group.items[0];
+        if(group.items.length===1)return iconOf(first);
+        const category=categoryOf(first);
+        const options={color:category.marker_color||'#64748b',symbol:category.marker_icon||undefined,text:markerDetailsVisible&&markerLabelsActive?groupMarkerText(group):'',subtype:typeOf(first)};
+        if(window.CCTVMarkerSystem?.icon){
+          const base=window.CCTVMarkerSystem.icon('camera',options);
+          return L.divIcon({className:'cctv-unified-marker-host',html:`<div style="position:relative;display:inline-block">${base.options.html}<b style="position:absolute;top:-7px;right:-9px;z-index:5;min-width:20px;height:20px;padding:1px 4px;border:2px solid #fff;border-radius:999px;background:#0f172a;color:#fff;font:800 11px/16px system-ui;text-align:center;box-shadow:0 1px 4px #0008">${group.items.length}</b></div>`,iconSize:base.options.iconSize,iconAnchor:base.options.iconAnchor,popupAnchor:base.options.popupAnchor});
+        }
+        return iconOf(first);
+      };
+      const popupGroup=group=>{
+        if(group.items.length===1)return popup(group.items[0]);
+        return `<div class="popup popup-group"><h3>จุดติดตั้งเดียวกัน — ${group.items.length} กล้อง</h3><p><b>พิกัด:</b> ${esc(group.lat)}, ${esc(group.lng)}</p><p>เลือกชื่อกล้องเพื่อดูข้อมูลของแต่ละ UID</p>${group.items.map((x,index)=>`<details ${index===0?'open':''}><summary>${esc(x.camera_name||x.name||'กล้อง CCTV')} · UID: ${esc(x.uid||'-')}</summary>${popup(x)}</details>`).join('')}</div>`;
+      };
+      function render(){const hasCoordinates=x=>x.lat!==null&&x.lng!==null&&x.lat!==''&&x.lng!=='';const visible=visibleItems(),query=$('search').value.trim(),hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value);layer.clearLayers();const points=[];groupByCoordinate(visible).forEach(group=>{L.marker([group.lat,group.lng],{icon:groupIcon(group)}).bindPopup(popupGroup(group)).addTo(layer);points.push([group.lat,group.lng])});const projects=visible.reduce((out,x)=>{const project=projectOf(x);out[project]=(out[project]||0)+1;return out},{}),projectNames=[...new Set(items.map(projectOf))].sort((a,b)=>a.localeCompare(b,'th'));$('ownerSummary').innerHTML='<h3>สรุปตามโครงการ / หน่วยงานเจ้าของ</h3>'+projectNames.map(name=>`<button type="button" data-owner-summary="${esc(name)}"><span>${esc(name)}</span><b>${(projects[name]||0).toLocaleString()} จุด</b></button>`).join('')||'<h3>สรุปตามโครงการ / หน่วยงานเจ้าของ</h3><div>ไม่พบข้อมูล</div>';$('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;render()});renderLegend(visible);$('total').textContent=items.length.toLocaleString();$('shown').textContent=visible.length.toLocaleString();$('notice').textContent=`พบ ${visible.length.toLocaleString()} รายการ · แสดง ${visible.length.toLocaleString()} กล้อง ณ ${points.length.toLocaleString()} พิกัด${query?` · ค้นหา “${query}” แล้ว`:''} · ข้อมูลรหัสผ่านปกปิดบนแผนที่`;if(points.length&&(!hasFitted||hasFilter)){map.fitBounds(points,{padding:[28,28],maxZoom:14});hasFitted=true}}
       function zoomVisible(){const hasCoordinates=x=>x.lat!==null&&x.lng!==null&&x.lat!==''&&x.lng!=='';const points=visibleItems().filter(x=>hasCoordinates(x)).map(x=>[Number(x.lat),Number(x.lng)]).filter(([lat,lng])=>Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=5&&lat<=7.5&&lng>=100&&lng<=102.5);if(points.length)map.fitBounds(points,{padding:[28,28],maxZoom:14})}
       function exportCsv(){const rows=visibleItems().map(x=>({uid:x.uid||'',camera_name:x.camera_name||x.name||'',camera_type:typeOf(x),project:projectOf(x),owner:x.ownership_category||'',area:x.area||'',status:x.status||'',latitude:x.lat??'',longitude:x.lng??''}));if(!rows.length){$('notice').textContent='ไม่มีรายการตามตัวกรองสำหรับส่งออก';return}const fields=Object.keys(rows[0]),quote=v=>'"'+String(v??'').replaceAll('"','""')+'"',content='\ufeff'+[fields.join(','),...rows.map(row=>fields.map(f=>quote(row[f])).join(','))].join('\r\n'),link=document.createElement('a');link.href=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));link.download='cctv-map-'+new Date().toISOString().slice(0,10)+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),0)}
       /* Spatial administrative filtering.  A resolved area is tested against
@@ -154,6 +186,7 @@ async function loadAdministrativeBoundaries(){
         const hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value||$('station')?.value);
         const markerLimit=mobileMapMode?(hasFilter?1200:700):visible.length;
         const renderItems=visible.slice(0,markerLimit);
+        const markerGroups=groupByCoordinate(renderItems);
         const points=[];
         layer.clearLayers();
         if(selectedAreaLayer){map.removeLayer(selectedAreaLayer);selectedAreaLayer=null}
@@ -169,15 +202,14 @@ async function loadAdministrativeBoundaries(){
         $('ownerSummary').querySelectorAll('[data-owner-summary]').forEach(button=>button.onclick=()=>{$('owner').value=button.dataset.ownerSummary;fitOnNextRender=true;render()});
         const drawFrom=start=>{
           if(token!==renderToken)return;
-          const end=Math.min(start+80,renderItems.length);
+          const end=Math.min(start+80,markerGroups.length);
           for(let index=start;index<end;index++){
-            const x=renderItems[index],lat=Number(x.lat),lng=Number(x.lng);
-            if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<5||lat>7.5||lng<100||lng>102.5)continue;
-            L.marker([lat,lng],{icon:iconOf(x)}).bindPopup(popup(x)).addTo(layer);
-            points.push([lat,lng]);
+            const group=markerGroups[index];
+            L.marker([group.lat,group.lng],{icon:groupIcon(group)}).bindPopup(popupGroup(group)).addTo(layer);
+            points.push([group.lat,group.lng]);
           }
-          $('shown').textContent=points.length.toLocaleString();
-          if(end<renderItems.length){requestAnimationFrame(()=>drawFrom(end));return}
+          $('shown').textContent=Math.min(end,markerGroups.length)===markerGroups.length?renderItems.length.toLocaleString():'กำลังแสดง…';
+          if(end<markerGroups.length){requestAnimationFrame(()=>drawFrom(end));return}
           const spatialNote=areaGeometry&&areaGeometry.query===query?' · กรองตามขอบเขตพื้นที่จริง':'';
           const limitNote=renderItems.length<visible.length?` · โหมดมือถือแสดง ${renderItems.length.toLocaleString()} จุดเพื่อความลื่นไหล — เลือก สภ. หรือค้นหาเพื่อดูจุดอื่น`:'';
           $('notice').textContent=`พบ ${visible.length.toLocaleString()} รายการ · แสดงหมุด ${points.length.toLocaleString()} จุด${query?` · ค้นหา “${query}” แล้ว`:''}${spatialNote}${limitNote}`;
