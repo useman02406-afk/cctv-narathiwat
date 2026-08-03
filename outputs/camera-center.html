@@ -36,7 +36,7 @@
   </style>
   <script>
     (()=>{
-      const frame=document.getElementById('workspace'),cacheVersion='20260803-02';
+      const frame=document.getElementById('workspace'),cacheVersion='20260803-03';
       frame.addEventListener('load',()=>[80,300,800].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}},delay)));
       const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
       document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
