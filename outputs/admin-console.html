@@ -21,4 +21,39 @@
   async function load(){const [{data:profiles,error:profileError},{data:logs}]=await Promise.all([db.from('profiles').select('*').order('created_at',{ascending:false}),db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(20)]);if(profileError){$('notice').textContent='โหลดข้อมูลผู้ใช้ไม่สำเร็จ: '+profileError.message;return}rows=profiles||[];$('total').textContent=rows.length.toLocaleString();$('pending').textContent=rows.filter(x=>!x.active).length.toLocaleString();$('admins').textContent=rows.filter(x=>x.role==='ADMIN').length.toLocaleString();$('notice').textContent='ADMIN สามารถแก้ไข อนุมัติ ระงับ และลบบัญชีได้';renderLogs(logs);render()}
   async function start(e){const session=e.detail||window.cctvSession;if(!session)return;db=session.client;currentUserId=session.user.id;if(session.profile.role!=='ADMIN'){location.replace('home.html');return}$('search').oninput=render;load()}if(window.cctvSession)start({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',start,{once:true});})();
   </script>
+<script>
+/* Administrator shortcut: approve the account and confirm its email in one action. */
+(()=>{
+  const confirmUser=async(id,button)=>{
+    const label=button.dataset.userName||'บัญชีผู้ใช้';
+    const approved=await (window.cctvConfirm?.('อนุมัติและยืนยันบัญชี',`ยืนยัน ${label} เพื่อให้เข้าสู่ระบบได้ทันทีโดยไม่ต้องรออีเมล`,'ยืนยัน')??Promise.resolve(confirm(`อนุมัติและยืนยัน ${label} หรือไม่?`)));
+    if(!approved)return;
+    button.disabled=true;
+    const db=window.cctvSession?.client;
+    if(!db){window.smartAlert?.('ทำรายการไม่สำเร็จ','ไม่พบการเชื่อมต่อฐานข้อมูล กรุณารีเฟรชหน้าเว็บ','error')||alert('ไม่พบการเชื่อมต่อฐานข้อมูล');button.disabled=false;return;}
+    const {error}=await db.rpc('admin_confirm_user_email',{target_id:id});
+    if(error){window.smartAlert?.('ยืนยันไม่สำเร็จ',error.message,'error')||alert(error.message);button.disabled=false;return;}
+    window.smartAlert?.('อนุมัติบัญชีแล้ว','ผู้ใช้สามารถเข้าสู่ระบบได้ทันที','success')||alert('อนุมัติบัญชีแล้ว');
+    location.reload();
+  };
+  const addApproveButtons=()=>document.querySelectorAll('#users .actions').forEach(actions=>{
+    if(actions.querySelector('[data-confirm-user]'))return;
+    const source=actions.querySelector('[data-edit],[data-save],[data-delete]');
+    const id=source?.dataset.edit||source?.dataset.save||source?.dataset.delete;
+    if(!id)return;
+    const row=actions.closest('tr');
+    const name=row?.querySelector('td b')?.textContent?.trim()||'บัญชีผู้ใช้';
+    const button=document.createElement('button');
+    button.type='button';button.className='btn detail';button.textContent='อนุมัติ / ยืนยัน';
+    button.dataset.confirmUser=id;button.dataset.userName=name;
+    button.title='เปิดใช้งานและยืนยันอีเมล เพื่อให้เข้าสู่ระบบได้ทันที';
+    button.onclick=()=>confirmUser(id,button);
+    const deleteButton=actions.querySelector('[data-delete]');
+    actions.insertBefore(button,deleteButton||null);
+  });
+  const users=document.getElementById('users');
+  if(users)new MutationObserver(addApproveButtons).observe(users,{childList:true,subtree:true});
+  addApproveButtons();
+})();
+</script>
 </body></html>
