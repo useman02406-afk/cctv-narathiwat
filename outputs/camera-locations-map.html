@@ -68,7 +68,9 @@
       };
       const usesDashFields=x=>['กล้อง กอ.รมน. (6เมืองหลัก)','มหาดไทย (สป.มท.)'].includes(projectOf(x));
       const markerUid=x=>usesDashFields(x)?'':String(x.uid||'').trim();
-      const markerText=x=>markerDetailsVisible&&markerLabelsActive?[`UID: ${String(x.uid||'-').trim()||'-'}`,x.camera_name||x.name||'กล้อง CCTV',stationOf(x)]:'';
+      // Keep the map readable at close zoom: the label is the camera name only.
+      // UID, station and the remaining fields are available in the marker popup.
+      const markerText=x=>markerDetailsVisible&&markerLabelsActive?[x.camera_name||x.name||'กล้อง CCTV']:'';
       const categoryOf=x=>categories.find(category=>category.name===typeOf(x))||x.camera_categories||{};
       const iconOf=x=>{const c=categoryOf(x),options={color:c.marker_color||'#64748b',symbol:c.marker_icon||undefined,text:markerText(x),subtype:typeOf(x)};if(window.CCTVMarkerSystem?.icon)return window.CCTVMarkerSystem.icon('camera',options);return L.divIcon({className:'cctv-unified-marker-host',html:`<span style="display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;background:${esc(c.marker_color||'#64748b')};color:#fff;font:700 16px/1 system-ui;transform:rotate(-45deg)"><b style="transform:rotate(45deg)">📹</b></span>`,iconSize:[34,38],iconAnchor:[17,34],popupAnchor:[0,-34]})};
 async function loadAdministrativeBoundaries(){
