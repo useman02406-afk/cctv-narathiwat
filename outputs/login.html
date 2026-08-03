@@ -61,7 +61,7 @@
         </label>
         <button id="submit" type="submit">เข้าสู่ระบบ</button>
       </form>
-      <button id="forgot" class="secondary" type="button">ลืมรหัสผ่าน</button>
+      <button id="forgot" class="secondary" type="button">ติดต่อผู้ดูแลเพื่อรีเซ็ตรหัสผ่าน</button>
       <button id="showRegister" class="secondary" type="button">ลงทะเบียนผู้ใช้</button>
       <p id="loginMessage" class="message" role="status" aria-live="polite"></p>
       <p class="note">บัญชีใหม่จะอยู่ระหว่างรอผู้ดูแลระบบอนุมัติก่อนใช้งาน</p>
@@ -163,7 +163,9 @@
         else localStorage.removeItem(registrationCooldownKey);
       };
 
-      if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
+      if (new URLSearchParams(location.search).get('error')) {
+        loginMessage('บัญชีอยู่ระหว่างรอผู้ดูแลระบบอนุมัติ หรือยังไม่ได้รับอนุญาตให้ใช้งาน');
+      }
       $('showRegister').addEventListener('click', () => showRegister(true));
       $('backToLogin').addEventListener('click', () => showRegister(false));
       restoreRegistrationCooldown();
@@ -214,13 +216,10 @@
         location.replace('home.html');
       });
 
-      $('forgot').addEventListener('click', async () => {
-        const address = $('email').value.trim();
-        if (!address) return loginMessage('กรุณากรอกอีเมลก่อนกดลืมรหัสผ่าน');
-        const redirectTo = new URL('password-reset.html', location.href).href;
-        const { error } = await db.auth.resetPasswordForEmail(address, { redirectTo });
-        if (error) return loginMessage('ส่งลิงก์กู้รหัสผ่านไม่สำเร็จ: ' + errorText(error));
-        loginMessage('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว กรุณาเปิดลิงก์ล่าสุดในอีเมล', true);
+      $('forgot').addEventListener('click', () => {
+        const message = 'ระบบรีเซ็ตรหัสผ่านผ่านอีเมลปิดใช้งานอยู่ กรุณาติดต่อผู้ดูแลระบบเพื่อรีเซ็ตรหัสผ่าน';
+        loginMessage(message);
+        window.smartAlert?.('ติดต่อผู้ดูแลระบบ', message, 'info', 4200);
       });
 
       $('registerForm').addEventListener('submit', async (event) => {
@@ -267,10 +266,19 @@
           window.smartAlert?.('ลงทะเบียนไม่สำเร็จ', 'ไม่พบข้อมูลบัญชีที่สร้าง โปรดลองอีกครั้ง', 'error', 3200);
           return;
         }
+        // When Confirm email is disabled in Supabase, signUp creates a session.
+        // Sign it out immediately because an administrator must still approve the profile.
+        if (data.session) await db.auth.signOut();
         $('registerForm').reset();
         $('otherDepartmentWrap').classList.add('hidden');
-        registerMessage('ส่งคำขอลงทะเบียนสำเร็จ กรุณายืนยันอีเมลหากระบบส่งลิงก์มา และรอผู้ดูแลระบบอนุมัติบัญชี', true);
-        window.smartAlert?.('ส่งคำขอลงทะเบียนแล้ว', 'ระบบแจ้งผู้ดูแลเพื่ออนุมัติบัญชีแล้ว', 'success');
+        if (!data.session) {
+          const message = 'บัญชีถูกสร้างแล้ว แต่ระบบยังเปิดการยืนยันอีเมลอยู่ กรุณาให้ผู้ดูแลปิด Confirm email ใน Supabase ก่อนใช้งาน';
+          registerMessage(message);
+          window.smartAlert?.('ต้องตั้งค่า Supabase เพิ่มเติม', message, 'warning', 5200);
+          return;
+        }
+        registerMessage('ส่งคำขอลงทะเบียนสำเร็จ บัญชีอยู่ระหว่างรอผู้ดูแลระบบอนุมัติ เมื่อได้รับอนุมัติแล้วจึงเข้าสู่ระบบได้', true);
+        window.smartAlert?.('ส่งคำขอลงทะเบียนแล้ว', 'บัญชีอยู่ระหว่างรอผู้ดูแลระบบอนุมัติ', 'success');
       });
     })();
   </script>
