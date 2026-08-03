@@ -129,13 +129,44 @@
         if (open) { $('regFullName').focus(); $('registerCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         else { $('email').focus(); }
       };
-      const errorText = (error) => error?.message === 'Invalid login credentials'
-        ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง หรือลองกด “ลืมรหัสผ่าน”'
-        : (error?.message || 'ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง');
+      const registrationCooldownKey = 'cctv_registration_cooldown_until';
+      const isEmailRateLimited = (error) => /(?:email\s+)?rate limit exceeded/i.test(error?.message || '');
+      const errorText = (error) => {
+        if (isEmailRateLimited(error)) return 'ระบบส่งอีเมลยืนยันถึงขีดจำกัดชั่วคราว กรุณารอสักระยะแล้วลองใหม่เพียงครั้งเดียว';
+        if (error?.message === 'Invalid login credentials') return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง หรือลองกด “ลืมรหัสผ่าน”';
+        return error?.message || 'ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง';
+      };
+      let registrationCooldownTimer;
+      const setRegistrationCooldown = (durationMs = 5 * 60 * 1000) => {
+        const button = $('registerSubmit');
+        const until = Date.now() + durationMs;
+        localStorage.setItem(registrationCooldownKey, String(until));
+        clearInterval(registrationCooldownTimer);
+        const update = () => {
+          const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+          if (!seconds) {
+            clearInterval(registrationCooldownTimer);
+            localStorage.removeItem(registrationCooldownKey);
+            button.disabled = false;
+            button.textContent = 'ส่งคำขอลงทะเบียน';
+            return;
+          }
+          button.disabled = true;
+          button.textContent = `รอลองใหม่ ${Math.ceil(seconds / 60)} นาที`;
+        };
+        update();
+        registrationCooldownTimer = setInterval(update, 1000);
+      };
+      const restoreRegistrationCooldown = () => {
+        const until = Number(localStorage.getItem(registrationCooldownKey));
+        if (until > Date.now()) setRegistrationCooldown(until - Date.now());
+        else localStorage.removeItem(registrationCooldownKey);
+      };
 
       if (new URLSearchParams(location.search).get('error')) loginMessage('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
       $('backToLogin').addEventListener('click', () => showRegister(false));
+      restoreRegistrationCooldown();
       const bindPasswordToggle = (inputId, buttonId, showLabel = 'แสดงรหัสผ่าน') => {
         $(buttonId).addEventListener('click', () => {
           const input = $(inputId), button = $(buttonId), visible = input.type === 'text';
@@ -194,6 +225,11 @@
 
       $('registerForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+        const cooldownUntil = Number(localStorage.getItem(registrationCooldownKey));
+        if (cooldownUntil > Date.now()) {
+          setRegistrationCooldown(cooldownUntil - Date.now());
+          return registerMessage('กรุณารอให้ครบเวลาที่กำหนดก่อนส่งคำขอใหม่');
+        }
         const password = $('regPassword').value;
         const confirmPassword = $('regConfirmPassword').value;
         const department = $('regDepartment').value;
@@ -221,6 +257,7 @@
         $('registerSubmit').disabled = false;
         if (error) {
           const text = error.message.includes('profiles_username_unique_ci') ? 'Username นี้ถูกใช้งานแล้ว กรุณาเลือกใหม่' : errorText(error);
+          if (isEmailRateLimited(error)) setRegistrationCooldown();
           registerMessage(text);
           window.smartAlert?.('ลงทะเบียนไม่สำเร็จ', text, 'error', 3200);
           return;
