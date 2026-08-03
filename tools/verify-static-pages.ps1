@@ -35,6 +35,20 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
     & node --check (Join-Path $OutputRoot $js)
     if ($LASTEXITCODE -ne 0) { $failed.Add("Invalid JavaScript syntax: $js") }
   }
+  foreach ($file in $htmlFiles) {
+    $text = [System.IO.File]::ReadAllText($file.FullName, [System.Text.Encoding]::UTF8)
+    $inlineScripts = [regex]::Matches($text, '<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    for ($i = 0; $i -lt $inlineScripts.Count; $i++) {
+      $tempScript = Join-Path $env:TEMP ("cctv-static-check-$([guid]::NewGuid().ToString('N')).js")
+      try {
+        [System.IO.File]::WriteAllText($tempScript, $inlineScripts[$i].Groups[1].Value, [System.Text.UTF8Encoding]::new($false))
+        & node --check $tempScript
+        if ($LASTEXITCODE -ne 0) { $failed.Add("Invalid inline JavaScript: $($file.Name) script #$($i + 1)") }
+      } finally {
+        Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
+      }
+    }
+  }
 }
 
 if ($failed.Count) {
