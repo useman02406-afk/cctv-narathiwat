@@ -9,8 +9,9 @@
   <link rel="stylesheet" href="jis-ui-theme.css">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; font-family: Sarabun, sans-serif; color: #15262b; background: linear-gradient(135deg,#102f38,#195d72 52%,#4d7e8f); }
-    .auth-shell { width: min(1040px, calc(100% - 32px)); margin: 34px auto; display: grid; grid-template-columns: minmax(0,420px) minmax(0,560px); gap: 22px; align-items: start; justify-content: center; }
+    body { margin: 0; min-height: 100vh; padding: 24px 16px; display: flex; align-items: center; justify-content: center; font-family: Sarabun, sans-serif; color: #15262b; background: linear-gradient(135deg,#102f38,#195d72 52%,#4d7e8f); }
+    .auth-shell { width: min(1040px, 100%); margin: 0; display: grid; grid-template-columns: minmax(0,420px) minmax(0,560px); gap: 22px; align-items: start; justify-content: center; }
+    .auth-shell:not(.register-open) { width: min(420px, 100%); grid-template-columns: minmax(0,420px); }
     .box { background: #ffffffef; border: 1px solid #fff; border-radius: 16px; padding: 30px; box-shadow: 0 22px 60px #001b29aa; }
     .register-card { display: none; }
     .register-card.is-open { display: block; }
@@ -40,7 +41,7 @@
     .password-hint.ok { color: #067c51; }
     .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
     .hidden { display: none !important; }
-    @media (max-width: 780px) { .auth-shell { width: min(560px, calc(100% - 24px)); grid-template-columns: 1fr; margin: 12px auto 28px; } .box { padding: 24px; } }
+    @media (max-width: 780px) { body { align-items: flex-start; padding: 12px; } .auth-shell, .auth-shell:not(.register-open) { width: min(560px, 100%); grid-template-columns: 1fr; margin: 0 auto 16px; } .box { padding: 24px; } }
     @media (max-width: 430px) { .auth-shell { width: calc(100% - 18px); } .box { padding: 20px 16px; border-radius: 13px; } .two-columns { grid-template-columns: 1fr; gap: 0; } }
   </style>
 </head>
@@ -126,6 +127,7 @@
       const registerMessage = (text, ok = false) => { $('registerMessage').textContent = text; $('registerMessage').className = ok ? 'message ok' : 'message'; };
       const showRegister = (open) => {
         $('registerCard').classList.toggle('is-open', open);
+        document.querySelector('.auth-shell').classList.toggle('register-open', open);
         if (open) { $('regFullName').focus(); $('registerCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         else { $('email').focus(); }
       };
