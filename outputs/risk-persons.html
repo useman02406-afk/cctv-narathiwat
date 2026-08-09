@@ -41,7 +41,7 @@
   const $=x=>document.getElementById(x);
   const esc=x=>String(x??'–').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const nameOf=x=>`ประเภทที่ ${x.risk_category} ${C[x.risk_category-1]||'ไม่ระบุ'}`;
-  const canEdit=()=>['ADMIN','OFFICER','VIEWER'].includes(session.profile.role);
+  const canEdit=()=>['ADMIN','OFFICER'].includes(session.profile.role);
   const coord=x=>{const lat=Number(x.latitude),lng=Number(x.longitude);return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180?[lat,lng]:null};
   function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3500)}
   function options(){const o=C.map((x,i)=>`<option value="${i+1}">ประเภทที่ ${i+1} ${esc(x)}</option>`).join('');$('category').innerHTML=o;$('filterCategory').innerHTML='<option value="">ทุกประเภท</option>'+o}
