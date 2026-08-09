@@ -323,7 +323,7 @@
   }
 
   function addHomeSearchNavigation(profile) {
-    if (!['ADMIN', 'OFFICER'].includes(profile?.role)) return;
+    if (!['ADMIN', 'OFFICER', 'VIEWER'].includes(profile?.role)) return;
     if (!location.pathname.toLowerCase().endsWith('/command-center.html')) return;
     const add = () => {
       if (document.getElementById('home-search-nav')) return;
@@ -342,7 +342,7 @@
 
   function addHomeSearchDashboardSummary(session) {
     if (!location.pathname.toLowerCase().endsWith('/command-center.html')) return;
-    if (!['ADMIN', 'OFFICER'].includes(session?.profile?.role)) return;
+    if (!['ADMIN', 'OFFICER', 'VIEWER'].includes(session?.profile?.role)) return;
     let total = null;
     const render = () => {
       const grid = document.getElementById('overviewGrid');
@@ -475,6 +475,32 @@
     if (notice) notice.textContent = `${notice.textContent.replace(/ · จุดกล้องที่เลือกได้ \d+ จุด$/, '')} · เลือกจุดกล้องได้ ${rows.length.toLocaleString()} จุด`;
   }
 
+  // One permission model across every module. UI controls are only a
+  // convenience layer; PostgreSQL RLS enforces the same rule server-side.
+  function applyRolePermissions(session) {
+    const canManage = ['ADMIN', 'OFFICER'].includes(session?.profile?.role);
+    window.cctvPermissions = Object.freeze({
+      canView: Boolean(session?.profile?.active),
+      canManage,
+      role: session?.profile?.role || 'VIEWER'
+    });
+    document.documentElement.dataset.userRole = window.cctvPermissions.role;
+    if (canManage) return;
+    const hideMutationControls = () => {
+      document.querySelectorAll([
+        '#new', '#save', '#importPanel', '#importData',
+        '[data-edit]', '[data-del]', '[data-delete]',
+        '[data-system-edit]', '[data-system-delete]', '[data-draw]',
+        '.create-action', '.edit-action', '.delete-action'
+      ].join(',')).forEach((node) => {
+        node.hidden = true;
+        node.setAttribute('aria-hidden', 'true');
+      });
+    };
+    hideMutationControls();
+    new MutationObserver(hideMutationControls).observe(document.body, { childList: true, subtree: true });
+  }
+
   // The auth check is asynchronous, so DOMContentLoaded may already have fired
   // by the time it completes. Bind now and also retry after the DOM is ready.
   if (!bindLogout()) document.addEventListener('DOMContentLoaded', bindLogout, { once: true });
@@ -499,6 +525,7 @@
       }
     });
     window.cctvSession = { user: session.user, profile, client };
+    applyRolePermissions(window.cctvSession);
     window.dispatchEvent(new CustomEvent('cctv-auth-ready', { detail: window.cctvSession }));
     hideAuthLoading();
     document.documentElement.style.visibility = 'visible';

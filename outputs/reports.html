@@ -81,7 +81,7 @@
       draw();
       if(failed.length){$('notice').textContent='สรุปข้อมูลส่วนที่อ่านได้แล้ว · ยังโหลดไม่ได้: '+failed.join(', ');$('notice').className='notice error'}
     }
-    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return;if(!['ADMIN','OFFICER'].includes(session.profile?.role)){alert('บัญชีนี้ไม่มีสิทธิ์เข้าถึงศูนย์รายงาน');location.replace('home.html');return}db=session.client;$('user').textContent=`${session.profile.full_name||session.user.email} · ${session.profile.role}`;$('print').onclick=()=>window.print();load()}
+    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return;if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){alert('บัญชีนี้ไม่มีสิทธิ์เข้าถึงศูนย์รายงาน');location.replace('home.html');return}db=session.client;$('user').textContent=`${session.profile.full_name||session.user.email} · ${session.profile.role}`;$('print').onclick=()=>window.print();load()}
     window.addEventListener('cctv-auth-ready',start,{once:true});if(window.cctvSession)start();
   })();
   </script>
