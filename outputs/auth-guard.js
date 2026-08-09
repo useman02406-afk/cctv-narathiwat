@@ -224,9 +224,13 @@
       });
     };
     cleanup();
-    const observer = new MutationObserver(cleanup);
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.setTimeout(() => observer.disconnect(), 8000);
+    const observeCleanup = () => {
+      if (!document.body) return window.setTimeout(observeCleanup, 0);
+      const observer = new MutationObserver(cleanup);
+      observer.observe(document.body, { childList: true, subtree: true });
+      window.setTimeout(() => observer.disconnect(), 8000);
+    };
+    observeCleanup();
   }
 
 
@@ -498,7 +502,12 @@
       });
     };
     hideMutationControls();
-    new MutationObserver(hideMutationControls).observe(document.body, { childList: true, subtree: true });
+    const observeMutationControls = () => {
+      if (!document.body) return window.setTimeout(observeMutationControls, 0);
+      new MutationObserver(hideMutationControls).observe(document.body, { childList: true, subtree: true });
+      hideMutationControls();
+    };
+    observeMutationControls();
   }
 
   // The auth check is asynchronous, so DOMContentLoaded may already have fired
