@@ -542,8 +542,7 @@
             n = new Date();
           return d.toDateString() === n.toDateString();
         };
-        const canEdit = (x) =>
-          session.profile.role === "ADMIN" || x.created_by === session.user.id;
+        const canEdit = (x) => ["ADMIN", "OFFICER"].includes(session.profile.role);
         const EVENT_CATEGORIES = {
           SECURITY: {
             label: "ความมั่นคง",
@@ -949,7 +948,7 @@
         function start(e) {
           session = e.detail || window.cctvSession;
           if (!session) return;
-          if (!["ADMIN", "OFFICER"].includes(session.profile.role)) {
+          if (!["ADMIN", "OFFICER", "VIEWER"].includes(session.profile.role)) {
             swal("error", "ไม่มีสิทธิ์เข้าถึง", "บัญชีนี้ไม่มีสิทธิ์เข้าถึงข้อมูลบันทึกเหตุการณ์").then(
               () => location.replace("home.html"),
             );
