@@ -51,7 +51,7 @@
       const unknownStatus=(sets.cameras||[]).filter(camera=>camera.status==='ไม่ระบุ').length;
       const qualityHint=`รอระบุประเภทย่อย ${pendingSubtype.toLocaleString('th-TH')} · สถานะไม่ระบุ ${unknownStatus.toLocaleString('th-TH')}`;
       const openLink=view=>view==='quality'?'<a class="btn map" href="camera-data-quality.html"><i class="fa-solid fa-shield-halved"></i> ตรวจสอบ</a>':`<a class="btn map" href="${mapLink(view)}"><i class="fa-solid fa-map"></i> แผนที่</a>`;
-      $('cards').innerHTML=configs.map(([key,label,icon,,view])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">${key==='cameraquality'?qualityHint:'รายการในระบบ'}</div><div class="actions"><button class="btn" data-export="${key}"><i class="fa-solid fa-download"></i> CSV</button>${openLink(view)}</div></article>`).join('');
+      $('cards').innerHTML=configs.map(([key,label,icon])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">${key==='cameraquality'?qualityHint:'รายการในระบบ'}</div></article>`).join('');
       $('rows').innerHTML=configs.map(([key,label,,,view])=>`<tr><td>${label}</td><td>${count(key)}</td><td><button class="btn" data-export="${key}">CSV</button> ${openLink(view)}</td></tr>`).join('');
       document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>download('report-'+button.dataset.export,sets[button.dataset.export]||[]));
       $('exportAll').onclick=()=>download('command-center-summary',configs.map(([key,label])=>({module:label,total:(sets[key]||[]).length,exported_at:new Date().toISOString()})));
