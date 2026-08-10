@@ -20,9 +20,49 @@
     const text=v=>String(v??'').trim(), key=v=>text(v).toLocaleLowerCase('th-TH');
     const groups=(field)=>{const map=new Map();items.forEach(item=>{let value='';if(field==='uid'){value=key(item.uid);if(['','-','n/a','na','ไม่ระบุ'].includes(value))return}else if(field==='name')value=key(item.camera_name||item.name);else if(item.lat!==null&&item.lng!==null)value=Number(item.lat).toFixed(6)+', '+Number(item.lng).toFixed(6);if(!value)return;const list=map.get(value)||[];list.push(item);map.set(value,list)});return [...map.entries()].filter(([,list])=>list.length>1).sort((a,b)=>b[1].length-a[1].length)};
     function render(){const all={uid:groups('uid'),name:groups('name'),coordinate:groups('coordinate')};$('uidCount').textContent=all.uid.length.toLocaleString();$('nameCount').textContent=all.name.length.toLocaleString();$('coordCount').textContent=all.coordinate.length.toLocaleString();const current=all[active];$('notice').textContent=`พบ ${current.length.toLocaleString()} กลุ่ม — UID ที่เป็น “-” หรือไม่ระบุจะไม่ถูกนับเป็นข้อมูลซ้ำ; ตรวจสอบแต่ละกลุ่มก่อนลบ เพราะบางกล้องอาจอยู่จุดเดียวกันจริง`;$('rows').innerHTML=current.length?current.map(([value,list])=>`<tr><td class="key">${esc(value)}</td><td><span class="count">${list.length} รายการ</span></td><td>${list.map(x=>`<span class="item">#${x.id} · ${esc(x.camera_name||x.name)} · ${esc(x.area||'ไม่ระบุพื้นที่')} ${x.uid?`· UID ${esc(x.uid)}`:''}</span>`).join('')}</td><td><a class="open" href="camera-management.html?search=${encodeURIComponent(active==='uid'?value:(list[0].uid||list[0].camera_name||list[0].name||''))}">เปิดจัดการ →</a></td></tr>`).join(''):'<tr><td colspan="4" class="empty">ไม่พบข้อมูลซ้ำในหมวดนี้</td></tr>';}
-    async function load(){const rows=[];for(let from=0;;from+=500){const r=await db.from('cctv_locations').select('id,camera_name,name,uid,area,lat,lng').order('id').range(from,from+499);if(r.error)throw r.error;rows.push(...(r.data||[]));if((r.data||[]).length<500)break}items=rows;render()}
-    function start(event){const session=event.detail||window.cctvSession;if(!session)return;if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){document.body.innerHTML='<main class="wrap"><section class="panel"><h1>ไม่มีสิทธิ์เข้าถึง</h1><p>หน้านี้สำหรับ ADMIN เพื่อทบทวนข้อมูลซ้ำก่อนดำเนินการเท่านั้น</p></section></main>';return}db=session.client;document.querySelectorAll('[data-kind]').forEach(button=>button.onclick=()=>{active=button.dataset.kind;document.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===button));render()});load().catch(error=>$('notice').textContent='ตรวจข้อมูลไม่สำเร็จ: '+error.message)}
-    if(window.cctvSession)start({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',start,{once:true});
+    let loading=false,started=false;
+    const waitFor=(promise,ms=20000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('หมดเวลารอข้อมูลจาก Supabase กรุณาลองใหม่')),ms))]);
+    function showLoadError(error){
+      $('notice').innerHTML='ตรวจข้อมูลไม่สำเร็จ: '+esc(error.message||error)+' <button type="button" id="retryLoad">ลองใหม่</button>';
+      $('retryLoad')?.addEventListener('click',()=>load());
+    }
+    async function load(){
+      if(loading||!db)return;
+      loading=true;
+      $('notice').textContent='กำลังตรวจข้อมูลกล้องจาก Supabase…';
+      try{
+        const rows=[];
+        for(let from=0;;from+=500){
+          const r=await waitFor(db.from('cctv_locations').select('id,camera_name,name,uid,area,lat,lng').order('id').range(from,from+499));
+          if(r.error)throw r.error;
+          const page=r.data||[];
+          rows.push(...page);
+          if(page.length<500)break;
+        }
+        items=rows;
+        $('notice').textContent='ตรวจสอบข้อมูล '+items.length.toLocaleString()+' รายการแล้ว';
+        render();
+      }catch(error){showLoadError(error)}finally{loading=false}
+    }
+    function start(event){
+      if(started)return true;
+      const session=event?.detail||window.cctvSession;
+      if(!session?.client)return false;
+      if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){
+        document.body.innerHTML='<main class="wrap"><section class="panel"><h1>ไม่มีสิทธิ์เข้าถึง</h1><p>บัญชีนี้ไม่มีสิทธิ์เปิดหน้าตรวจข้อมูลซ้ำ</p></section></main>';
+        return true;
+      }
+      started=true; db=session.client;
+      document.querySelectorAll('[data-kind]').forEach(button=>button.onclick=()=>{active=button.dataset.kind;document.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===button));render()});
+      load(); return true;
+    }
+    function boot(){
+      if(start({detail:window.cctvSession}))return;
+      let attempts=0;
+      const timer=setInterval(()=>{if(start({detail:window.cctvSession})||++attempts>=30){clearInterval(timer);if(!started)$('notice').textContent='ไม่พบข้อมูลการเข้าสู่ระบบ กรุณากลับไปเข้าสู่ระบบใหม่'}},500);
+      window.addEventListener('cctv-auth-ready',start,{once:true});
+    }
+    boot();
   })();
   </script>
 </body></html>
