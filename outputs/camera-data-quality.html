@@ -47,22 +47,47 @@
     async function load(){
       if(!db||loading)return;
       loading=true;
-      const notice=$('notice');
+      const notice=$('notice'),fields='id,camera_name,name,uid,camera_type,ownership_category,project,area,status,lat,lng',pageSize=250;
       notice.classList.remove('error');
+      notice.textContent='กำลังเริ่มตรวจสอบข้อมูลกล้อง…';
       try{
-        const all=[],pageSize=250;
-        for(let from=0;;from+=pageSize){
-          notice.textContent=`กำลังตรวจสอบข้อมูลกล้อง ${all.length.toLocaleString()} รายการ…`;
-          const r=await waitFor(db.from('cctv_locations').select('id,camera_name,name,uid,camera_type,ownership_category,project,area,status,lat,lng').order('id').range(from,from+pageSize-1));
-          if(r.error)throw r.error;
-          const batch=r.data||[];
-          all.push(...batch);
-          if(batch.length<pageSize)break;
-          await new Promise(done=>setTimeout(done,45));
+        const first=await waitFor(db.from('cctv_locations').select(fields,{count:'exact'}).order('id').range(0,pageSize-1));
+        if(first.error)throw first.error;
+        const total=Number(first.count)||((first.data||[]).length);
+        const pages=[]; pages[0]=first.data||[];
+        const update=()=>{
+          items=pages.flatMap(part=>part||[]);
+          render();
+          notice.textContent=`กำลังตรวจสอบข้อมูลกล้อง ${items.length.toLocaleString()} / ${total.toLocaleString()} รายการ…`;
+        };
+        update();
+        const offsets=[];
+        for(let from=pageSize;from<total;from+=pageSize)offsets.push(from);
+        let completed=pages[0].length,failed=0;
+        async function worker(){
+          while(offsets.length){
+            const from=offsets.shift(),index=Math.floor(from/pageSize);
+            try{
+              const r=await waitFor(db.from('cctv_locations').select(fields).order('id').range(from,from+pageSize-1));
+              if(r.error)throw r.error;
+              pages[index]=r.data||[];
+              completed+=pages[index].length;
+              update();
+            }catch(error){
+              failed++;
+              pages[index]=[];
+              notice.textContent=`กำลังตรวจสอบข้อมูล ${completed.toLocaleString()} / ${total.toLocaleString()} รายการ… (ข้ามชุดที่ตอบช้า ${failed} ชุด)`;
+            }
+          }
         }
-        items=all;
+        await Promise.all(Array.from({length:Math.min(4,offsets.length)},worker));
+        items=pages.flatMap(part=>part||[]);
         render();
-        notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;
+        if(failed){
+          notice.classList.add('error');
+          notice.innerHTML=`ตรวจสอบได้ ${items.length.toLocaleString()} / ${total.toLocaleString()} รายการ · มี ${failed} ชุดตอบช้า <button type="button" class="tab" id="qualityRetry">ตรวจสอบใหม่</button>`;
+          $('qualityRetry')?.addEventListener('click',()=>load());
+        }else notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;
       }catch(error){showLoadError(error)}finally{loading=false}
     }
     function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return false;db=session.client;if(!started){started=true;document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>select(button.dataset.tab))}load();return true}
