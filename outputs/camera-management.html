@@ -340,25 +340,85 @@
         background: #f59e0b;
       }
       @media (max-width: 680px) {
+        body {
+          font-size: 14px;
+        }
+        .top {
+          padding: 9px 12px;
+        }
+        .top h1 {
+          font-size: 17px;
+        }
+        .top p,
+        #user {
+          font-size: 11px;
+        }
+        .wrap {
+          margin: 10px auto;
+          padding: 0 8px;
+        }
+        .bar {
+          margin-bottom: 9px;
+        }
+        .back,
+        .btn {
+          padding: 8px 10px;
+          font-size: 12px;
+        }
+        .panel {
+          padding: 11px;
+          border-radius: 10px;
+          margin-bottom: 10px;
+        }
+        .panel h2 {
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+        .filters {
+          gap: 6px;
+          margin-bottom: 9px;
+        }
+        .filters input,
+        .filters select {
+          padding: 7px 8px;
+          font-size: 12px;
+        }
         .location-card {
           grid-template-columns: 1fr;
-          padding: 12px;
-          gap: 11px;
+          padding: 9px;
+          gap: 7px;
         }
         .location-photo,
         .location-photo img {
-          min-height: 175px;
+          display: none;
         }
         .location-title {
-          font-size: 17px;
+          font-size: 15px;
+          line-height: 1.28;
         }
+        .location-meta { margin: 3px 0 7px; font-size: 11px; }
+        .location-count { padding: 4px 7px; font-size: 10px; }
+        .camera-unit-list { gap: 5px; }
+        .camera-unit { border-left-width: 4px; border-radius: 7px; padding: 6px 7px; }
         .camera-unit-main {
           align-items: flex-start;
+          gap: 6px;
         }
+        .camera-unit-name,.camera-unit-id { font-size: 12px; line-height: 1.35; }
+        .camera-unit-type { margin-right: 3px; padding: 1px 5px; font-size: 9px; }
         .camera-unit-detail {
           display: grid;
-          gap: 3px;
+          grid-template-columns: repeat(2,minmax(0,1fr));
+          gap: 2px 8px;
+          margin-top: 4px;
+          font-size: 10px;
+          line-height: 1.35;
         }
+        .camera-unit-actions { gap: 3px; }
+        .camera-unit-actions .btn.small { padding: 4px 6px; font-size: 10px; }
+        .location-add { margin-top: 7px; padding: 6px 8px; font-size: 11px; }
+        .pager { padding-top: 9px; font-size: 11px; }
+        .pager button { min-width: 29px; height: 29px; font-size: 11px; }
       }
       .summary-grid {
         display: grid;
