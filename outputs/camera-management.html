@@ -227,6 +227,139 @@
       .camera-credentials small {
         color: #475569;
       }
+      .location-cell {
+        padding: 0;
+        background: #f8fafc;
+      }
+      .location-card {
+        display: grid;
+        grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+        gap: 16px;
+        padding: 16px;
+        background: linear-gradient(135deg, #ffffff, #f8fbff);
+      }
+      .location-photo {
+        min-height: 145px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #bfdbfe;
+        background: #e0f2fe;
+        display: grid;
+        place-items: center;
+        color: #0f5b99;
+        font-size: 42px;
+      }
+      .location-photo img {
+        width: 100%;
+        height: 100%;
+        min-height: 145px;
+        object-fit: cover;
+        display: block;
+      }
+      .location-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .location-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 19px;
+        line-height: 1.35;
+      }
+      .location-meta {
+        margin: 5px 0 11px;
+        color: #475569;
+        font-size: 13px;
+      }
+      .location-count {
+        flex: 0 0 auto;
+        border-radius: 99px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-weight: 800;
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+      .camera-unit-list {
+        display: grid;
+        gap: 8px;
+      }
+      .camera-unit {
+        --unit-color: #64748b;
+        --unit-soft: #f1f5f9;
+        border-left: 6px solid var(--unit-color);
+        border-radius: 10px;
+        background: var(--unit-soft);
+        padding: 9px 11px;
+      }
+      .camera-unit-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .camera-unit-name {
+        color: #0f172a;
+        font-weight: 800;
+      }
+      .camera-unit-id {
+        color: #0f172a;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+      .camera-unit-type {
+        display: inline-block;
+        margin-right: 6px;
+        border-radius: 99px;
+        background: var(--unit-color);
+        color: #fff;
+        padding: 2px 7px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+      .camera-unit-detail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px 14px;
+        margin-top: 6px;
+        color: #334155;
+        font-size: 12px;
+      }
+      .camera-unit-detail b {
+        color: #1e3a8a;
+      }
+      .camera-unit-actions {
+        display: flex;
+        gap: 5px;
+        flex: 0 0 auto;
+      }
+      .location-add {
+        margin-top: 10px;
+        background: #f59e0b;
+      }
+      @media (max-width: 680px) {
+        .location-card {
+          grid-template-columns: 1fr;
+          padding: 12px;
+          gap: 11px;
+        }
+        .location-photo,
+        .location-photo img {
+          min-height: 175px;
+        }
+        .location-title {
+          font-size: 17px;
+        }
+        .camera-unit-main {
+          align-items: flex-start;
+        }
+        .camera-unit-detail {
+          display: grid;
+          gap: 3px;
+        }
+      }
       .summary-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -547,7 +680,7 @@
           put("ownerSummary", items, (x) => x.ownership_category, "ไม่ระบุ");
           put("areaSummary", items, (x) => x.area, "ไม่ระบุ");
         }
-        function render() {
+        function renderLegacy() {
           const q = $("search").value.toLowerCase(),
             station = $("filterOwner").value,
             t = $("filterType").value,
@@ -629,6 +762,163 @@
                 document
                   .querySelector(".tablewrap")
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }),
+          );
+        }
+        function render() {
+          const q = $("search").value.toLowerCase();
+          const station = $("filterOwner").value;
+          const selectedType = $("filterType").value;
+          const selectedStatus = $("filterStatus").value;
+          const filtered = items.filter(
+            (camera) =>
+              (!q ||
+                [
+                  camera.camera_name,
+                  camera.uid,
+                  camera.area,
+                  camera.ownership_category,
+                  cameraUser(camera),
+                  cameraPassword(camera),
+                ].some((value) =>
+                  String(value || "")
+                    .toLowerCase()
+                    .includes(q),
+                )) &&
+              (!station || String(camera.area || "") === station) &&
+              (!selectedType || typeName(camera) === selectedType) &&
+              (!selectedStatus || camera.status === selectedStatus),
+          );
+
+          const groupMap = new Map();
+          filtered.forEach((camera) => {
+            const lat = Number(camera.lat);
+            const lng = Number(camera.lng);
+            const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
+            const areaKey = String(camera.area || "")
+              .trim()
+              .toLowerCase();
+            const nameKey = String(camera.camera_name || "")
+              .trim()
+              .toLowerCase();
+            const key = hasCoordinates
+              ? `${areaKey}|${lat.toFixed(6)}|${lng.toFixed(6)}`
+              : `${areaKey}|${nameKey}`;
+            if (!groupMap.has(key)) groupMap.set(key, { key, cameras: [] });
+            groupMap.get(key).cameras.push(camera);
+          });
+          const groups = Array.from(groupMap.values()).sort((a, b) => {
+            const aName = a.cameras[0]?.camera_name || "";
+            const bName = b.cameras[0]?.camera_name || "";
+            return aName.localeCompare(bName, "th");
+          });
+          const pageSize = Number($("pageSize").value) || 50;
+          const totalPages = Math.max(1, Math.ceil(groups.length / pageSize));
+          if (page > totalPages) page = totalPages;
+          const start = (page - 1) * pageSize;
+          const pageGroups = groups.slice(start, start + pageSize);
+          const typePalette = {
+            "WI-FI": { color: "#16a34a", soft: "#dcfce7" },
+            "4G": { color: "#0891b2", soft: "#cffafe" },
+            "ยุทธวิธี": { color: "#dc2626", soft: "#fee2e2" },
+          };
+          const styleFor = (camera) => {
+            const type = typeName(camera);
+            const category = categories.find(
+              (item) => String(item.id) === String(camera.camera_category_id),
+            );
+            const customColor = String(category?.marker_color || "");
+            const color = /^#[0-9a-f]{3,8}$/i.test(customColor)
+              ? customColor
+              : typePalette[type]?.color || "#64748b";
+            return { type, color, soft: typePalette[type]?.soft || "#f1f5f9" };
+          };
+          const unitCard = (camera, showName) => {
+            const style = styleFor(camera);
+            const uid = camera.uid || "ไม่ระบุ UID/IP";
+            return `<div class="camera-unit" style="--unit-color:${style.color};--unit-soft:${style.soft}">
+              <div class="camera-unit-main">
+                <div>
+                  <span class="camera-unit-type">${esc(style.type)}</span>
+                  <span class="camera-unit-id">UID/IP: ${esc(uid)}</span>
+                  ${showName ? `<div class="camera-unit-name">${esc(camera.camera_name || "ไม่ระบุชื่อกล้อง")}</div>` : ""}
+                </div>
+                ${canEdit(camera) ? `<span class="camera-unit-actions"><button class="btn small secondary" data-edit="${camera.id}" title="แก้ไขกล้อง"><i class="fa-solid fa-pen"></i></button><button class="btn small" style="background:#dc2626" data-delete="${camera.id}" title="ลบกล้อง"><i class="fa-solid fa-trash"></i></button></span>` : ""}
+              </div>
+              <div class="camera-unit-detail">
+                <span><b>User:</b> ${esc(cameraUser(camera) || "—")}</span>
+                <span><b>รหัสผ่าน:</b> ${esc(cameraPassword(camera) || "—")}</span>
+                <span><b>สถานะ:</b> ${esc(camera.status || "ไม่ระบุ")}</span>
+                <span><b>โครงการ:</b> ${esc(camera.ownership_category || "ไม่ระบุ")}</span>
+              </div>
+            </div>`;
+          };
+          $("rows").innerHTML = pageGroups.length
+            ? pageGroups
+                .map((group, index) => {
+                  const cameras = group.cameras;
+                  const names = [...new Set(cameras.map((camera) => camera.camera_name).filter(Boolean))];
+                  const title = names.length === 1 ? names[0] : "จุดติดตั้งเดียวกัน";
+                  const first = cameras[0];
+                  const photo = cameras.find((camera) => camera.photo_url)?.photo_url;
+                  const coordinates =
+                    first.lat !== null && first.lat !== undefined && first.lng !== null && first.lng !== undefined
+                      ? `${first.lat}, ${first.lng}`
+                      : "ยังไม่ระบุพิกัด";
+                  return `<tr><td colspan="8" class="location-cell"><article class="location-card">
+                    <div class="location-photo">${photo ? `<a href="${esc(photo)}" target="_blank" rel="noopener"><img src="${esc(photo)}" alt="ภาพจุดติดตั้ง"></a>` : '<i class="fa-solid fa-video"></i>'}</div>
+                    <div>
+                      <div class="location-head"><div><h3 class="location-title">${esc(title || "ไม่ระบุชื่อจุดติดตั้ง")}</h3><div class="location-meta"><i class="fa-solid fa-location-dot"></i> ${esc(first.area || "ไม่ระบุพื้นที่")} · พิกัด ${esc(coordinates)}</div></div><span class="location-count">${cameras.length.toLocaleString()} กล้อง</span></div>
+                      <div class="camera-unit-list">${cameras.map((camera) => unitCard(camera, names.length > 1)).join("")}</div>
+                      ${canEdit() ? `<button class="btn small location-add" data-add-group="${index}"><i class="fa-solid fa-plus-square"></i> เพิ่มกล้องในจุดนี้</button>` : ""}
+                    </div>
+                  </article></td></tr>`;
+                })
+                .join("")
+            : '<tr><td colspan="8" class="empty">ไม่พบข้อมูล</td></tr>';
+          document.querySelectorAll("[data-edit]").forEach(
+            (button) => (button.onclick = () => openEdit(button.dataset.edit)),
+          );
+          document.querySelectorAll("[data-delete]").forEach(
+            (button) => (button.onclick = () => removeCamera(button.dataset.delete)),
+          );
+          document.querySelectorAll("[data-add-group]").forEach(
+            (button) =>
+              (button.onclick = () => {
+                const source = pageGroups[Number(button.dataset.addGroup)]?.cameras?.[0];
+                if (!source) return;
+                clear();
+                $("cameraName").value = source.camera_name || "";
+                $("area").value = source.area || "";
+                $("lat").value = source.lat ?? "";
+                $("lng").value = source.lng ?? "";
+                $("ownershipCategory").value = source.ownership_category || "";
+                $("formPanel").classList.remove("hidden");
+                $("formPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+              }),
+          );
+          $("range").textContent = groups.length
+            ? `แสดงจุดติดตั้ง ${(start + 1).toLocaleString()}–${Math.min(start + pageSize, groups.length).toLocaleString()} จาก ${groups.length.toLocaleString()} จุด · กล้อง ${filtered.length.toLocaleString()} ตัว`
+            : "ไม่พบข้อมูล";
+          const pageNumbers = [];
+          const addPage = (number) => {
+            if (number >= 1 && number <= totalPages && !pageNumbers.includes(number)) pageNumbers.push(number);
+          };
+          [1, 2, page - 1, page, page + 1, totalPages - 1, totalPages].forEach(addPage);
+          pageNumbers.sort((a, b) => a - b);
+          let previous = 0;
+          $("pages").innerHTML =
+            `<button type="button" data-page="${page - 1}" ${page === 1 ? "disabled" : ""}>‹</button>` +
+            pageNumbers
+              .map((number) => `${number - previous > 1 ? "<span>…</span>" : ""}<button type="button" data-page="${number}" class="${number === page ? "active" : ""}">${number}</button>${((previous = number), "")}`)
+              .join("") +
+            `<button type="button" data-page="${page + 1}" ${page === totalPages ? "disabled" : ""}>›</button>`;
+          document.querySelectorAll("[data-page]").forEach(
+            (button) =>
+              (button.onclick = () => {
+                page = Number(button.dataset.page);
+                render();
+                document.querySelector(".tablewrap")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }),
           );
         }
