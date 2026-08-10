@@ -44,7 +44,27 @@
     let loading=false,started=false;
     const waitFor=async(promise,ms=20000)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('หมดเวลารอข้อมูล กรุณาลองใหม่')),ms)})])}finally{clearTimeout(timer)}};
     function showLoadError(error){const notice=$('notice');notice.classList.add('error');notice.innerHTML=`ตรวจสอบข้อมูลไม่สำเร็จ: ${esc(error.message||'ไม่สามารถเชื่อมต่อฐานข้อมูลได้')} <button type="button" class="tab" id="qualityRetry">ลองใหม่</button>`;$('qualityRetry')?.addEventListener('click',()=>load())}
-    async function load(){if(!db||loading)return;loading=true;const notice=$('notice');notice.classList.remove('error');notice.textContent='กำลังตรวจสอบข้อมูลจาก Supabase...';try{const all=[];for(let from=0;;from+=500){const r=await waitFor(db.from('cctv_locations').select('*').order('camera_name').range(from,from+499));if(r.error)throw r.error;const batch=r.data||[];all.push(...batch);if(batch.length<500)break;await new Promise(done=>setTimeout(done,30))}items=all;render();notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;}catch(error){showLoadError(error)}finally{loading=false}}
+    async function load(){
+      if(!db||loading)return;
+      loading=true;
+      const notice=$('notice');
+      notice.classList.remove('error');
+      try{
+        const all=[],pageSize=250;
+        for(let from=0;;from+=pageSize){
+          notice.textContent=`กำลังตรวจสอบข้อมูลกล้อง ${all.length.toLocaleString()} รายการ…`;
+          const r=await waitFor(db.from('cctv_locations').select('id,camera_name,name,uid,camera_type,ownership_category,project,area,status,lat,lng').order('id').range(from,from+pageSize-1));
+          if(r.error)throw r.error;
+          const batch=r.data||[];
+          all.push(...batch);
+          if(batch.length<pageSize)break;
+          await new Promise(done=>setTimeout(done,45));
+        }
+        items=all;
+        render();
+        notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;
+      }catch(error){showLoadError(error)}finally{loading=false}
+    }
     function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return false;db=session.client;if(!started){started=true;document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>select(button.dataset.tab))}load();return true}
     function boot(){if(start({detail:window.cctvSession}))return;const onReady=event=>{if(start(event))window.removeEventListener('cctv-auth-ready',onReady)};window.addEventListener('cctv-auth-ready',onReady);let attempts=0;const poll=setInterval(()=>{attempts++;if(start({detail:window.cctvSession})||attempts>=30){clearInterval(poll);window.removeEventListener('cctv-auth-ready',onReady);if(!window.cctvSession){const notice=$('notice');notice.classList.add('error');notice.textContent='ไม่พบข้อมูลการเข้าสู่ระบบ กรุณารีเฟรชและเข้าสู่ระบบใหม่'}}},500)}
     boot();
