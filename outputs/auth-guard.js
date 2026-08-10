@@ -34,6 +34,60 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', prioritizeTheme, { once: true });
   else prioritizeTheme();
+
+  // Every Leaflet screen gets the same two basemaps.  The pages still create
+  // their normal OpenStreetMap layer themselves; this small adapter detects
+  // that layer and adds a compact control for switching to satellite imagery.
+  // Keeping it here prevents map modules from drifting into different UI.
+  function installSharedMapLayers() {
+    const leaflet = window.L;
+    if (!leaflet || leaflet.__cctvSharedMapLayers) return Boolean(leaflet);
+    leaflet.__cctvSharedMapLayers = true;
+
+    let newestMap = null;
+    const createMap = leaflet.map;
+    const createTileLayer = leaflet.tileLayer;
+
+    leaflet.map = function () {
+      newestMap = createMap.apply(this, arguments);
+      return newestMap;
+    };
+
+    leaflet.tileLayer = function (url, options) {
+      const roadLayer = createTileLayer.call(this, url, options);
+      const isOsmRoad = typeof url === 'string' && /tile\.openstreetmap\.org/i.test(url);
+      if (isOsmRoad && newestMap && !newestMap.__cctvBasemapControl && leaflet.control?.layers) {
+        const satelliteLayer = createTileLayer.call(this,
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 19,
+            attribution: '&copy; Esri, Maxar, Earthstar Geographics and the GIS User Community'
+          });
+        const selector = leaflet.control.layers(
+          { 'แผนที่ปกติ': roadLayer, 'ภาพถ่ายดาวเทียม': satelliteLayer },
+          null,
+          { position: 'topright', collapsed: true }
+        );
+        selector.addTo(newestMap);
+        newestMap.__cctvBasemapControl = selector;
+      }
+      return roadLayer;
+    };
+
+    if (!document.getElementById('shared-map-layer-style')) {
+      const style = document.createElement('style');
+      style.id = 'shared-map-layer-style';
+      style.textContent = '.leaflet-control-layers{border:0!important;border-radius:12px!important;box-shadow:0 5px 16px #07112655!important;font-family:Sarabun,system-ui,sans-serif!important}.leaflet-control-layers-expanded{padding:8px 10px!important;font-size:13px!important;line-height:1.65!important}.leaflet-control-layers-toggle{width:38px!important;height:38px!important;border-radius:12px!important;background-color:#fff!important;background-size:23px 23px!important}';
+      document.head.appendChild(style);
+    }
+    return true;
+  }
+
+  let sharedMapLayerAttempts = 0;
+  const sharedMapLayerTimer = setInterval(() => {
+    if (installSharedMapLayers() || ++sharedMapLayerAttempts > 120) clearInterval(sharedMapLayerTimer);
+  }, 80);
+
   // The legacy command-center route redirects to home.html above. Every
   // active module therefore uses the same protected loading behavior.
   const isDashboard = false;
