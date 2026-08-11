@@ -87,7 +87,9 @@ async function loadAdministrativeBoundaries(){
       }
       const setOptions=(id,values,label)=>{$(id).innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')};
       function renderLegend(source=items){const rows=categories.map(c=>{const count=source.filter(x=>typeOf(x)===c.name).length;return `<div class="legend-row"><i class="dot" style="background:${esc(c.marker_color||'#64748b')}"></i><span>${esc(c.name)}</span><b style="margin-left:auto;color:#056a9f">${count.toLocaleString()}</b></div>`}).join('');$('legend').innerHTML=`<h3>สัญลักษณ์ประเภทกล้อง</h3>${rows}`}
-      const stationOf=x=>x.station||x.area||'ไม่ระบุสถานี / พื้นที่';
+      // `area` is the canonical location field in cctv_locations.
+      // Do not read the legacy `station` field: it is not present in the current schema.
+      const stationOf=x=>x.area||'ไม่ระบุสถานี / พื้นที่';
       const valueList=(rows,read)=>[...new Set(rows.map(read).map(value=>String(value??'').trim()).filter(Boolean))];
       const sharedValue=(rows,read)=>{const values=valueList(rows,read);return values.length===1?values[0]:values.length?values.join(' / '):'–'};
       const safeUid=x=>{const raw=String(x.uid||'').trim();return usesDashFields(x)?'-':(raw||'-')};
