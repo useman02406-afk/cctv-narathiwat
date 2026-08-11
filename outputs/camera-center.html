@@ -34,9 +34,10 @@
     @media(max-width:650px){body.camera-map-active .stage{height:calc(100vh - 170px)!important;min-height:420px!important}body.camera-map-active .stage iframe{min-height:420px!important}}
     body.camera-map-fullscreen{overflow:hidden!important}
     body.camera-map-fullscreen .top,body.camera-map-fullscreen .overview,body.camera-map-fullscreen .tabs{display:none!important}
-    body.camera-map-fullscreen .wrap{display:block!important;max-width:none!important;margin:0!important;padding:0!important;height:100dvh!important}
-    body.camera-map-fullscreen .stage{position:fixed!important;inset:0!important;z-index:2147482000!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;border:0!important;border-radius:0!important;overflow:hidden!important}
-    body.camera-map-fullscreen .stage iframe{display:block!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important}
+    body.camera-map-fullscreen .wrap{display:block!important;max-width:none!important;margin:0!important;padding:0!important;height:100vh!important}
+    body.camera-map-fullscreen .stage{position:fixed!important;inset:0!important;z-index:2147482000!important;width:100vw!important;height:100vh!important;min-height:100vh!important;border:0!important;border-radius:0!important;overflow:hidden!important}
+    body.camera-map-fullscreen .stage iframe{display:block!important;width:100vw!important;height:100vh!important;min-height:100vh!important}
+    @supports(height:100dvh){body.camera-map-fullscreen .wrap,body.camera-map-fullscreen .stage,body.camera-map-fullscreen .stage iframe{height:100dvh!important;min-height:100dvh!important}}
   </style>
   <script>
     (()=>{
