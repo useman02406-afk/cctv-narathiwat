@@ -88,9 +88,84 @@
           notice.innerHTML=`ตรวจสอบได้ ${items.length.toLocaleString()} / ${total.toLocaleString()} รายการ · มี ${failed} ชุดตอบช้า <button type="button" class="tab" id="qualityRetry">ตรวจสอบใหม่</button>`;
           $('qualityRetry')?.addEventListener('click',()=>load());
         }else notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;
-      }catch(error){showLoadError(error)}finally{loading=false}
+      }catch(error){
+        showLoadError(error);
+        const retry=$('qualityRetry');
+        if(retry){
+          const cleanRetry=retry.cloneNode(true);
+          retry.replaceWith(cleanRetry);
+          cleanRetry.addEventListener('click',loadStable);
+        }
+      }finally{loading=false}
     }
-    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return false;db=session.client;if(!started){started=true;document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>select(button.dataset.tab))}load();return true}
+    // Stable cursor-based loader. It requests one small page at a time and aborts a
+    // stalled request before retrying, preventing the half-finished state caused by
+    // multiple timed-out page requests remaining open in the browser.
+    async function loadStable(){
+      if(!db||loading)return;
+      loading=true;
+      const notice=$('notice');
+      const fields='id,camera_name,name,uid,camera_type,ownership_category,project,area,status,lat,lng';
+      const pageSize=250;
+      async function query(factory,timeout=18000){
+        const controller=new AbortController();
+        const timer=setTimeout(()=>controller.abort(),timeout);
+        try{
+          let request=factory();
+          if(typeof request.abortSignal==='function')request=request.abortSignal(controller.signal);
+          const response=await request;
+          if(response.error)throw response.error;
+          return response;
+        }catch(error){
+          if(controller.signal.aborted)throw new Error('หมดเวลารอข้อมูล');
+          throw error;
+        }finally{clearTimeout(timer)}
+      }
+      try{
+        notice.classList.remove('error');
+        notice.textContent='กำลังเตรียมตรวจคุณภาพข้อมูลกล้อง…';
+        const counted=await query(()=>db.from('cctv_locations').select('id',{count:'exact',head:true}));
+        const total=Number(counted.count)||0;
+        let lastId='',retries=0;
+        items=[];
+        while(true){
+          notice.textContent=`กำลังตรวจสอบข้อมูลกล้อง ${items.length.toLocaleString()} / ${total.toLocaleString()} รายการ…`;
+          let response=null;
+          for(retries=0;retries<3;retries++){
+            try{
+              response=await query(()=>{
+                let request=db.from('cctv_locations').select(fields).order('id',{ascending:true}).limit(pageSize);
+                if(lastId)request=request.gt('id',lastId);
+                return request;
+              });
+              break;
+            }catch(error){
+              if(retries===2)throw new Error(`อ่านข้อมูลต่อไม่ได้หลัง ${items.length.toLocaleString()} รายการ: ${error.message}`);
+              notice.textContent=`การเชื่อมต่อช้า กำลังลองใหม่ (${retries+1}/3)…`;
+              await new Promise(done=>setTimeout(done,700*(retries+1)));
+            }
+          }
+          const batch=response?.data||[];
+          if(!batch.length)break;
+          items.push(...batch);
+          lastId=batch[batch.length-1].id;
+          render();
+          if(batch.length<pageSize)break;
+          await new Promise(done=>setTimeout(done,25));
+        }
+        render();
+        notice.textContent=`ตรวจสอบล่าสุด ${new Date().toLocaleString('th-TH')} · กล้อง ${items.length.toLocaleString()} รายการ`;
+      }catch(error){
+        showLoadError(error);
+        const retry=$('qualityRetry');
+        if(retry){
+          const cleanRetry=retry.cloneNode(true);
+          retry.replaceWith(cleanRetry);
+          cleanRetry.addEventListener('click',loadStable);
+        }
+      }finally{loading=false}
+    }
+    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return false;db=session.client;if(!started){started=true;document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>select(button.dataset.tab))}loadStable();return true}
     function boot(){if(start({detail:window.cctvSession}))return;const onReady=event=>{if(start(event))window.removeEventListener('cctv-auth-ready',onReady)};window.addEventListener('cctv-auth-ready',onReady);let attempts=0;const poll=setInterval(()=>{attempts++;if(start({detail:window.cctvSession})||attempts>=30){clearInterval(poll);window.removeEventListener('cctv-auth-ready',onReady);if(!window.cctvSession){const notice=$('notice');notice.classList.add('error');notice.textContent='ไม่พบข้อมูลการเข้าสู่ระบบ กรุณารีเฟรชและเข้าสู่ระบบใหม่'}}},500)}
     boot();
   })();
