@@ -25,7 +25,6 @@
     const csv=value=>'"'+String(value??'').replaceAll('"','""')+'"';
     const configs=[
       ['cameras','กล้อง CCTV','fa-video','cctv_locations','cctv','id,uid,camera_name,name,camera_type,ownership_category,project,area,lat,lng,status,created_at,updated_at'],
-      ['cameraquality','ตรวจคุณภาพข้อมูลกล้อง','fa-shield-halved',null,'quality','id,uid,camera_name,name,camera_type,ownership_category,area,status'],
       ['economic','พื้นที่เศรษฐกิจ','fa-building-columns','economic_data','economy','id,name,type,risk_level,score,cctv'],
       ['incidents','บันทึกเหตุการณ์','fa-triangle-exclamation','incidents','security','id,case_no,incident_category,incident_subcategory,incident_type,location,status,occurred_at'],
       ['riskareas','จุดเสี่ยง / พื้นที่เฝ้าระวัง','fa-draw-polygon','risk_areas','security','id,name,area_code,risk_category,risk_level,zone_kind,status,updated_at'],
@@ -45,12 +44,9 @@
       return links[view]||'home.html';
     }
     function draw(){
-      const total=configs.filter(([key])=>key!=='cameraquality').reduce((sum,[key])=>sum+(sets[key]||[]).length,0);
-      const pendingSubtype=(sets.cameras||[]).filter(camera=>camera.camera_type==='รอระบุประเภทย่อย').length;
-      const unknownStatus=(sets.cameras||[]).filter(camera=>camera.status==='ไม่ระบุ').length;
-      const qualityHint=`รอระบุประเภทย่อย ${pendingSubtype.toLocaleString('th-TH')} · สถานะไม่ระบุ ${unknownStatus.toLocaleString('th-TH')}`;
-      const openLink=view=>view==='quality'?'<a class="btn map" href="camera-data-quality.html"><i class="fa-solid fa-shield-halved"></i> ตรวจสอบ</a>':`<a class="btn map" href="${mapLink(view)}"><i class="fa-solid fa-map"></i> แผนที่</a>`;
-      $('cards').innerHTML=configs.map(([key,label,icon])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">${key==='cameraquality'?qualityHint:'รายการในระบบ'}</div></article>`).join('');
+      const total=configs.reduce((sum,[key])=>sum+(sets[key]||[]).length,0);
+      const openLink=view=>`<a class="btn map" href="${mapLink(view)}"><i class="fa-solid fa-map"></i> แผนที่</a>`;
+      $('cards').innerHTML=configs.map(([key,label,icon])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">รายการในระบบ</div></article>`).join('');
       $('rows').innerHTML=configs.map(([key,label,,,view])=>`<tr><td>${label}</td><td>${count(key)}</td><td><button class="btn" data-export="${key}">CSV</button> ${openLink(view)}</td></tr>`).join('');
       document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>download('report-'+button.dataset.export,sets[button.dataset.export]||[]));
       $('exportAll').onclick=()=>download('command-center-summary',configs.map(([key,label])=>({module:label,total:(sets[key]||[]).length,exported_at:new Date().toISOString()})));
@@ -71,10 +67,6 @@
       sets={};$('notice').className='notice';const failed=[];
       for(let index=0;index<configs.length;index++){
         const row=configs[index],key=row[0],label=row[1],table=row[3],columns=row[5];
-        if(key==='cameraquality'){
-          sets[key]=(sets.cameras||[]).filter(camera=>camera.camera_type==='รอระบุประเภทย่อย'||camera.status==='ไม่ระบุ');
-          continue;
-        }
         $('notice').textContent=`กำลังโหลด ${label} (${index+1}/${configs.length})…`;
         try{sets[key]=await readInQueue(table,columns)}catch(error){console.warn('Report module skipped:',key,error);sets[key]=[];failed.push(label)}
       }

@@ -3,66 +3,47 @@
 <head>
   <script>if(window.top===window.self)location.replace('camera-center.html#camera-duplicate-review.html'+location.search)</script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ตรวจสอบข้อมูลกล้องซ้ำ | CCTV POLICE9</title>
+  <title>ตรวจสอบข้อมูลกล้อง | ศูนย์ CCTV</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-guard.js"></script>
   <style>
-    :root{--ink:#142333;--blue:#1e5ed8;--line:#d9e4ed;--bg:#eef4f8;--warn:#a85b00}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Thai',sans-serif}.top{padding:18px clamp(18px,4vw,48px);background:#12346b;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px}.top h1{margin:0;font-size:22px}.top p{margin:3px 0 0;color:#d8e9ff;font-size:13px}.top a{color:#fff;text-decoration:none;border:1px solid #91add1;border-radius:8px;padding:8px 11px}.wrap{max-width:1340px;margin:22px auto;padding:0 18px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}.card span{font-size:13px;color:#627488}.card b{display:block;font-size:28px;margin-top:4px;color:var(--warn)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs button{border:1px solid #bfd0df;border-radius:8px;padding:8px 11px;background:#fff;color:#27435c;font:600 13px inherit;cursor:pointer}.tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.notice{font-size:13px;color:#5c7084;margin:0 0 12px}.table{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;background:#eef5fb;color:#53687d}th,td{border-bottom:1px solid #e0e9ef;padding:11px;vertical-align:top}.key{font-weight:700;color:#183f78;word-break:break-word}.count{display:inline-block;border-radius:99px;padding:3px 8px;background:#fff1dd;color:#9a5700;font-weight:700}.item{display:block;margin-bottom:3px}.item:last-child{margin:0}.open{color:#1e5ed8;text-decoration:none;font-weight:700;white-space:nowrap}.empty{text-align:center;color:#627488;padding:28px}@media(max-width:720px){.top{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr}.wrap{padding:0 10px}}
+    :root{--ink:#142333;--blue:#1769d1;--line:#d9e4ed;--bg:#eef4f8;--warn:#a85b00;--bad:#b42335}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Thai',sans-serif}.top{padding:18px clamp(18px,4vw,48px);background:#12346b;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px}.top h1{margin:0;font-size:22px}.top p{margin:3px 0 0;color:#d8e9ff;font-size:13px}.top a{color:#fff;text-decoration:none;border:1px solid #91add1;border-radius:8px;padding:8px 11px}.wrap{max-width:1340px;margin:22px auto;padding:0 18px}.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}.card{cursor:pointer;border-left:5px solid var(--blue)}.card.warn{border-left-color:#f59e0b}.card.bad{border-left-color:#ef476f}.card span{font-size:13px;color:#627488}.card b{display:block;font-size:27px;margin-top:4px;color:var(--warn)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs button{border:1px solid #bfd0df;border-radius:8px;padding:8px 11px;background:#fff;color:#27435c;font:600 13px inherit;cursor:pointer}.tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.notice{font-size:13px;color:#5c7084;margin:0 0 12px;line-height:1.55}.notice.error{color:#b42335}.table{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px}th{text-align:left;background:#eef5fb;color:#53687d}th,td{border-bottom:1px solid #e0e9ef;padding:11px;vertical-align:top}.tag{display:inline-block;border-radius:99px;padding:3px 8px;background:#fff1dd;color:#9a5700;font-weight:700}.tag.bad{background:#ffe4e6;color:#b42335}.open{color:#1e5ed8;text-decoration:none;font-weight:700;white-space:nowrap}.empty{text-align:center;color:#627488;padding:28px}.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:14px;font-size:13px}.pager button{border:1px solid #bfd0df;border-radius:8px;padding:7px 10px;background:#fff;color:#27435c;font:inherit;cursor:pointer}.pager button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:720px){.top{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 10px}.tabs{flex-wrap:nowrap;overflow:auto;padding-bottom:5px}.tabs button{white-space:nowrap;flex:0 0 auto}.card{padding:12px}.card b{font-size:24px}}
   </style>
 </head>
 <body>
-  <header class="top"><div><h1>ตรวจสอบข้อมูลกล้องซ้ำ</h1><p>แยกกลุ่ม UID ซ้ำ ชื่อซ้ำ และพิกัดซ้ำก่อนดำเนินการแก้ไขหรือลบ</p></div><a href="camera-center.html">← ศูนย์จัดการกล้อง CCTV</a></header>
-  <main class="wrap"><section class="cards"><article class="card"><span>UID ซ้ำ</span><b id="uidCount">–</b></article><article class="card"><span>ชื่อกล้องซ้ำ</span><b id="nameCount">–</b></article><article class="card"><span>พิกัดซ้ำ</span><b id="coordCount">–</b></article></section><section class="panel"><div class="tabs"><button class="active" data-kind="uid">UID ซ้ำ</button><button data-kind="name">ชื่อกล้องซ้ำ</button><button data-kind="coordinate">พิกัดซ้ำ</button></div><p id="notice" class="notice">กำลังตรวจข้อมูล…</p><div class="table"><table><thead><tr><th>ข้อมูลที่ซ้ำ</th><th>จำนวน</th><th>รายการในกลุ่ม</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></section></main>
+  <header class="top"><div><h1>ตรวจสอบข้อมูลกล้อง</h1><p>รวมการตรวจสอบข้อมูลซ้ำ คุณภาพข้อมูล พิกัด UID ประเภท โครงการ และสถานะไว้ในหน้าเดียว</p></div><a href="camera-center.html">ศูนย์จัดการกล้อง CCTV</a></header>
+  <main class="wrap">
+    <section class="cards">
+      <article class="card" data-tab="all"><span>รายการทั้งหมด</span><b id="allCount">–</b></article>
+      <article class="card warn" data-tab="coordinate"><span>พิกัดว่าง / ไม่ถูกต้อง</span><b id="coordinateCount">–</b></article>
+      <article class="card bad" data-tab="uid"><span>UID ซ้ำ</span><b id="uidCount">–</b></article>
+      <article class="card warn" data-tab="category"><span>ประเภท / โครงการไม่ระบุ</span><b id="categoryCount">–</b></article>
+      <article class="card warn" data-tab="status"><span>สถานะไม่ระบุ</span><b id="statusCount">–</b></article>
+    </section>
+    <section class="panel">
+      <div class="tabs">
+        <button class="active" data-tab="all">รายการตรวจสอบทั้งหมด</button><button data-tab="coordinate">พิกัดว่าง / ไม่ถูกต้อง</button><button data-tab="uid">UID ซ้ำ</button><button data-tab="category">ประเภท / โครงการไม่ระบุ</button><button data-tab="status">สถานะไม่ระบุ</button>
+      </div>
+      <p id="notice" class="notice">กำลังเตรียมตรวจสอบข้อมูล…</p>
+      <div class="table"><table><thead><tr><th>ชื่อกล้อง</th><th>UID</th><th>ประเภท / โครงการ</th><th>สภ. / พื้นที่</th><th>พิกัด</th><th>สถานะ</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="pager" id="pager"></div>
+    </section>
+  </main>
   <script>
   (()=>{
     const $=id=>document.getElementById(id), esc=v=>String(v??'–').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    let db,items=[],active='uid';
-    const text=v=>String(v??'').trim(), key=v=>text(v).toLocaleLowerCase('th-TH');
-    const groups=(field)=>{const map=new Map();items.forEach(item=>{let value='';if(field==='uid'){value=key(item.uid);if(['','-','n/a','na','ไม่ระบุ'].includes(value))return}else if(field==='name')value=key(item.camera_name||item.name);else if(item.lat!==null&&item.lng!==null)value=Number(item.lat).toFixed(6)+', '+Number(item.lng).toFixed(6);if(!value)return;const list=map.get(value)||[];list.push(item);map.set(value,list)});return [...map.entries()].filter(([,list])=>list.length>1).sort((a,b)=>b[1].length-a[1].length)};
-    function render(){const all={uid:groups('uid'),name:groups('name'),coordinate:groups('coordinate')};$('uidCount').textContent=all.uid.length.toLocaleString();$('nameCount').textContent=all.name.length.toLocaleString();$('coordCount').textContent=all.coordinate.length.toLocaleString();const current=all[active];$('notice').textContent=`พบ ${current.length.toLocaleString()} กลุ่ม — UID ที่เป็น “-” หรือไม่ระบุจะไม่ถูกนับเป็นข้อมูลซ้ำ; ตรวจสอบแต่ละกลุ่มก่อนลบ เพราะบางกล้องอาจอยู่จุดเดียวกันจริง`;$('rows').innerHTML=current.length?current.map(([value,list])=>`<tr><td class="key">${esc(value)}</td><td><span class="count">${list.length} รายการ</span></td><td>${list.map(x=>`<span class="item">#${x.id} · ${esc(x.camera_name||x.name)} · ${esc(x.area||'ไม่ระบุพื้นที่')} ${x.uid?`· UID ${esc(x.uid)}`:''}</span>`).join('')}</td><td><a class="open" href="camera-management.html?search=${encodeURIComponent(active==='uid'?value:(list[0].uid||list[0].camera_name||list[0].name||''))}">เปิดจัดการ →</a></td></tr>`).join(''):'<tr><td colspan="4" class="empty">ไม่พบข้อมูลซ้ำในหมวดนี้</td></tr>';}
-    let loading=false,started=false;
-    const waitFor=(promise,ms=20000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('หมดเวลารอข้อมูลจาก Supabase กรุณาลองใหม่')),ms))]);
-    function showLoadError(error){
-      $('notice').innerHTML='ตรวจข้อมูลไม่สำเร็จ: '+esc(error.message||error)+' <button type="button" id="retryLoad">ลองใหม่</button>';
-      $('retryLoad')?.addEventListener('click',()=>load());
-    }
-    async function load(){
-      if(loading||!db)return;
-      loading=true;
-      $('notice').textContent='กำลังตรวจข้อมูลกล้องจาก Supabase…';
-      try{
-        const rows=[];
-        for(let from=0;;from+=500){
-          const r=await waitFor(db.from('cctv_locations').select('id,camera_name,name,uid,area,lat,lng').order('id').range(from,from+499));
-          if(r.error)throw r.error;
-          const page=r.data||[];
-          rows.push(...page);
-          if(page.length<500)break;
-        }
-        items=rows;
-        $('notice').textContent='ตรวจสอบข้อมูล '+items.length.toLocaleString()+' รายการแล้ว';
-        render();
-      }catch(error){showLoadError(error)}finally{loading=false}
-    }
-    function start(event){
-      if(started)return true;
-      const session=event?.detail||window.cctvSession;
-      if(!session?.client)return false;
-      if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){
-        document.body.innerHTML='<main class="wrap"><section class="panel"><h1>ไม่มีสิทธิ์เข้าถึง</h1><p>บัญชีนี้ไม่มีสิทธิ์เปิดหน้าตรวจข้อมูลซ้ำ</p></section></main>';
-        return true;
-      }
-      started=true; db=session.client;
-      document.querySelectorAll('[data-kind]').forEach(button=>button.onclick=()=>{active=button.dataset.kind;document.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===button));render()});
-      load(); return true;
-    }
-    function boot(){
-      if(start({detail:window.cctvSession}))return;
-      let attempts=0;
-      const timer=setInterval(()=>{if(start({detail:window.cctvSession})||++attempts>=30){clearInterval(timer);if(!started)$('notice').textContent='ไม่พบข้อมูลการเข้าสู่ระบบ กรุณากลับไปเข้าสู่ระบบใหม่'}},500);
-      window.addEventListener('cctv-auth-ready',start,{once:true});
-    }
-    boot();
+    let db,items=[],active='all',page=1,loading=false,started=false;const perPage=50;
+    const clean=v=>String(v??'').trim(), norm=v=>clean(v).toLowerCase(), missing=v=>['','-','n/a','na','ไม่ระบุ','รอระบุ','unknown'].includes(norm(v));
+    const badCoordinate=x=>{const lat=Number(x.lat),lng=Number(x.lng);return !Number.isFinite(lat)||!Number.isFinite(lng)||lat<-90||lat>90||lng<-180||lng>180||lat===0||lng===0};
+    const duplicateIds=()=>{const map=new Map;items.forEach(x=>{const uid=norm(x.uid);if(!missing(uid))map.set(uid,[...(map.get(uid)||[]),x.id])});return new Set([...map.values()].filter(list=>list.length>1).flat())};
+    const getGroups=()=>({all:items,coordinate:items.filter(badCoordinate),uid:items.filter(x=>duplicateIds().has(x.id)),category:items.filter(x=>missing(x.camera_type)||missing(x.project)||missing(x.ownership_category)),status:items.filter(x=>missing(x.status))});
+    function rowTag(value,bad=false){return `<span class="tag${bad?' bad':''}">${esc(value)}</span>`}
+    function render(){const groups=getGroups(),rows=groups[active]||[];$('allCount').textContent=groups.all.length.toLocaleString();$('coordinateCount').textContent=groups.coordinate.length.toLocaleString();$('uidCount').textContent=groups.uid.length.toLocaleString();$('categoryCount').textContent=groups.category.length.toLocaleString();$('statusCount').textContent=groups.status.length.toLocaleString();const pages=Math.max(1,Math.ceil(rows.length/perPage));page=Math.min(page,pages);const subset=rows.slice((page-1)*perPage,page*perPage);$('rows').innerHTML=subset.map(x=>`<tr><td><b>${esc(x.camera_name||x.name||'ไม่ระบุชื่อ')}</b></td><td>${missing(x.uid)?rowTag('ไม่ระบุ UID',true):esc(x.uid)}</td><td>${missing(x.camera_type)?rowTag('ไม่ระบุประเภท',true):esc(x.camera_type)}<br>${missing(x.project)?rowTag('ไม่ระบุโครงการ',true):esc(x.project)}</td><td>${esc(x.station||'ไม่ระบุ สภ.')}<br>${esc(x.area||'ไม่ระบุพื้นที่')}</td><td>${badCoordinate(x)?rowTag('รอแก้ไขพิกัด',true):`${esc(x.lat)}, ${esc(x.lng)}`}</td><td>${missing(x.status)?rowTag('ไม่ระบุสถานะ',true):esc(x.status)}</td><td><a class="open" href="camera-management.html?search=${encodeURIComponent(x.uid||x.camera_name||x.name||'')}">จัดการ</a></td></tr>`).join('')||'<tr><td colspan="7" class="empty">ไม่พบรายการในหมวดนี้</td></tr>';$('pager').innerHTML=`<button id="prev" ${page===1?'disabled':''}>ก่อนหน้า</button><span>หน้า ${page.toLocaleString()} / ${pages.toLocaleString()} · ${rows.length.toLocaleString()} รายการ</span><button id="next" ${page===pages?'disabled':''}>ถัดไป</button>`;$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===active));}
+    function setTab(tab){active=tab;page=1;render()}
+    async function query(factory,timeout=18000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{let request=factory();if(typeof request.abortSignal==='function')request=request.abortSignal(controller.signal);const response=await request;if(response.error)throw response.error;return response}catch(error){if(controller.signal.aborted)throw new Error('หมดเวลารอข้อมูล');throw error}finally{clearTimeout(timer)}}
+    async function load(){if(loading||!db)return;loading=true;items=[];try{const fields='id,camera_name,name,uid,camera_type,ownership_category,project,station,area,lat,lng,status';let lastId='',total=0;while(true){$('notice').textContent=`กำลังตรวจสอบข้อมูลกล้อง ${total.toLocaleString()} รายการ…`;let result,error;for(let attempt=0;attempt<3;attempt++){try{result=await query(()=>{let request=db.from('cctv_locations').select(fields).order('id',{ascending:true}).limit(250);if(lastId)request=request.gt('id',lastId);return request});error=null;break}catch(err){error=err;await new Promise(done=>setTimeout(done,500*(attempt+1)))}}if(error)throw error;const batch=result.data||[];if(!batch.length)break;items.push(...batch);total=items.length;lastId=batch[batch.length-1].id;render();if(batch.length<250)break;await new Promise(done=>setTimeout(done,20))}render();$('notice').textContent=`ตรวจสอบข้อมูล ${items.length.toLocaleString()} รายการแล้ว · UID ที่เป็น “-” หรือว่างจะไม่นับเป็น UID ซ้ำ`;}catch(error){$('notice').className='notice error';$('notice').textContent=`โหลดข้อมูลไม่สำเร็จ: ${error.message||error} · โปรดลองใหม่`;console.error(error)}finally{loading=false}}
+    function start(event){if(started)return true;const session=event?.detail||window.cctvSession;if(!session?.client)return false;if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){location.replace('home.html');return true}started=true;db=session.client;document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>setTab(el.dataset.tab)));load();return true}
+    if(!start({detail:window.cctvSession})){window.addEventListener('cctv-auth-ready',start,{once:true})}
   })();
   </script>
 </body></html>
