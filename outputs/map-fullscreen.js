@@ -5,9 +5,10 @@
   const MAP_SELECTORS = '#map, #riskMap, #incidentMap';
   const style = document.createElement('style');
   style.textContent = `
+    html.cctv-map-fullscreen-open,body.cctv-map-fullscreen-open{overflow:hidden!important;overscroll-behavior:none}
     .map-fullscreen-action{position:absolute;z-index:1200;top:12px;right:12px;border:0;border-radius:12px;padding:10px 13px;background:#078bc9;color:#fff;font:700 14px/1.1 system-ui,-apple-system,"Noto Sans Thai",sans-serif;box-shadow:0 4px 14px #001a3d66;cursor:pointer;display:flex;align-items:center;gap:7px}
     .map-fullscreen-action:hover{background:#056fa5}.map-fullscreen-action:focus-visible{outline:3px solid #ffc62c;outline-offset:2px}
-    .cctv-map-fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;z-index:2147483000!important;margin:0!important;border-radius:0!important;box-shadow:none!important;background:#d9edf6!important}
+    .cctv-map-fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;z-index:2147483000!important;margin:0!important;border-radius:0!important;box-shadow:none!important;background:#d9edf6!important;isolation:isolate}
     .cctv-map-fullscreen .map-fullscreen-action{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;background:#b91c1c}
     @media(max-width:600px){.map-fullscreen-action{padding:9px 11px;font-size:13px;border-radius:10px}}
   `;
@@ -25,19 +26,44 @@
     window.dispatchEvent(new Event('resize'));
   }
 
-  function toggleFullScreen(element, button) {
-    const active = element.classList.toggle('cctv-map-fullscreen');
-    document.body.classList.toggle('cctv-map-fullscreen-open', active);
-    button.innerHTML = active ? '✕ ปิดแผนที่เต็มจอ' : '⛶ แผนที่เต็มจอ';
-    button.textContent = active ? '× ปิดแผนที่เต็มจอ' : '↗ แผนที่เต็มจอ';
-    button.setAttribute('aria-label', active ? 'ปิดแผนที่เต็มหน้าจอ' : 'เปิดแผนที่แบบเต็มหน้าจอ');
-    button.setAttribute('aria-pressed', String(active));
+  function moveToFullscreenLayer(element, active) {
+    if (active) {
+      if (element.__cctvFullscreenPlaceholder) return;
+      const placeholder = document.createComment('cctv-map-fullscreen-placeholder');
+      element.parentNode?.insertBefore(placeholder, element);
+      element.__cctvFullscreenPlaceholder = placeholder;
+      document.body.appendChild(element);
+      return;
+    }
+    const placeholder = element.__cctvFullscreenPlaceholder;
+    if (placeholder?.parentNode) placeholder.parentNode.replaceChild(element, placeholder);
+    delete element.__cctvFullscreenPlaceholder;
+  }
+
+  function notifyParent(active) {
     try {
       if (window.parent && window.parent !== window) {
         const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
         window.parent.postMessage({ type: 'cctv-map-fullscreen', active }, targetOrigin);
       }
     } catch (_) { /* page may be opened from a non-standard origin */ }
+  }
+
+  function toggleFullScreen(element, button) {
+    const active = !element.classList.contains('cctv-map-fullscreen');
+    if (active) {
+      moveToFullscreenLayer(element, true);
+      element.classList.add('cctv-map-fullscreen');
+    } else {
+      element.classList.remove('cctv-map-fullscreen');
+      moveToFullscreenLayer(element, false);
+    }
+    document.documentElement.classList.toggle('cctv-map-fullscreen-open', active);
+    document.body.classList.toggle('cctv-map-fullscreen-open', active);
+    button.textContent = active ? '× ปิดแผนที่เต็มจอ' : '↗ แผนที่เต็มจอ';
+    button.setAttribute('aria-label', active ? 'ปิดแผนที่เต็มหน้าจอ' : 'เปิดแผนที่แบบเต็มหน้าจอ');
+    button.setAttribute('aria-pressed', String(active));
+    notifyParent(active);
     refreshMap(element);
   }
 
@@ -48,8 +74,6 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'map-fullscreen-action';
-    button.innerHTML = '⛶ แผนที่เต็มจอ';
-    button.setAttribute('aria-label', 'เปิดแผนที่แบบเต็มหน้าจอ');
     button.textContent = '↗ แผนที่เต็มจอ';
     button.setAttribute('aria-label', 'เปิดแผนที่แบบเต็มหน้าจอ');
     button.setAttribute('aria-pressed', 'false');
@@ -80,7 +104,6 @@
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
     const active = document.querySelector('.cctv-map-fullscreen');
-    if (!active) return;
-    active.querySelector('.map-fullscreen-action')?.click();
+    if (active) active.querySelector('.map-fullscreen-action')?.click();
   });
 })();
