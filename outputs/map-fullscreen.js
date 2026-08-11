@@ -20,7 +20,7 @@
   function refreshMap(element) {
     const leafletMap = getLeafletMap(element);
     if (leafletMap && typeof leafletMap.invalidateSize === 'function') {
-      [0, 80, 260].forEach(delay => setTimeout(() => leafletMap.invalidateSize({ pan: false }), delay));
+      [0, 90, 300, 650].forEach(delay => setTimeout(() => leafletMap.invalidateSize({ pan: false }), delay));
     }
     window.dispatchEvent(new Event('resize'));
   }
@@ -29,7 +29,15 @@
     const active = element.classList.toggle('cctv-map-fullscreen');
     document.body.classList.toggle('cctv-map-fullscreen-open', active);
     button.innerHTML = active ? '✕ ปิดแผนที่เต็มจอ' : '⛶ แผนที่เต็มจอ';
+    button.textContent = active ? '× ปิดแผนที่เต็มจอ' : '↗ แผนที่เต็มจอ';
+    button.setAttribute('aria-label', active ? 'ปิดแผนที่เต็มหน้าจอ' : 'เปิดแผนที่แบบเต็มหน้าจอ');
     button.setAttribute('aria-pressed', String(active));
+    try {
+      if (window.parent && window.parent !== window) {
+        const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+        window.parent.postMessage({ type: 'cctv-map-fullscreen', active }, targetOrigin);
+      }
+    } catch (_) { /* page may be opened from a non-standard origin */ }
     refreshMap(element);
   }
 
@@ -41,6 +49,8 @@
     button.type = 'button';
     button.className = 'map-fullscreen-action';
     button.innerHTML = '⛶ แผนที่เต็มจอ';
+    button.setAttribute('aria-label', 'เปิดแผนที่แบบเต็มหน้าจอ');
+    button.textContent = '↗ แผนที่เต็มจอ';
     button.setAttribute('aria-label', 'เปิดแผนที่แบบเต็มหน้าจอ');
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('click', () => toggleFullScreen(element, button));

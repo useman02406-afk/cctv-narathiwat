@@ -32,12 +32,19 @@
     body.camera-map-active .stage iframe{height:100%!important;min-height:520px!important}
     @supports(height:100dvh){body.camera-map-active .stage{height:calc(100dvh - 190px)!important}}
     @media(max-width:650px){body.camera-map-active .stage{height:calc(100vh - 170px)!important;min-height:420px!important}body.camera-map-active .stage iframe{min-height:420px!important}}
+    body.camera-map-fullscreen{overflow:hidden!important}
+    body.camera-map-fullscreen .top,body.camera-map-fullscreen .overview,body.camera-map-fullscreen .tabs{display:none!important}
+    body.camera-map-fullscreen .wrap{display:block!important;max-width:none!important;margin:0!important;padding:0!important;height:100dvh!important}
+    body.camera-map-fullscreen .stage{position:fixed!important;inset:0!important;z-index:2147482000!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;border:0!important;border-radius:0!important;overflow:hidden!important}
+    body.camera-map-fullscreen .stage iframe{display:block!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important}
   </style>
   <script>
     (()=>{
-      const frame=document.getElementById('workspace'),cacheVersion='20260803-04';
+      const frame=document.getElementById('workspace'),cacheVersion='20260811-mapfix';
       frame.addEventListener('load',()=>[80,300,800].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}},delay)));
-      const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
+      const notifyFrameResize=()=>[0,120,360,700].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe not ready */}},delay));
+      window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||event.data?.type!=='cctv-map-fullscreen')return;document.body.classList.toggle('camera-map-fullscreen',Boolean(event.data.active));notifyFrameResize()});
+      const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.body.classList.remove('camera-map-fullscreen');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
       document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
       document.getElementById('refresh').addEventListener('click',()=>location.reload());
       const requested=location.hash.slice(1),[rawRequestedSrc,...requestedQuery]=requested.split('?'),requestedSrc=rawRequestedSrc==='camera-record-browser.html'?'camera-management.html':rawRequestedSrc==='camera-data-quality.html'?'camera-duplicate-review.html':rawRequestedSrc;const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===requestedSrc)||document.querySelector('.tab.active');if(selected)openTab(selected,requestedQuery.join('?'));
