@@ -80,7 +80,7 @@
     function start(event) {
       const session = event.detail || window.cctvSession;
       if (!session) return;
-      map = L.map('map').setView([6.425,101.825], 11);
+      map = L.map('map', {preferCanvas:true, markerZoomAnimation:false, fadeAnimation:false}).setView([6.425,101.825], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
       layer = L.layerGroup().addTo(map);
       session.client.from('economic_data').select('*').order('name').then(({data,error}) => {

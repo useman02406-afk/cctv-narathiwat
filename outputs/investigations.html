@@ -628,10 +628,10 @@
         }
         function initMap() {
           if (map) return;
-          map = L.map("incidentMap").setView([6.425, 101.825], 12);
+          map = L.map("incidentMap", { preferCanvas: true, markerZoomAnimation: false, fadeAnimation: false }).setView([6.425, 101.825], 12);
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
-            attribution: "&copy; OpenStreetMap contributors",
+            attribution: "&copy; OpenStreetMap contributors", updateWhenZooming: false, updateWhenIdle: true, keepBuffer: 2,
           }).addTo(map);
           incidentLayer = L.layerGroup().addTo(map);
           const legend = L.control({ position: "bottomright" });
