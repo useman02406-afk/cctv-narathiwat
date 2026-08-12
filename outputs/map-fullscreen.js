@@ -109,7 +109,10 @@
     button.setAttribute('aria-label', active ? '\u0e1b\u0e34\u0e14\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48\u0e40\u0e15\u0e47\u0e21\u0e2b\u0e19\u0e49\u0e32\u0e08\u0e2d' : '\u0e40\u0e1b\u0e34\u0e14\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48\u0e41\u0e1a\u0e1a\u0e40\u0e15\u0e47\u0e21\u0e2b\u0e19\u0e49\u0e32\u0e08\u0e2d');
     button.setAttribute('aria-pressed', String(active));
     notifyParent(active);
-    requestAnimationFrame(() => requestAnimationFrame(() => refreshMap(element, [0, 100, 300, 700, 1200])));
+    // A small, bounded refresh sequence is enough for Leaflet to recalculate
+    // tiles after the element is moved.  Longer repeated invalidations make
+    // iOS Safari stutter and can leave a partially painted map.
+    requestAnimationFrame(() => requestAnimationFrame(() => refreshMap(element, [0, 160, 480])));
   }
 
   function attach(element) {

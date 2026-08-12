@@ -37,23 +37,30 @@
     body.camera-map-fullscreen .wrap{display:block!important;max-width:none!important;margin:0!important;padding:0!important;height:100vh!important}
     body.camera-map-fullscreen .stage{position:fixed!important;inset:0!important;z-index:2147482000!important;width:100vw!important;height:var(--camera-map-viewport-height,100vh)!important;min-height:var(--camera-map-viewport-height,100vh)!important;border:0!important;border-radius:0!important;overflow:hidden!important}
     body.camera-map-fullscreen .stage iframe{position:fixed!important;inset:0!important;display:block!important;width:100vw!important;height:var(--camera-map-viewport-height,100vh)!important;min-height:var(--camera-map-viewport-height,100vh)!important;max-height:none!important}
-    @supports(height:100dvh){body.camera-map-fullscreen .wrap,body.camera-map-fullscreen .stage,body.camera-map-fullscreen .stage iframe{height:100dvh!important;min-height:100dvh!important}}
+    /* The pixel value is supplied by visualViewport.  Do not override it with
+       100dvh: Safari can report a stale dynamic viewport while its browser UI
+       animates, leaving the lower half of the map blank. */
   </style>
   <script>
     (()=>{
-      const frame=document.getElementById('workspace'),cacheVersion='20260812-mapfullscreen2';
-      frame.addEventListener('load',()=>[80,300,800].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}},delay)));
-      const notifyFrameResize=()=>[0,120,360,700].forEach(delay=>setTimeout(()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe not ready */}},delay));
+      const frame=document.getElementById('workspace'),cacheVersion='20260812-mapfullscreen3';
+      let frameResizeTimer=0,lastViewport='';
+      const dispatchFrameResize=()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}};
+      frame.addEventListener('load',()=>{setTimeout(dispatchFrameResize,180)});
+      const notifyFrameResize=()=>{clearTimeout(frameResizeTimer);frameResizeTimer=setTimeout(dispatchFrameResize,90)};
       const syncFullscreenViewport=()=>{
         if(!document.body.classList.contains('camera-map-fullscreen'))return;
         const viewport=window.visualViewport;
         const height=Math.round(viewport?.height||window.innerHeight||document.documentElement.clientHeight||0);
         const width=Math.round(viewport?.width||window.innerWidth||document.documentElement.clientWidth||0);
+        const nextViewport=`${width}x${height}`;
+        if(nextViewport===lastViewport)return;
+        lastViewport=nextViewport;
         if(height>0)document.documentElement.style.setProperty('--camera-map-viewport-height',`${height}px`);
         if(width>0)frame.style.setProperty('width',`${width}px`,'important');
         notifyFrameResize();
       };
-      window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||event.data?.type!=='cctv-map-fullscreen')return;const active=Boolean(event.data.active);document.body.classList.toggle('camera-map-fullscreen',active);if(active)syncFullscreenViewport();else{document.documentElement.style.removeProperty('--camera-map-viewport-height');frame.style.removeProperty('width')}notifyFrameResize()});
+      window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='cctv-map-fullscreen')return;const active=Boolean(event.data.active);document.body.classList.toggle('camera-map-fullscreen',active);if(active){lastViewport='';syncFullscreenViewport()}else{lastViewport='';document.documentElement.style.removeProperty('--camera-map-viewport-height');frame.style.removeProperty('width')}notifyFrameResize()});
       window.addEventListener('resize',syncFullscreenViewport,{passive:true});
       window.visualViewport?.addEventListener('resize',syncFullscreenViewport,{passive:true});
       const openTab=(btn,forwardedSearch='')=>{const src=btn.dataset.src,params=new URLSearchParams(String(forwardedSearch).replace(/^\?/,''));if(src==='camera-locations-map.html')params.set('v',cacheVersion);const query=params.toString();document.body.classList.remove('camera-map-fullscreen');document.documentElement.style.removeProperty('--camera-map-viewport-height');frame.style.removeProperty('width');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.body.classList.toggle('camera-map-active',src==='camera-locations-map.html');frame.src=src+(query?`?${query}`:'');history.replaceState(null,'',`#${src}${forwardedSearch?`?${String(forwardedSearch).replace(/^\?/,'')}`:''}`)};
