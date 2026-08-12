@@ -2,14 +2,14 @@
 (() => {
   'use strict';
 
-  const MAP_SELECTORS = '#map, #riskMap, #incidentMap';
+  const MAP_SELECTORS = '.leaflet-container, #map, #riskMap, #incidentMap';
   const refreshTimers = new WeakMap();
   const style = document.createElement('style');
   style.textContent = `
     html.cctv-map-fullscreen-open,body.cctv-map-fullscreen-open{overflow:hidden!important;overscroll-behavior:none}
     .map-fullscreen-action{position:absolute;z-index:1200;top:12px;right:12px;border:0;border-radius:12px;padding:10px 13px;background:#078bc9;color:#fff;font:700 14px/1.1 system-ui,-apple-system,"Noto Sans Thai",sans-serif;box-shadow:0 4px 14px #001a3d66;cursor:pointer;display:flex;align-items:center;gap:7px}
     .map-fullscreen-action:hover{background:#056fa5}.map-fullscreen-action:focus-visible{outline:3px solid #ffc62c;outline-offset:2px}
-    .cctv-map-fullscreen{position:fixed!important;inset:0!important;width:100vw!important;min-width:100vw!important;height:100vh!important;min-height:100vh!important;max-width:none!important;max-height:none!important;z-index:2147483000!important;margin:0!important;border-radius:0!important;box-shadow:none!important;background:#d9edf6!important;isolation:isolate}
+    .cctv-map-fullscreen{position:fixed!important;inset:0!important;box-sizing:border-box!important;overflow:hidden!important;width:100vw!important;min-width:100vw!important;height:100vh!important;min-height:100vh!important;max-width:none!important;max-height:none!important;padding:0!important;z-index:2147483000!important;margin:0!important;border-radius:0!important;box-shadow:none!important;background:#d9edf6!important;isolation:isolate}
     @supports(height:100dvh){.cctv-map-fullscreen{height:100dvh!important;min-height:100dvh!important}}
     .cctv-map-fullscreen .leaflet-pane,.cctv-map-fullscreen .leaflet-map-pane{will-change:transform}
     .cctv-map-fullscreen .map-fullscreen-action{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;background:#b91c1c}
@@ -19,7 +19,15 @@
 
   const getLeafletMap = element => element && element.__cctvLeafletMap;
 
-  function refreshMap(element, delays = [0, 80, 260]) {
+  function viewportPixels() {
+    const viewport = window.visualViewport;
+    return {
+      width: Math.max(1, Math.round(viewport?.width || window.innerWidth || document.documentElement.clientWidth || 1)),
+      height: Math.max(1, Math.round(viewport?.height || window.innerHeight || document.documentElement.clientHeight || 1))
+    };
+  }
+
+  function refreshMap(element, delays = [0, 100, 300, 700]) {
     const leafletMap = getLeafletMap(element);
     if (!leafletMap || typeof leafletMap.invalidateSize !== 'function') return;
     const prior = refreshTimers.get(element) || [];
@@ -71,8 +79,9 @@
         minHeight: element.style.getPropertyValue('min-height'),
         minHeightPriority: element.style.getPropertyPriority('min-height')
       };
-      const viewportWidth = `${Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0)}px`;
-      const viewportHeight = `${Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0)}px`;
+      const viewport = viewportPixels();
+      const viewportWidth = `${viewport.width}px`;
+      const viewportHeight = `${viewport.height}px`;
       element.style.setProperty('width', viewportWidth, 'important');
       element.style.setProperty('height', viewportHeight, 'important');
       element.style.setProperty('min-height', viewportHeight, 'important');
@@ -99,7 +108,7 @@
     button.setAttribute('aria-label', active ? '\u0e1b\u0e34\u0e14\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48\u0e40\u0e15\u0e47\u0e21\u0e2b\u0e19\u0e49\u0e32\u0e08\u0e2d' : '\u0e40\u0e1b\u0e34\u0e14\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48\u0e41\u0e1a\u0e1a\u0e40\u0e15\u0e47\u0e21\u0e2b\u0e19\u0e49\u0e32\u0e08\u0e2d');
     button.setAttribute('aria-pressed', String(active));
     notifyParent(active);
-    refreshMap(element, [0, 60, 180, 420, 800]);
+    requestAnimationFrame(() => requestAnimationFrame(() => refreshMap(element, [0, 100, 300, 700, 1200])));
   }
 
   function attach(element) {
@@ -134,6 +143,9 @@
       if (element) {
         element.__cctvLeafletMap = instance;
         instance.on('popupopen popupclose', () => refreshMap(element, [0, 120]));
+        // Modules create maps after authentication; attach the control at map
+        // creation time so every Leaflet map receives the same stable mode.
+        setTimeout(() => attach(element), 0);
       }
       return instance;
     };
@@ -146,13 +158,14 @@
       // Keep an expanded iframe map aligned to Safari's actual visual viewport
       // after an address-bar or orientation resize.
       if (element.classList.contains('cctv-map-fullscreen')) {
-        const viewportWidth = `${Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0)}px`;
-        const viewportHeight = `${Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0)}px`;
+        const viewport = viewportPixels();
+        const viewportWidth = `${viewport.width}px`;
+        const viewportHeight = `${viewport.height}px`;
         element.style.setProperty('width', viewportWidth, 'important');
         element.style.setProperty('height', viewportHeight, 'important');
         element.style.setProperty('min-height', viewportHeight, 'important');
       }
-      refreshMap(element, [0, 120]);
+      refreshMap(element, [0, 100, 300, 700]);
     });
   }
   function initialise() { patchLeaflet(); document.querySelectorAll(MAP_SELECTORS).forEach(attach); }
@@ -162,6 +175,7 @@
   window.addEventListener('resize', refreshActiveMap, { passive: true });
   window.addEventListener('orientationchange', refreshActiveMap, { passive: true });
   window.visualViewport?.addEventListener('resize', refreshActiveMap, { passive: true });
+  window.visualViewport?.addEventListener('scroll', refreshActiveMap, { passive: true });
   window.addEventListener('pageshow', refreshActiveMap, { passive: true });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
