@@ -28,7 +28,7 @@
     };
   }
 
-  function refreshMap(element, delays = [0, 100, 300, 700]) {
+  function refreshMap(element, delays = [0, 140, 360]) {
     const leafletMap = getLeafletMap(element);
     if (!leafletMap || typeof leafletMap.invalidateSize !== 'function') return;
     const prior = refreshTimers.get(element) || [];
@@ -129,11 +129,17 @@
     element.appendChild(button);
 
     if ('ResizeObserver' in window) {
-      let resizePending = false;
-      new ResizeObserver(() => {
-        if (resizePending) return;
-        resizePending = true;
-        requestAnimationFrame(() => { resizePending = false; refreshMap(element, [0]); });
+      let resizeTimer = 0;
+      let lastSize = '';
+      new ResizeObserver(entries => {
+        const rect = entries[entries.length - 1]?.contentRect;
+        const nextSize = rect ? `${Math.round(rect.width)}x${Math.round(rect.height)}` : '';
+        // Ignore duplicate/hidden measurements so Leaflet does not redraw
+        // tiles continuously while a user is panning or zooming.
+        if (!nextSize || nextSize === '0x0' || nextSize === lastSize) return;
+        lastSize = nextSize;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => refreshMap(element, [0, 160]), 90);
       }).observe(element);
     }
   }
@@ -146,7 +152,7 @@
       const element = typeof id === 'string' ? document.getElementById(id) : id;
       if (element) {
         element.__cctvLeafletMap = instance;
-        instance.on('popupopen popupclose', () => refreshMap(element, [0, 120]));
+        instance.on('popupopen popupclose', () => refreshMap(element, [0, 140]));
         // Modules create maps after authentication; attach the control at map
         // creation time so every Leaflet map receives the same stable mode.
         setTimeout(() => attach(element), 0);
@@ -169,7 +175,7 @@
         element.style.setProperty('height', viewportHeight, 'important');
         element.style.setProperty('min-height', viewportHeight, 'important');
       }
-      refreshMap(element, [0, 140, 420]);
+      refreshMap(element, [0, 160, 380]);
     });
   }
   function scheduleActiveMapRefresh(delay = 110) {

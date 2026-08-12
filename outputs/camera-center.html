@@ -43,7 +43,7 @@
   </style>
   <script>
     (()=>{
-      const frame=document.getElementById('workspace'),cacheVersion='20260812-mapfullscreen3';
+      const frame=document.getElementById('workspace'),cacheVersion='20260812-mapfullscreen4';
       let frameResizeTimer=0,lastViewport='';
       const dispatchFrameResize=()=>{try{frame.contentWindow.dispatchEvent(new Event('resize'))}catch(error){/* iframe is not ready yet */}};
       frame.addEventListener('load',()=>{setTimeout(dispatchFrameResize,180)});
