@@ -4,6 +4,7 @@
 
   const MAP_SELECTORS = '.leaflet-container, #map, #riskMap, #incidentMap';
   const refreshTimers = new WeakMap();
+  let activeRefreshTimer = 0;
   const style = document.createElement('style');
   style.textContent = `
     html.cctv-map-fullscreen-open,body.cctv-map-fullscreen-open{overflow:hidden!important;overscroll-behavior:none}
@@ -165,18 +166,24 @@
         element.style.setProperty('height', viewportHeight, 'important');
         element.style.setProperty('min-height', viewportHeight, 'important');
       }
-      refreshMap(element, [0, 100, 300, 700]);
+      refreshMap(element, [0, 140, 420]);
     });
+  }
+  function scheduleActiveMapRefresh(delay = 110) {
+    clearTimeout(activeRefreshTimer);
+    activeRefreshTimer = setTimeout(refreshActiveMap, delay);
   }
   function initialise() { patchLeaflet(); document.querySelectorAll(MAP_SELECTORS).forEach(attach); }
 
   document.addEventListener('DOMContentLoaded', initialise);
   const timer = setInterval(() => { if (patchLeaflet()) clearInterval(timer); }, 50);
-  window.addEventListener('resize', refreshActiveMap, { passive: true });
-  window.addEventListener('orientationchange', refreshActiveMap, { passive: true });
-  window.visualViewport?.addEventListener('resize', refreshActiveMap, { passive: true });
-  window.visualViewport?.addEventListener('scroll', refreshActiveMap, { passive: true });
-  window.addEventListener('pageshow', refreshActiveMap, { passive: true });
+  // Do not invalidate on visualViewport scroll. Safari emits that event while
+  // Leaflet is zooming/panning, which repeatedly redraws tiles and produces a
+  // partial or jittery map. Resize/orientation events are debounced instead.
+  window.addEventListener('resize', () => scheduleActiveMapRefresh(120), { passive: true });
+  window.addEventListener('orientationchange', () => scheduleActiveMapRefresh(180), { passive: true });
+  window.visualViewport?.addEventListener('resize', () => scheduleActiveMapRefresh(150), { passive: true });
+  window.addEventListener('pageshow', () => scheduleActiveMapRefresh(80), { passive: true });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
     document.querySelector('.cctv-map-fullscreen')?.querySelector('.map-fullscreen-action')?.click();
