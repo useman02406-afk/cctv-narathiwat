@@ -57,10 +57,41 @@
     delete element.__cctvFullscreenPlaceholder;
   }
 
+  function setFullscreenDimensions(element, active) {
+    if (active) {
+      // Leaflet writes an inline pixel height while it is initialised.  Some
+      // module styles also use an important mobile height rule, so explicitly
+      // setting the dimensions here is the only reliable way to make an
+      // iframe map fill the iOS viewport after its parent enters fullscreen.
+      element.__cctvOriginalInlineSize = {
+        width: element.style.getPropertyValue('width'),
+        widthPriority: element.style.getPropertyPriority('width'),
+        height: element.style.getPropertyValue('height'),
+        heightPriority: element.style.getPropertyPriority('height'),
+        minHeight: element.style.getPropertyValue('min-height'),
+        minHeightPriority: element.style.getPropertyPriority('min-height')
+      };
+      const viewportWidth = `${Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0)}px`;
+      const viewportHeight = `${Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0)}px`;
+      element.style.setProperty('width', viewportWidth, 'important');
+      element.style.setProperty('height', viewportHeight, 'important');
+      element.style.setProperty('min-height', viewportHeight, 'important');
+      return;
+    }
+    const original = element.__cctvOriginalInlineSize;
+    ['width', 'height', 'minHeight'].forEach(key => {
+      const cssKey = key === 'minHeight' ? 'min-height' : key;
+      element.style.removeProperty(cssKey);
+      if (original?.[key]) element.style.setProperty(cssKey, original[key], original[`${key}Priority`] || '');
+    });
+    delete element.__cctvOriginalInlineSize;
+  }
+
   function toggleFullScreen(element, button) {
     const active = !element.classList.contains('cctv-map-fullscreen');
     if (active) moveToFullscreenLayer(element, true);
     element.classList.toggle('cctv-map-fullscreen', active);
+    setFullscreenDimensions(element, active);
     if (!active) moveToFullscreenLayer(element, false);
     document.documentElement.classList.toggle('cctv-map-fullscreen-open', active);
     document.body.classList.toggle('cctv-map-fullscreen-open', active);
@@ -110,7 +141,20 @@
     return true;
   }
 
-  function refreshActiveMap() { document.querySelectorAll(MAP_SELECTORS).forEach(element => refreshMap(element, [0, 120])); }
+  function refreshActiveMap() {
+    document.querySelectorAll(MAP_SELECTORS).forEach(element => {
+      // Keep an expanded iframe map aligned to Safari's actual visual viewport
+      // after an address-bar or orientation resize.
+      if (element.classList.contains('cctv-map-fullscreen')) {
+        const viewportWidth = `${Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0)}px`;
+        const viewportHeight = `${Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0)}px`;
+        element.style.setProperty('width', viewportWidth, 'important');
+        element.style.setProperty('height', viewportHeight, 'important');
+        element.style.setProperty('min-height', viewportHeight, 'important');
+      }
+      refreshMap(element, [0, 120]);
+    });
+  }
   function initialise() { patchLeaflet(); document.querySelectorAll(MAP_SELECTORS).forEach(attach); }
 
   document.addEventListener('DOMContentLoaded', initialise);
