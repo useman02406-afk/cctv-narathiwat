@@ -20,6 +20,7 @@
     .notice{margin:14px 0;padding:11px 13px;border-radius:9px;background:#e0f2fe;color:#075985}.map{height:calc(100vh - 360px);min-height:420px;border-radius:13px;border:1px solid #cbd5e1;overflow:hidden}
     .popup h3{margin:0 0 8px;color:#173b62}.popup p{margin:5px 0}.marker{display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;box-shadow:0 3px 9px #17203366;transform:rotate(-45deg);font-size:16px}.marker span{transform:rotate(45deg)}
     @media(max-width:600px){main{padding:12px}.map{min-height:360px;height:58vh}.filter{flex:1;text-align:center}.station-control select{min-width:0;width:100%}}
+    .econ-tools{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:9px;margin:14px 0}.econ-tools input,.econ-tools select,.econ-modal input,.econ-modal select,.econ-modal textarea{width:100%;border:1px solid #b7c7da;border-radius:9px;padding:10px;font:inherit;color:#172033;background:#fff}.econ-history{margin-top:14px;background:#fff;border:1px solid #dbe5ef;border-radius:12px;overflow:auto}.econ-history table{width:100%;border-collapse:collapse;min-width:850px}.econ-history th,.econ-history td{padding:10px;border-bottom:1px solid #e5edf5;text-align:left;vertical-align:top}.econ-history th{background:#e0f2fe;color:#173b62}.econ-add{border:0;border-radius:9px;background:#0ea5e9;padding:10px 14px;color:#fff;font:inherit;font-weight:800;cursor:pointer}.econ-add[hidden]{display:none}.econ-modal-backdrop{position:fixed;inset:0;background:#0f172a99;display:grid;place-items:center;padding:16px;z-index:5000}.econ-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 18px 55px #02061799}.econ-modal h2{margin:0 0 14px;color:#173b62}.econ-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.econ-modal label{display:grid;gap:5px;font-weight:800;color:#334155}.econ-modal .full{grid-column:1/-1}.econ-modal textarea{min-height:82px;resize:vertical}.econ-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.econ-cancel{border:1px solid #94a3b8;border-radius:9px;background:#fff;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}@media(max-width:600px){.econ-tools,.econ-grid{grid-template-columns:1fr}.econ-add{width:100%}}
   </style>
 <script src="map-fullscreen.js?v=20260812-4"></script>
 </head>
@@ -34,10 +35,14 @@
     <label class="station-control" for="stationFilter">สภ. / พื้นที่รับผิดชอบ
       <select id="stationFilter" class="filter"><option value="">ทุก สภ.</option></select>
     </label>
+    <button class="econ-add" id="addEconomic" hidden>＋ เพิ่มพื้นที่เศรษฐกิจ</button>
+    <section class="econ-tools" aria-label="ค้นหารายการย้อนหลัง"><input id="historySearch" placeholder="ค้นหาชื่อสถานที่ หรือพิกัด"><select id="typeSearch"><option value="">ทุกประเภทสถานที่</option></select><select id="districtSearch"><option value="">ทุกอำเภอ</option></select><select id="provinceSearch"><option value="">ทุกจังหวัด</option></select></section>
     <section class="summary" id="summary"></section>
     <div class="notice" id="notice">กำลังโหลดข้อมูล…</div>
     <div id="map" class="map"></div>
+    <section class="econ-history"><table><thead><tr><th>ประเภท</th><th>ชื่อสถานที่</th><th>พิกัด</th><th>อำเภอ</th><th>จังหวัด</th><th>สภ.</th><th>CCTV</th><th>ผู้บันทึก</th><th>บันทึกเมื่อ</th></tr></thead><tbody id="historyRows"></tbody></table><div id="historyEmpty" style="padding:18px;color:#64748b" hidden>ไม่พบรายการตามเงื่อนไขที่เลือก</div></section>
   </main>
+  <div class="econ-modal-backdrop" id="economicModal" hidden><form class="econ-modal" id="economicForm"><h2>เพิ่มพื้นที่เศรษฐกิจ</h2><div class="econ-grid"><label>ประเภทสถานที่<select id="formType" required><option value="">เลือกประเภท</option><option>สถานีบริการน้ำมัน</option><option>ธนาคาร</option><option>ATM</option><option>ร้านทอง</option><option>ร้านสะดวกซื้อ</option><option>ห้างสรรพสินค้า</option><option value="อื่นๆ">อื่นๆ (ระบุในรายละเอียด)</option></select></label><label>ชื่อสถานที่<input id="formName" required></label><label>ละติจูด (lat)<input id="formLat" type="number" step="any" required></label><label>ลองจิจูด (lng)<input id="formLng" type="number" step="any" required></label><label>CCTV ครอบคลุม<select id="formCctv" required><option>มี (ครอบคลุมเต็มพื้นที่)</option><option>มี (บางส่วน)</option><option>ไม่มี</option></select></label><label>สภ. / พื้นที่รับผิดชอบ<input id="formStation"></label><label>อำเภอ<input id="formDistrict"></label><label>จังหวัด<input id="formProvince" value="นราธิวาส"></label><label>ชื่อผู้บันทึก<input id="formRecorder" required></label><label class="full">รายละเอียดเพิ่มเติม<textarea id="formDetails"></textarea></label></div><div class="econ-actions"><button class="econ-cancel" type="button" id="cancelEconomic">ยกเลิก</button><button class="econ-add" type="submit">บันทึกข้อมูล</button></div></form></div>
   <script>
   (() => {
     const types = [
@@ -46,15 +51,75 @@
       {name:'ATM', icon:'🏧', code:'ECON_ATM', color:'#0f766e'},
       {name:'ร้านสะดวกซื้อ', icon:'🛒', code:'ECON_CONVENIENCE', color:'#059669'},
       {name:'ห้างสรรพสินค้า', icon:'🏬', code:'ECON_MALL', color:'#9333ea'},
-      {name:'ร้านทอง', icon:'💰', code:'ECON_GOLD', color:'#ca8a04'}
+      {name:'ร้านทอง', icon:'💰', code:'ECON_GOLD', color:'#ca8a04'},
+      {name:'อื่นๆ', icon:'📍', code:'ECON_OTHER', color:'#64748b'}
     ];
     const $ = id => document.getElementById(id);
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = '';
+    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = '', sessionRef;
     const stationOf = row => {
       const match = /(?:^|\n)station:\s*(.+?)(?:\n|$)/i.exec(String(row.details || ''));
       return match ? match[1].trim() : 'ไม่ระบุ สภ.';
     };
+    const areaOf = row => {
+      const details = String(row.details || '');
+      const get = key => (new RegExp(`(?:^|\\n)${key}:\\s*(.+?)(?:\\n|$)`, 'i').exec(details) || [])[1]?.trim() || '';
+      return {district:get('district'), province:get('province')};
+    };
+    const unique = values => [...new Set(values.filter(Boolean))].sort((a,b) => a.localeCompare(b, 'th'));
+    const optionHtml = (values, placeholder) => `<option value="">${placeholder}</option>${values.map(value => `<option value="${safe(value)}">${safe(value)}</option>`).join('')}`;
+
+    function renderHistory() {
+      const needle = $('historySearch').value.trim().toLowerCase();
+      const type = $('typeSearch').value;
+      const district = $('districtSearch').value;
+      const province = $('provinceSearch').value;
+      const station = $('stationFilter').value;
+      const result = rows.filter(row => {
+        const area = areaOf(row);
+        const haystack = [row.type,row.name,row.lat,row.lng,stationOf(row),area.district,area.province,row.details].join(' ').toLowerCase();
+        return (!needle || haystack.includes(needle)) && (!type || row.type === type) && (!district || area.district === district) && (!province || area.province === province) && (!station || stationOf(row) === station);
+      });
+      $('historyRows').innerHTML = result.map(row => {
+        const area = areaOf(row);
+        const coordinates = Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lng)) ? `${Number(row.lat).toFixed(6)}, ${Number(row.lng).toFixed(6)}` : '-';
+        return `<tr><td>${safe(row.type)}</td><td>${safe(row.name || '-')}</td><td>${coordinates}</td><td>${safe(area.district || '-')}</td><td>${safe(area.province || '-')}</td><td>${safe(stationOf(row))}</td><td>${safe(row.cctv || '-')}</td><td>${safe(row.recorder || '-')}</td><td>${safe(row.timestamp || '-')}</td></tr>`;
+      }).join('');
+      $('historyEmpty').hidden = result.length !== 0;
+    }
+
+    function configureForm() {
+      const canEdit = ['ADMIN','OFFICER'].includes(String(sessionRef?.profile?.role || '').toUpperCase());
+      $('addEconomic').hidden = !canEdit;
+      if (!canEdit) return;
+      const modal = $('economicModal');
+      $('addEconomic').onclick = () => { modal.hidden = false; $('formName').focus(); };
+      $('cancelEconomic').onclick = () => { modal.hidden = true; $('economicForm').reset(); $('formProvince').value = 'นราธิวาส'; };
+      $('economicForm').onsubmit = async event => {
+        event.preventDefault();
+        const lat = Number($('formLat').value), lng = Number($('formLng').value);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < 5 || lat > 8 || lng < 99 || lng > 103) { alert('กรุณาระบุพิกัดละติจูดและลองจิจูดให้ถูกต้อง'); return; }
+        const station = $('formStation').value.trim(), district = $('formDistrict').value.trim(), province = $('formProvince').value.trim();
+        const details = [station && `station: ${station}`, district && `district: ${district}`, province && `province: ${province}`, $('formDetails').value.trim()].filter(Boolean).join('\n');
+        const payload = {type:$('formType').value, name:$('formName').value.trim(), lat, lng, cctv:$('formCctv').value, recorder:$('formRecorder').value.trim(), details, risk_level:'ไม่ระบุ', timestamp:new Date().toISOString()};
+        const {error} = await sessionRef.client.from('economic_data').insert(payload);
+        if (error) { alert('บันทึกข้อมูลไม่สำเร็จ: ' + error.message); return; }
+        modal.hidden = true; $('economicForm').reset(); $('formProvince').value = 'นราธิวาส';
+        alert('บันทึกพื้นที่เศรษฐกิจเรียบร้อย'); loadRows();
+      };
+    }
+
+    async function loadRows() {
+      $('notice').textContent = 'กำลังโหลดข้อมูลพื้นที่เศรษฐกิจ...';
+      const {data,error} = await sessionRef.client.from('economic_data').select('*').order('name');
+      if (error) { $('notice').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + error.message; return; }
+      rows = (data || []).filter(row => types.some(type => type.name === row.type));
+      $('status').textContent = 'ข้อมูลพื้นที่เศรษฐกิจ ' + rows.length.toLocaleString('th-TH') + ' จุด';
+      $('typeSearch').innerHTML = optionHtml(unique(rows.map(row => row.type)), 'ทุกประเภทสถานที่');
+      $('districtSearch').innerHTML = optionHtml(unique(rows.map(row => areaOf(row).district)), 'ทุกอำเภอ');
+      $('provinceSearch').innerHTML = optionHtml(unique(rows.map(row => areaOf(row).province)), 'ทุกจังหวัด');
+      render(); renderHistory();
+    }
 
     function markerIcon(type) {
       return L.divIcon({className:'', iconSize:[34,34], iconAnchor:[17,32],
@@ -71,7 +136,7 @@
       const stations = [...new Set(rows.map(stationOf))].sort((a,b) => a.localeCompare(b, 'th'));
       $('stationFilter').innerHTML = `<option value="">ทุก สภ.</option>${stations.map(station => `<option value="${safe(station)}">${safe(station)}</option>`).join('')}`;
       $('stationFilter').value = activeStation;
-      $('stationFilter').onchange = event => { activeStation = event.target.value; render(); };
+      $('stationFilter').onchange = event => { activeStation = event.target.value; render(); renderHistory(); };
       $('summary').innerHTML = `<article class="card"><small>ทั้งหมดที่แสดง</small><b>${visible.length.toLocaleString('th-TH')} จุด</b></article>` +
         types.map(type => `<article class="card"><small>${type.icon} ${type.name}</small><b>${visible.filter(row => row.type === type.name).length.toLocaleString('th-TH')}</b></article>`).join('');
       layer.clearLayers();
@@ -80,7 +145,7 @@
         if (row.lat === null || row.lng === null || row.lat === '' || row.lng === '') return;
         const lat = Number(row.lat), lng = Number(row.lng);
         if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < 5 || lat > 7.5 || lng < 100 || lng > 102.5) return;
-        const type = types.find(item => item.name === row.type);
+        const type = types.find(item => item.name === row.type) || types[types.length - 1];
         const popup = `<div class="popup"><h3>${safe(row.name || 'ไม่ระบุชื่อ')}</h3><p><b>ประเภท:</b> ${safe(row.type)}</p><p><b>สภ.รับผิดชอบ:</b> ${safe(stationOf(row))}</p><p><b>ระดับความเสี่ยง:</b> ${safe(row.risk_level || 'ไม่ระบุ')}</p><p><b>รายละเอียด:</b> ${safe(row.details || '–')}</p><p><b>พิกัด:</b> ${Number(row.lat).toFixed(6)}, ${Number(row.lng).toFixed(6)}</p></div>`;
         L.marker([Number(row.lat), Number(row.lng)], {icon: markerIcon(type), title: row.name || row.type}).bindPopup(popup).addTo(layer);
         bounds.push([Number(row.lat), Number(row.lng)]);
@@ -91,15 +156,13 @@
     function start(event) {
       const session = event.detail || window.cctvSession;
       if (!session) return;
+      sessionRef = session;
       map = L.map('map', {preferCanvas:true, markerZoomAnimation:false, fadeAnimation:false}).setView([6.425,101.825], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
       layer = L.layerGroup().addTo(map);
-      session.client.from('economic_data').select('*').order('name').then(({data,error}) => {
-        if (error) { $('notice').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + error.message; return; }
-        rows = (data || []).filter(row => types.some(type => type.name === row.type));
-        $('status').textContent = 'ข้อมูลพื้นที่เศรษฐกิจ ' + rows.length.toLocaleString('th-TH') + ' จุด';
-        render();
-      });
+      ['historySearch','typeSearch','districtSearch','provinceSearch'].forEach(id => $(id).addEventListener(id === 'historySearch' ? 'input' : 'change', renderHistory));
+      configureForm();
+      loadRows();
     }
     if (window.cctvSession) start({detail:window.cctvSession});
     else window.addEventListener('cctv-auth-ready', start, {once:true});
