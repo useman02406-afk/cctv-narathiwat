@@ -21,7 +21,7 @@
     .notice{margin:14px 0;padding:11px 13px;border-radius:9px;background:#e0f2fe;color:#075985}.map{height:calc(100vh - 360px);min-height:420px;border-radius:13px;border:1px solid #cbd5e1;overflow:hidden}
     .popup h3{margin:0 0 8px;color:#173b62}.popup p{margin:5px 0}.marker{display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50% 50% 50% 0;box-shadow:0 3px 9px #17203366;transform:rotate(-45deg);font-size:16px}.marker span{transform:rotate(45deg)}
     @media(max-width:600px){main{padding:12px}.map{min-height:360px;height:58vh}.filter{flex:1;text-align:center}.station-control select{min-width:0;width:100%}}
-    .econ-tools{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:9px;margin:14px 0}.econ-tools input,.econ-tools select,.econ-modal input,.econ-modal select,.econ-modal textarea{width:100%;border:1px solid #b7c7da;border-radius:9px;padding:10px;font:inherit;color:#172033;background:#fff}.econ-history{margin-top:14px;background:#fff;border:1px solid #dbe5ef;border-radius:12px;overflow:auto}.econ-history table{width:100%;border-collapse:collapse;min-width:850px}.econ-history th,.econ-history td{padding:10px;border-bottom:1px solid #e5edf5;text-align:left;vertical-align:top}.econ-history th{background:#e0f2fe;color:#173b62}.econ-add{border:0;border-radius:9px;background:#0ea5e9;padding:10px 14px;color:#fff;font:inherit;font-weight:800;cursor:pointer}.econ-add[hidden]{display:none}.econ-modal-backdrop{position:fixed;inset:0;background:#0f172a99;display:grid;place-items:center;padding:16px;z-index:5000}.econ-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 18px 55px #02061799}.econ-modal h2{margin:0 0 14px;color:#173b62}.econ-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.econ-modal label{display:grid;gap:5px;font-weight:800;color:#334155}.econ-modal .full{grid-column:1/-1}.econ-modal textarea{min-height:82px;resize:vertical}.econ-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.econ-cancel{border:1px solid #94a3b8;border-radius:9px;background:#fff;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}@media(max-width:600px){.econ-tools,.econ-grid{grid-template-columns:1fr}.econ-add{width:100%}}
+    .econ-tools{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:9px;margin:14px 0}.econ-tools input,.econ-tools select,.econ-modal input,.econ-modal select,.econ-modal textarea{width:100%;border:1px solid #b7c7da;border-radius:9px;padding:10px;font:inherit;color:#172033;background:#fff}.econ-history{margin-top:14px;background:#fff;border:1px solid #dbe5ef;border-radius:12px;overflow:auto}.econ-history table{width:100%;border-collapse:collapse;min-width:850px}.econ-history th,.econ-history td{padding:10px;border-bottom:1px solid #e5edf5;text-align:left;vertical-align:top}.econ-history th{background:#e0f2fe;color:#173b62}.econ-add{border:0;border-radius:9px;background:#0ea5e9;padding:10px 14px;color:#fff;font:inherit;font-weight:800;cursor:pointer}.econ-add[hidden]{display:none}.econ-modal-backdrop{position:fixed;inset:0;background:#0f172a99;display:grid;place-items:center;padding:16px;z-index:5000}.econ-modal-backdrop[hidden]{display:none!important}.econ-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 18px 55px #02061799}.econ-modal h2{margin:0 0 14px;color:#173b62}.econ-modal-close{float:right;border:0;border-radius:8px;background:#e2e8f0;color:#334155;width:34px;height:34px;font-size:23px;line-height:1;cursor:pointer}.econ-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;clear:both}.econ-modal label{display:grid;gap:5px;font-weight:800;color:#334155}.econ-modal .full{grid-column:1/-1}.econ-modal textarea{min-height:82px;resize:vertical}.econ-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.econ-cancel{border:1px solid #94a3b8;border-radius:9px;background:#fff;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}body.econ-modal-open{overflow:hidden}@media(max-width:600px){.econ-tools,.econ-grid{grid-template-columns:1fr}.econ-add{width:100%}}
   </style>
 <script src="map-fullscreen.js?v=20260812-4"></script>
 </head>
@@ -43,7 +43,12 @@
     <div id="map" class="map"></div>
     <section class="econ-history"><table><thead><tr><th>ประเภท</th><th>ชื่อสถานที่</th><th>พิกัด</th><th>อำเภอ</th><th>จังหวัด</th><th>สภ.</th><th>CCTV</th><th>ผู้บันทึก</th><th>บันทึกเมื่อ</th></tr></thead><tbody id="historyRows"></tbody></table><div id="historyEmpty" style="padding:18px;color:#64748b" hidden>ไม่พบรายการตามเงื่อนไขที่เลือก</div></section>
   </main>
-  <div class="econ-modal-backdrop" id="economicModal" hidden><form class="econ-modal" id="economicForm"><h2>เพิ่มพื้นที่เศรษฐกิจ</h2><div class="econ-grid"><label>ประเภทสถานที่<select id="formType" required><option value="">เลือกประเภท</option><option>สถานีบริการน้ำมัน</option><option>ธนาคาร</option><option>ATM</option><option>ร้านทอง</option><option>ร้านสะดวกซื้อ</option><option>ห้างสรรพสินค้า</option><option value="อื่นๆ">อื่นๆ (ระบุในรายละเอียด)</option></select></label><label>ชื่อสถานที่<input id="formName" required></label><label>ละติจูด (lat)<input id="formLat" type="number" step="any" required></label><label>ลองจิจูด (lng)<input id="formLng" type="number" step="any" required></label><label>CCTV ครอบคลุม<select id="formCctv" required><option>มี (ครอบคลุมเต็มพื้นที่)</option><option>มี (บางส่วน)</option><option>ไม่มี</option></select></label><label>สภ. / พื้นที่รับผิดชอบ<input id="formStation"></label><label>อำเภอ<input id="formDistrict"></label><label>จังหวัด<input id="formProvince" value="นราธิวาส"></label><label>ชื่อผู้บันทึก<input id="formRecorder" required></label><label class="full">รายละเอียดเพิ่มเติม<textarea id="formDetails"></textarea></label></div><div class="econ-actions"><button class="econ-cancel" type="button" id="cancelEconomic">ยกเลิก</button><button class="econ-add" type="submit">บันทึกข้อมูล</button></div></form></div>
+  <div class="econ-modal-backdrop" id="economicModal" hidden>
+    <form class="econ-modal" id="economicForm" data-sweet-confirm data-sweet-title="ยืนยันการเพิ่มพื้นที่เศรษฐกิจ" data-sweet-message="ตรวจสอบประเภทสถานที่ พิกัด และรายละเอียดก่อนบันทึก" data-sweet-confirm-text="บันทึกข้อมูล" role="dialog" aria-modal="true" aria-labelledby="economicFormTitle">
+      <button class="econ-modal-close" type="button" id="closeEconomic" aria-label="ปิดฟอร์มเพิ่มพื้นที่เศรษฐกิจ">×</button><h2 id="economicFormTitle">เพิ่มพื้นที่เศรษฐกิจ</h2>
+      <div class="econ-grid"><label>ประเภทสถานที่<select id="formType" required><option value="">เลือกประเภท</option><option>สถานีบริการน้ำมัน</option><option>ธนาคาร</option><option>ATM</option><option>ร้านทอง</option><option>ร้านสะดวกซื้อ</option><option>ห้างสรรพสินค้า</option><option value="อื่นๆ">อื่นๆ (ระบุในรายละเอียด)</option></select></label><label>ชื่อสถานที่<input id="formName" required></label><label>ละติจูด (lat)<input id="formLat" type="number" step="any" required></label><label>ลองจิจูด (lng)<input id="formLng" type="number" step="any" required></label><label>CCTV ครอบคลุม<select id="formCctv" required><option>มี (ครอบคลุมเต็มพื้นที่)</option><option>มี (บางส่วน)</option><option>ไม่มี</option></select></label><label>สภ. / พื้นที่รับผิดชอบ<input id="formStation"></label><label>อำเภอ<input id="formDistrict"></label><label>จังหวัด<input id="formProvince" value="นราธิวาส"></label><label>ชื่อผู้บันทึก<input id="formRecorder" required></label><label class="full">รายละเอียดเพิ่มเติม<textarea id="formDetails"></textarea></label></div><div class="econ-actions"><button class="econ-cancel" type="button" id="cancelEconomic">ยกเลิก</button><button class="econ-add" type="submit" id="saveEconomic">บันทึกข้อมูล</button></div>
+    </form>
+  </div>
   <script>
   (() => {
     const types = [
@@ -91,11 +96,27 @@
 
     function configureForm() {
       const canEdit = ['ADMIN','OFFICER'].includes(String(sessionRef?.profile?.role || '').toUpperCase());
+      const modal = $('economicModal'), form = $('economicForm');
+      let lastFocus = null;
+      const closeModal = ({reset = true} = {}) => {
+        modal.hidden = true;
+        document.body.classList.remove('econ-modal-open');
+        if (reset) { form.reset(); $('formProvince').value = 'นราธิวาส'; }
+        lastFocus?.focus?.();
+      };
+      const openModal = () => {
+        lastFocus = document.activeElement;
+        modal.hidden = false;
+        document.body.classList.add('econ-modal-open');
+        window.setTimeout(() => $('formName').focus(), 0);
+      };
+      $('cancelEconomic').onclick = () => closeModal();
+      $('closeEconomic').onclick = () => closeModal();
+      modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
       $('addEconomic').hidden = !canEdit;
       if (!canEdit) return;
-      const modal = $('economicModal');
-      $('addEconomic').onclick = () => { modal.hidden = false; $('formName').focus(); };
-      $('cancelEconomic').onclick = () => { modal.hidden = true; $('economicForm').reset(); $('formProvince').value = 'นราธิวาส'; };
+      $('addEconomic').onclick = openModal;
       $('economicForm').onsubmit = async event => {
         event.preventDefault();
         const lat = Number($('formLat').value), lng = Number($('formLng').value);
@@ -103,10 +124,16 @@
         const station = $('formStation').value.trim(), district = $('formDistrict').value.trim(), province = $('formProvince').value.trim();
         const details = [station && `station: ${station}`, district && `district: ${district}`, province && `province: ${province}`, $('formDetails').value.trim()].filter(Boolean).join('\n');
         const payload = {type:$('formType').value, name:$('formName').value.trim(), lat, lng, cctv:$('formCctv').value, recorder:$('formRecorder').value.trim(), details, risk_level:'ไม่ระบุ', timestamp:new Date().toISOString()};
-        const {error} = await sessionRef.client.from('economic_data').insert(payload);
-        if (error) { alert('บันทึกข้อมูลไม่สำเร็จ: ' + error.message); return; }
-        modal.hidden = true; $('economicForm').reset(); $('formProvince').value = 'นราธิวาส';
-        alert('บันทึกพื้นที่เศรษฐกิจเรียบร้อย'); loadRows();
+        const saveButton = $('saveEconomic');
+        saveButton.disabled = true; saveButton.textContent = 'กำลังบันทึก…';
+        try {
+          const {error} = await sessionRef.client.from('economic_data').insert(payload);
+          if (error) { smartAlert('บันทึกข้อมูลไม่สำเร็จ', error.message, 'error'); return; }
+          closeModal();
+          await loadRows();
+        } finally {
+          saveButton.disabled = false; saveButton.textContent = 'บันทึกข้อมูล';
+        }
       };
     }
 

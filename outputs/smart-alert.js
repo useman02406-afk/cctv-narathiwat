@@ -136,6 +136,34 @@
       window.setTimeout(() => { allowOneNativeConfirm = false; }, 0);
     }, true);
   }
+  function bindFormConfirmation() {
+    document.addEventListener('submit', async (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.matches('[data-sweet-confirm]')) return;
+      if (form.dataset.sweetConfirmed === 'true') {
+        delete form.dataset.sweetConfirmed;
+        return;
+      }
+      if (form.dataset.sweetConfirmBusy === 'true') {
+        event.preventDefault();
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      form.dataset.sweetConfirmBusy = 'true';
+      const approved = await window.cctvConfirm(
+        form.dataset.sweetTitle || 'ยืนยันการบันทึกข้อมูล',
+        form.dataset.sweetMessage || 'โปรดตรวจสอบข้อมูลก่อนบันทึก',
+        form.dataset.sweetConfirmText || 'บันทึกข้อมูล'
+      );
+      delete form.dataset.sweetConfirmBusy;
+      if (!approved) return;
+      form.dataset.sweetConfirmed = 'true';
+      if (typeof form.requestSubmit === 'function') form.requestSubmit(event.submitter || undefined);
+      else form.submit();
+    }, true);
+  }
   bindMutationAlerts();
   bindDeleteConfirmation();
+  bindFormConfirmation();
 })();
