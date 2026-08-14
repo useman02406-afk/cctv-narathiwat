@@ -3,10 +3,6 @@ Safely imports warrant-person photos into Supabase Storage and links them to
 risk_person_records. The service role key is prompted as hidden input and is
 kept only in this PowerShell process.
 
-Examples:
-  .\scripts\run-risk-person-photo-import.ps1 -ZipPath "C:\path\บุคคลตามหมายจับ.zip"
-  .\scripts\run-risk-person-photo-import.ps1 -ZipPath "C:\path\บุคคลตามหมายจับ.zip" -Apply
-
 Run without -Apply first to check the matches. Use -Apply only after the dry
 run reports the expected matches.
 #>
@@ -19,19 +15,20 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path -Parent $PSScriptRoot
 $importer = Join-Path $PSScriptRoot 'upload-risk-person-photos.mjs'
-$node = (Get-Command node -ErrorAction SilentlyContinue).Source
-if (-not $node) {
-  throw 'ไม่พบ Node.js: ติดตั้ง Node.js LTS ก่อน แล้วจึงเรียกสคริปต์นี้อีกครั้ง'
+$nodeCommand = Get-Command node -ErrorAction SilentlyContinue
+if (-not $nodeCommand) {
+  throw 'Node.js was not found. Install Node.js LTS, then run this script again.'
 }
+$node = $nodeCommand.Source
 
-$secureKey = Read-Host 'วาง Supabase service_role key (จะไม่แสดงและไม่ถูกบันทึก)' -AsSecureString
-$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+$secureKey = Read-Host 'Paste Supabase service_role key (hidden; not saved)' -AsSecureString
+$bstr = [IntPtr]::Zero
 $plainKey = $null
 $extractDir = Join-Path ([System.IO.Path]::GetTempPath()) ("warrant-photo-import-" + [Guid]::NewGuid().ToString('N'))
 
 try {
+  $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
   $plainKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
   $env:SUPABASE_SERVICE_ROLE_KEY = $plainKey
 
@@ -41,12 +38,14 @@ try {
   $arguments = @($importer, $extractDir)
   if ($Apply) { $arguments += '--apply' }
   & $node @arguments
-  if ($LASTEXITCODE -ne 0) { throw "ตัวนำเข้าหยุดทำงาน (exit code $LASTEXITCODE)" }
+  if ($LASTEXITCODE -ne 0) {
+    throw "Photo importer stopped with exit code $LASTEXITCODE."
+  }
 
   if ($Apply) {
-    Write-Host 'นำเข้ารูปและเชื่อมข้อมูลเสร็จแล้ว' -ForegroundColor Green
+    Write-Host 'Import completed: photos were uploaded and linked.' -ForegroundColor Green
   } else {
-    Write-Host 'ตรวจสอบแบบ dry run เสร็จแล้ว — หากยอดตรงตามต้องการ ให้รันอีกครั้งพร้อม -Apply' -ForegroundColor Yellow
+    Write-Host 'Dry run completed. If the match count is correct, rerun with -Apply.' -ForegroundColor Yellow
   }
 }
 finally {
