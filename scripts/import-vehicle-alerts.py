@@ -388,13 +388,44 @@ def upload_media(project_url, key, media_by_plate, records):
 
 
 def upsert_records(project_url, key, records):
+    """Save imported rows without losing an actionable Supabase error.
+
+    Older deployments used a partial unique index for ``source_record_key``.
+    PostgREST cannot use a partial index with ``on_conflict``, which results in
+    an opaque HTTP 400.  Try the fast batch upsert first, then fall back to an
+    update-or-insert request per source row.  The fallback works with both the
+    legacy index and the newer unique constraint migration.
+    """
     endpoint = project_url.rstrip("/") + "/rest/v1/vehicle_alerts?on_conflict=source_record_key"
+    base_endpoint = project_url.rstrip("/") + "/rest/v1/vehicle_alerts"
     for start in range(0, len(records), 100):
         batch = records[start:start + 100]
-        headers = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates,return=minimal"}
-        req = urllib.request.Request(endpoint, data=json.dumps(batch, ensure_ascii=False).encode("utf-8"), headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=120):
-            pass
+        try:
+            request(endpoint, "POST", key, batch, extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
+            continue
+        except SupabaseRequestError as error:
+            if error.status not in {400, 409}:
+                raise
+            print(
+                "Batch upsert was rejected; using compatible row-by-row save. "
+                f"Supabase said: {error.message}",
+                file=sys.stderr,
+            )
+
+        for record in batch:
+            source_key = clean(record.get("source_record_key"))
+            try:
+                if source_key:
+                    filter_url = base_endpoint + "?source_record_key=eq." + urllib.parse.quote(source_key, safe="")
+                    updated = request(filter_url, "PATCH", key, record, extra_headers={"Prefer": "return=representation"})
+                    if json.loads(updated.decode("utf-8") or "[]"):
+                        continue
+                request(base_endpoint, "POST", key, [record], extra_headers={"Prefer": "return=minimal"})
+            except SupabaseRequestError as row_error:
+                label = clean(record.get("plate_number")) or source_key or "unknown row"
+                raise RuntimeError(
+                    f"Unable to save vehicle record '{label}': {row_error.message}"
+                ) from row_error
 
 
 def main():
