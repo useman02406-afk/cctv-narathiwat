@@ -13,7 +13,13 @@ if ($PptxPath) { $arguments += @("--pptx", $PptxPath) }
 
 $pythonExe = $null
 $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
-if ($pythonCommand) { $pythonExe = $pythonCommand.Source }
+if ($pythonCommand -and $pythonCommand.Source -and
+    $pythonCommand.Source -notmatch '\\WindowsApps\\' -and
+    (Test-Path -LiteralPath $pythonCommand.Source -PathType Leaf)) {
+  # Do not use the Microsoft Store app-execution alias. It reports that Python
+  # is missing even when the bundled Codex runtime is available.
+  $pythonExe = $pythonCommand.Source
+}
 
 if (-not $pythonExe) {
   $bundledPython = Join-Path $env:USERPROFILE ".cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
@@ -21,8 +27,18 @@ if (-not $pythonExe) {
 }
 
 if (-not $pythonExe) {
-  throw "Python 3 was not found. Install Python 3 or add it to PATH, then run this script again."
+  $runtimeRoot = Join-Path $env:USERPROFILE ".cache\codex-runtimes"
+  $runtimePython = Get-ChildItem -LiteralPath $runtimeRoot -Filter python.exe -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\Lib\\venv\\' } |
+    Select-Object -First 1 -ExpandProperty FullName
+  if ($runtimePython) { $pythonExe = $runtimePython }
 }
+
+if (-not $pythonExe) {
+  throw "Python 3 was not found. The Codex bundled runtime was not found either. Install Python 3 or restore the Codex runtime, then run this script again."
+}
+
+Write-Host "Using Python runtime: $pythonExe"
 
 function Invoke-VehicleImporter {
   param([string[]]$ImporterArguments)
