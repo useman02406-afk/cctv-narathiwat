@@ -83,16 +83,39 @@ def date_text(value):
     return value
 
 
-def iso_datetime(date_value, time_value):
-    date_value = date_text(date_value)
-    if not date_value:
+def time_text(value):
+    """Return a valid HH:MM:SS value from Excel's inconsistent time cells."""
+    if value is None:
         return None
-    if "T" in date_value:
-        return date_value
-    time_value = clean(time_value)
-    if time_value:
-        return f"{date_value}T{time_value[:8]}+07:00"
-    return f"{date_value}T00:00:00+07:00"
+    if isinstance(value, dt.datetime):
+        value = value.time()
+    if isinstance(value, dt.time):
+        return value.replace(microsecond=0).isoformat()
+
+    raw = clean(value)
+    if not raw or raw in {"-", "–", "—", "ไม่ระบุ"}:
+        return None
+
+    # Examples in source data: "00.01 -", "08:35 น.", "8.35".
+    match = re.search(
+        r"(?<!\d)([01]?\d|2[0-3])\s*[:.]\s*([0-5]\d)(?:\s*[:.]\s*([0-5]\d))?",
+        raw,
+    )
+    if not match:
+        return None
+    return f"{int(match.group(1)):02d}:{int(match.group(2)):02d}:{int(match.group(3) or 0):02d}"
+
+
+def iso_datetime(date_value, time_value):
+    normalized_date = date_text(date_value)
+    if not normalized_date:
+        return None
+    try:
+        date_part = normalized_date.split("T", 1)[0]
+        parsed_date = dt.date.fromisoformat(date_part)
+    except ValueError:
+        return None
+    return f"{parsed_date.isoformat()}T{time_text(time_value) or '00:00:00'}+07:00"
 
 
 def read_workbook(path: Path):
