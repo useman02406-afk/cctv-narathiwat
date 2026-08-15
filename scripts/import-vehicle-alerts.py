@@ -14,6 +14,7 @@ import os
 import re
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 import zipfile
 from collections import defaultdict
@@ -25,6 +26,18 @@ from openpyxl import load_workbook
 DEFAULT_PROJECT_URL = "https://rbahodbdbxfvftfxeipe.supabase.co"
 TEXT_NS = "{http://schemas.openxmlformats.org/drawingml/2006/main}t"
 REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship"
+VEHICLE_EVIDENCE_BUCKET = "vehicle-evidence"
+ALLOWED_MEDIA_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+
+class SupabaseRequestError(RuntimeError):
+    """Preserve Storage's response body so import failures are actionable."""
+
+    def __init__(self, status, url, message):
+        self.status = status
+        self.url = url
+        self.message = message
+        super().__init__(f"Supabase HTTP {status}: {message}")
 
 
 def clean(value):
@@ -302,13 +315,51 @@ def request(url, method, key, body=None, content_type="application/json", extra_
         headers.update(extra_headers)
     data = body if isinstance(body, bytes) else (json.dumps(body, ensure_ascii=False).encode("utf-8") if body is not None else None)
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=90) as response:
-        return response.read()
+    try:
+        with urllib.request.urlopen(req, timeout=90) as response:
+            return response.read()
+    except urllib.error.HTTPError as error:
+        message = error.read().decode("utf-8", errors="replace").strip()
+        raise SupabaseRequestError(error.code, url, message or error.reason) from error
+
+
+def ensure_vehicle_evidence_bucket(project_url, key):
+    """Create the private Storage bucket when the migration was not run yet."""
+    base = project_url.rstrip("/") + "/storage/v1/bucket"
+    try:
+        request(f"{base}/{VEHICLE_EVIDENCE_BUCKET}", "GET", key)
+        return
+    except SupabaseRequestError as error:
+        # Storage returns either 400 or 404 for a non-existent bucket,
+        # depending on the Storage API version.
+        if error.status not in {400, 404}:
+            raise
+
+    bucket = {
+        "id": VEHICLE_EVIDENCE_BUCKET,
+        "name": VEHICLE_EVIDENCE_BUCKET,
+        "public": False,
+        "file_size_limit": 10 * 1024 * 1024,
+        "allowed_mime_types": sorted(ALLOWED_MEDIA_TYPES),
+    }
+    try:
+        request(base, "POST", key, bucket)
+        print("Created Storage bucket: vehicle-evidence", file=sys.stderr)
+    except SupabaseRequestError as error:
+        # Another import may have created it between the GET and POST.
+        if error.status not in {400, 409}:
+            raise
 
 
 def upload_media(project_url, key, media_by_plate, records):
     uploaded = 0
+    skipped = 0
     plate_paths = defaultdict(list)
+    try:
+        ensure_vehicle_evidence_bucket(project_url, key)
+    except SupabaseRequestError as error:
+        print(f"Warning: unable to prepare Storage bucket; vehicle records will still import. {error}", file=sys.stderr)
+        return uploaded, len(media_by_plate)
     unique_media = {}
     for plate, media_items in media_by_plate.items():
         for media_name, content in media_items:
@@ -316,10 +367,16 @@ def upload_media(project_url, key, media_by_plate, records):
             unique_media[digest] = (media_name, content)
     for storage_path, (media_name, content) in unique_media.items():
         mime = mimetypes.guess_type(media_name)[0] or "application/octet-stream"
-        if mime not in {"image/jpeg", "image/png", "image/webp", "image/gif"}:
+        if mime not in ALLOWED_MEDIA_TYPES:
+            skipped += 1
             continue
-        endpoint = project_url.rstrip("/") + "/storage/v1/object/vehicle-evidence/" + urllib.parse.quote("vehicle-alerts/" + storage_path)
-        request(endpoint, "POST", key, content, mime, {"x-upsert": "true"})
+        endpoint = project_url.rstrip("/") + "/storage/v1/object/" + VEHICLE_EVIDENCE_BUCKET + "/" + urllib.parse.quote("vehicle-alerts/" + storage_path, safe="/")
+        try:
+            request(endpoint, "POST", key, content, mime, {"x-upsert": "true"})
+        except SupabaseRequestError as error:
+            skipped += 1
+            print(f"Warning: skipped media {media_name} ({error})", file=sys.stderr)
+            continue
         plate_paths[storage_path.split("/", 1)[0]].append(storage_path)
         uploaded += 1
     for record in records:
@@ -327,7 +384,7 @@ def upload_media(project_url, key, media_by_plate, records):
             {"bucket": "vehicle-evidence", "path": "vehicle-alerts/" + storage_path}
             for storage_path in plate_paths.get(normal_plate(record["plate_number"]), [])
         ]
-    return uploaded
+    return uploaded, skipped
 
 
 def upsert_records(project_url, key, records):
@@ -366,9 +423,10 @@ def main():
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
     if not key:
         raise SystemExit("Set SUPABASE_SERVICE_ROLE_KEY temporarily before running this importer.")
-    uploaded = upload_media(args.project_url, key, media, records)
+    uploaded, skipped = upload_media(args.project_url, key, media, records)
     upsert_records(args.project_url, key, records)
     summary["uploaded_media"] = uploaded
+    summary["skipped_media"] = skipped
     print(json.dumps(summary, ensure_ascii=False))
 
 
