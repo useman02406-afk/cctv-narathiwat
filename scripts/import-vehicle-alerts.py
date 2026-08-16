@@ -52,6 +52,20 @@ def clean_or_none(value):
     return value or None
 
 
+def normalize_vehicle_status(value, alert_type=None):
+    """Map source labels to values accepted by vehicle_alerts_status_check."""
+    context = f"{clean(value)} {clean(alert_type)}".lower()
+    if any(token in context for token in (
+        "\u0e44\u0e14\u0e49\u0e04\u0e37\u0e19", "\u0e1e\u0e1a\u0e41\u0e25\u0e49\u0e27", "recovered", "resolved", "found",
+    )):
+        return "\u0e1e\u0e1a\u0e41\u0e25\u0e49\u0e27"
+    if any(token in context for token in (
+        "\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01", "\u0e16\u0e2d\u0e19", "cancel", "inactive", "closed",
+    )):
+        return "\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01"
+    return "\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19"
+
+
 def normal_plate(value):
     return "".join(ch for ch in clean(value).upper() if ch.isalnum())
 
@@ -141,9 +155,7 @@ def read_workbook(path: Path):
         except (TypeError, ValueError):
             source_sequence = fallback_sequence
         alert_type = clean_or_none(get(row, "Texttb")) or clean_or_none(get(row, "สถานะ")) or "รถแจ้งเตือน"
-        current_status = clean_or_none(get(row, "สถานะ")) or "ใช้งาน"
-        if "ได้คืน" in alert_type or "ได้คืน" in current_status:
-            current_status = "พบแล้ว"
+        current_status = normalize_vehicle_status(get(row, "สถานะ"), alert_type)
         photo_refs = [clean_or_none(get(row, header)) for header in ("รย3", "รย4")]
         photo_refs = [reference for reference in photo_refs if reference]
         record = {
@@ -222,8 +234,8 @@ def read_workbook_positional(path: Path):
             source_sequence = fallback_sequence
         source_refs = [clean_or_none(get(row, key)) for key in ("ry3", "ry4")]
         source_refs = [item for item in source_refs if item]
-        case_status = clean_or_none(get(row, "case_status")) or "active"
         alert_type = clean_or_none(get(row, "alert_type")) or "vehicle-alert"
+        case_status = normalize_vehicle_status(get(row, "case_status"), alert_type)
         try:
             year = int(get(row, "year")) if get(row, "year") not in (None, "") else None
         except (TypeError, ValueError):
