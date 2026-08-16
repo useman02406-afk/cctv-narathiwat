@@ -16,6 +16,7 @@ import sys
 import urllib.parse
 import urllib.error
 import urllib.request
+import uuid
 import zipfile
 from collections import defaultdict
 from pathlib import Path
@@ -410,6 +411,38 @@ def upload_media(project_url, key, media_by_plate, records):
     return uploaded, skipped
 
 
+def resolve_created_by(project_url, key, requested_id=""):
+    """Return the profile UUID that owns imported audit rows.
+
+    ``vehicle_alerts.created_by`` is required by the production schema.  A
+    service-role import has no signed-in user, so use an explicitly supplied
+    profile UUID or the first active ADMIN profile.
+    """
+    requested_id = clean(requested_id)
+    if requested_id:
+        try:
+            return str(uuid.UUID(requested_id))
+        except ValueError as error:
+            raise RuntimeError("--created-by must be a valid profile UUID.") from error
+
+    endpoint = (
+        project_url.rstrip("/")
+        + "/rest/v1/profiles?select=id&role=eq.ADMIN&active=eq.true&limit=1"
+    )
+    try:
+        payload = request(endpoint, "GET", key)
+        profiles = json.loads(payload.decode("utf-8") or "[]")
+    except (SupabaseRequestError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Unable to find an active ADMIN profile: {error}") from error
+
+    if not profiles or not profiles[0].get("id"):
+        raise RuntimeError(
+            "No active ADMIN profile was found. Activate an ADMIN account or "
+            "run again with --created-by <profile UUID>."
+        )
+    return str(uuid.UUID(str(profiles[0]["id"])))
+
+
 def upsert_records(project_url, key, records):
     """Save imported rows without losing an actionable Supabase error.
 
@@ -456,6 +489,11 @@ def main():
     parser.add_argument("--xlsx", required=True, type=Path)
     parser.add_argument("--pptx", type=Path)
     parser.add_argument("--project-url", default=DEFAULT_PROJECT_URL)
+    parser.add_argument(
+        "--created-by",
+        default=os.environ.get("VEHICLE_IMPORT_CREATED_BY", ""),
+        help="Profile UUID used for created_by; defaults to the first active ADMIN.",
+    )
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     if not args.xlsx.is_file():
@@ -477,10 +515,14 @@ def main():
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
     if not key:
         raise SystemExit("Set SUPABASE_SERVICE_ROLE_KEY temporarily before running this importer.")
+    created_by = resolve_created_by(args.project_url, key, args.created_by)
+    for record in records:
+        record["created_by"] = created_by
     uploaded, skipped = upload_media(args.project_url, key, media, records)
     upsert_records(args.project_url, key, records)
     summary["uploaded_media"] = uploaded
     summary["skipped_media"] = skipped
+    summary["created_by"] = created_by
     print(json.dumps(summary, ensure_ascii=False))
 
 

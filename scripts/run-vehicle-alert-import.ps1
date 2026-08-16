@@ -5,11 +5,13 @@ param(
   [string]$XlsxPath,
   [ValidateScript({ [string]::IsNullOrWhiteSpace($_) -or (Test-Path -LiteralPath $_ -PathType Leaf) })]
   [string]$PptxPath,
+  [string]$CreatedBy,
   [switch]$Apply
 )
 
 $arguments = @("$PSScriptRoot\import-vehicle-alerts.py", "--xlsx", $XlsxPath)
 if ($PptxPath) { $arguments += @("--pptx", $PptxPath) }
+if ($CreatedBy) { $arguments += @("--created-by", $CreatedBy) }
 
 $pythonExe = $null
 $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
