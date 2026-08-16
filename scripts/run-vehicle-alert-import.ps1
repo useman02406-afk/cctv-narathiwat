@@ -41,11 +41,16 @@ if (-not $pythonExe) {
 }
 
 Write-Host "Using Python runtime: $pythonExe"
+$logPath = Join-Path $env:TEMP "cctv-vehicle-alert-import-last.log"
 
 function Invoke-VehicleImporter {
   param([string[]]$ImporterArguments)
-  & $pythonExe @ImporterArguments
-  return $LASTEXITCODE
+  Remove-Item -LiteralPath $logPath -Force -ErrorAction SilentlyContinue
+  & $pythonExe @ImporterArguments 2>&1 |
+    Tee-Object -FilePath $logPath |
+    Out-Host
+  $importerExitCode = $LASTEXITCODE
+  return $importerExitCode
 }
 
 if (-not $Apply) {
@@ -59,7 +64,14 @@ try {
   $env:SUPABASE_SERVICE_ROLE_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
   $applyArguments = @($arguments) + @("--apply")
   $exitCode = Invoke-VehicleImporter $applyArguments
-  if ($exitCode -ne 0) { throw "Vehicle alert importer stopped with exit code $exitCode." }
+  if ($exitCode -ne 0) {
+    Write-Host ""
+    Write-Host "Last importer messages:" -ForegroundColor Yellow
+    Get-Content -LiteralPath $logPath -Tail 35 -ErrorAction SilentlyContinue | Out-Host
+    throw "Vehicle alert importer stopped with exit code $exitCode. Full error log: $logPath"
+  }
+  Write-Host "Vehicle alert import completed successfully." -ForegroundColor Green
+  Write-Host "Import log: $logPath"
 }
 finally {
   Remove-Item Env:SUPABASE_SERVICE_ROLE_KEY -ErrorAction SilentlyContinue
