@@ -1,8 +1,18 @@
 (() => {
   'use strict';
-  if (window.__vehicleMapLoaded) return;
-  window.__vehicleMapLoaded = true;
-  const db = window.CCTV_SUPABASE;
+  if (window.__vehicleMapLoading || window.__vehicleMapLoaded) return;
+  window.__vehicleMapLoading = true;
+  let db = null;
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  async function waitForDatabase(timeout = 15000) {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      const client = window.CCTV_SUPABASE;
+      if (client && typeof client.from === 'function') return client;
+      await sleep(100);
+    }
+    throw new Error('ไม่พบการเชื่อมต่อฐานข้อมูล Supabase');
+  }
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const text = (row, ...keys) => keys.map(key => row[key]).find(value => value !== null && value !== undefined && String(value).trim()) ?? '-';
   const coord = value => { const n = Number(String(value ?? '').replace(/,/g, '.').trim()); return Number.isFinite(n) ? n : null; };
@@ -44,10 +54,12 @@
   }
 
   async function init(){
-    if(!db || !document.querySelector('main')) return;
+    db = await waitForDatabase();
+    const main = document.querySelector('main');
+    if(!main) throw new Error('ไม่พบพื้นที่แสดงผลหลัก');
     const section=document.createElement('section'); section.className='vehicle-live-panel';
     section.innerHTML=`<header class="vehicle-live-head"><h2>🚘 แผนที่และรายการรถจากฐานข้อมูล</h2><p>แสดงรถแจ้งเตือนและบันทึกพบรถ พร้อมพิกัดและรายละเอียดจริง</p></header><div class="vehicle-live-tools"><input id="vehicleLiveSearch" placeholder="ค้นหาทะเบียน ยี่ห้อ รุ่น สถานที่ หรือรายละเอียด"><select id="vehicleLiveStation"><option value="">ทุก สภ.</option></select><select id="vehicleLiveStatus"><option value="">ทุกสถานะ</option></select><select id="vehicleLivePageSize"><option>25</option><option selected>50</option><option>100</option></select></div><div class="vehicle-live-stats"><span class="vehicle-live-stat" id="vehicleLiveTotal">กำลังโหลด…</span><span class="vehicle-live-stat" id="vehicleLiveCoords"></span></div><div class="vehicle-live-grid"><div class="vehicle-map-shell"><div id="vehicleLiveMap" class="vehicle-map"></div><button type="button" class="vehicle-map-full">⛶ แผนที่เต็มจอ</button></div><div id="vehicleLiveList" class="vehicle-list"></div></div><div class="vehicle-pages"><button id="vehiclePrev">ก่อนหน้า</button><b id="vehiclePage"></b><button id="vehicleNext">ถัดไป</button></div>`;
-    document.querySelector('main').prepend(section);
+    main.prepend(section);
     try{
       await ensureLeaflet(); const rows=await fetchAll(); let page=1; let filtered=[]; let markers=[];
       const map=L.map('vehicleLiveMap',{preferCanvas:true}).setView([6.42,101.82],10);
@@ -72,5 +84,14 @@
       render(); setTimeout(()=>map.invalidateSize({pan:false}),120);
     }catch(error){document.getElementById('vehicleLiveTotal').textContent='โหลดข้อมูลไม่สำเร็จ'; document.getElementById('vehicleLiveList').innerHTML=`<div class="vehicle-empty">${esc(error.message||error)}</div>`;}
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+  async function boot(){
+    try {
+      await init();
+      window.__vehicleMapLoaded = true;
+    } catch(error) {
+      window.__vehicleMapLoading = false;
+      console.error('Vehicle map initialization failed:', error);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
 })();
