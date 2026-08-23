@@ -53,7 +53,25 @@
     return all;
   }
 
+  function hideLegacyDuplicateViews(){
+    const root=document.querySelector('main.wrap');
+    if(!root)return;
+    const children=Array.from(root.children);
+    const stats=children.find(el=>el.classList.contains('stats'));
+    const history=children.find(el=>{
+      if(!el.classList.contains('panel'))return false;
+      const heading=Array.from(el.children).find(child=>child.tagName==='H2');
+      return heading?.textContent.trim()==='ประวัติการตรวจพบ';
+    });
+    [stats,history].filter(Boolean).forEach(el=>{
+      el.hidden=true;
+      el.classList.add('vehicle-legacy-duplicate');
+      el.setAttribute('aria-hidden','true');
+    });
+  }
+
   async function init(){
+    hideLegacyDuplicateViews();
     db = await waitForDatabase();
     const main = document.querySelector('main');
     if(!main) throw new Error('ไม่พบพื้นที่แสดงผลหลัก');
