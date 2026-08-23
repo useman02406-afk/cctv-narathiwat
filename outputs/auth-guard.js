@@ -104,6 +104,31 @@
     document.documentElement.classList.add('auth-pending');
   }
   const client = window.supabase.createClient(URL, KEY);
+  // Shared read client for page enhancements that are loaded after auth-guard.
+  window.CCTV_SUPABASE = window.CCTV_SUPABASE || client;
+
+  function loadVehicleMapEnhancement() {
+    if (!/vehicle-(alerts|sightings)\.html$/i.test(location.pathname)) return;
+    if (!document.querySelector('link[data-vehicle-map]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = new URL('vehicle-map.css', location.href).href;
+      style.dataset.vehicleMap = 'true';
+      document.head.appendChild(style);
+    }
+    if (!document.querySelector('script[data-vehicle-map]')) {
+      const script = document.createElement('script');
+      script.src = new URL('vehicle-map.js', location.href).href;
+      script.defer = true;
+      script.dataset.vehicleMap = 'true';
+      document.head.appendChild(script);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadVehicleMapEnhancement, { once: true });
+  } else {
+    loadVehicleMapEnhancement();
+  }
   let localSignOutInProgress = false;
   client.auth.onAuthStateChange((event) => {
     if (event !== 'SIGNED_OUT' || localSignOutInProgress || location.pathname.toLowerCase().endsWith('/login.html')) return;
