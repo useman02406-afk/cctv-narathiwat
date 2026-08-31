@@ -67,6 +67,17 @@
     }
   }
 
+  function enforceViewerPermissions(event) {
+    const session = event?.detail || window.cctvSession;
+    if (session?.profile?.role !== 'VIEWER') return;
+    const createButton = document.getElementById('new');
+    const formPanel = document.getElementById('formPanel');
+    [createButton, formPanel].filter(Boolean).forEach((element) => {
+      element.classList.add(HIDDEN_CLASS);
+      element.setAttribute('aria-hidden', 'true');
+    });
+  }
+
   function applyCleanup() {
     installStyle();
     renameMapHeading();
@@ -76,6 +87,8 @@
 
   function start() {
     applyCleanup();
+    enforceViewerPermissions();
+    window.addEventListener('cctv-auth-ready', enforceViewerPermissions);
     const observer = new MutationObserver(applyCleanup);
     observer.observe(document.body, { childList: true, subtree: true });
     window.setTimeout(() => observer.disconnect(), 8000);
