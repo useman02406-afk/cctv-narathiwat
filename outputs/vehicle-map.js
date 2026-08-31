@@ -19,6 +19,7 @@
   const latitude = row => coord(row.latitude ?? row.lat);
   const longitude = row => coord(row.longitude ?? row.lng);
   const validPoint = row => { const lat=latitude(row), lng=longitude(row); return lat!==null&&lng!==null&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180; };
+  const stationName = row => String(text(row,'police_station')).replace('สภ.เมืองนรราธิวาส','สภ.เมืองนราธิวาส');
   const dt = value => { if (!value) return '-'; const d=new Date(value); return Number.isNaN(d.getTime())?String(value):d.toLocaleString('th-TH'); };
   const loadStyle = href => new Promise(resolve => { if ([...document.styleSheets].some(s => (s.href||'').includes(href.split('/').pop()))) return resolve(); const l=document.createElement('link'); l.rel='stylesheet'; l.href=href; l.onload=resolve; document.head.appendChild(l); });
   const loadScript = src => new Promise((resolve,reject) => { if ([...document.scripts].some(s => s.src===src)) return resolve(); const s=document.createElement('script'); s.src=src; s.onload=resolve; s.onerror=reject; document.head.appendChild(s); });
@@ -34,14 +35,14 @@
     return `<div class="vehicle-popup"><h3>${esc(text(row,'plate_number'))} ${esc(text(row,'province'))}</h3><dl>
       <dt>ประเภทแจ้ง</dt><dd>${esc(text(row,'alert_type'))}</dd><dt>สถานะ</dt><dd>${esc(text(row,'case_status','status'))}</dd>
       <dt>รถ</dt><dd>${esc([text(row,'vehicle_brand','brand'),text(row,'vehicle_model','model'),text(row,'vehicle_color','color')].filter(v=>v!=='-').join(' ')||'-')}</dd>
-      <dt>เลขตัวรถ</dt><dd>${esc(text(row,'chassis_number'))}</dd><dt>สภ.</dt><dd>${esc(text(row,'police_station'))}</dd>
+      <dt>เลขตัวรถ</dt><dd>${esc(text(row,'chassis_number'))}</dd><dt>สภ.</dt><dd>${esc(stationName(row))}</dd>
       <dt>วันที่แจ้ง</dt><dd>${esc(dt(row.reported_at))}</dd><dt>สถานที่พบ</dt><dd>${esc(text(row,'last_location','location'))}</dd>
       <dt>พิกัด</dt><dd>${esc(text(row,'latitude','lat'))}, ${esc(text(row,'longitude','lng'))}</dd><dt>รายละเอียด</dt><dd>${esc(text(row,'notes','details','incident_cause'))}</dd>
     </dl>${photo!=='-'?`<img loading="lazy" src="${esc(photo)}" alt="ภาพรถ ${esc(text(row,'plate_number'))}">`:''}</div>`;
   }
 
   function card(row,index){
-    return `<article class="vehicle-card"><h3>${esc(text(row,'plate_number'))} ${esc(text(row,'province'))}</h3><p><b>${esc(text(row,'alert_type'))}</b> · ${esc(text(row,'case_status','status'))}</p><p>${esc(text(row,'vehicle_brand','brand'))} ${esc(text(row,'vehicle_model','model'))} · ${esc(text(row,'vehicle_color','color'))}</p><p>สภ.: ${esc(text(row,'police_station'))}</p><p>${esc(text(row,'last_location','location'))}</p>${validPoint(row)?`<button type="button" data-focus="${index}">ดูบนแผนที่</button>`:''}</article>`;
+    return `<article class="vehicle-card"><h3>${esc(text(row,'plate_number'))} ${esc(text(row,'province'))}</h3><p><b>${esc(text(row,'alert_type'))}</b> · ${esc(text(row,'case_status','status'))}</p><p>${esc(text(row,'vehicle_brand','brand'))} ${esc(text(row,'vehicle_model','model'))} · ${esc(text(row,'vehicle_color','color'))}</p><p>สภ.: ${esc(stationName(row))}</p><p>${esc(text(row,'last_location','location'))}</p>${validPoint(row)?`<button type="button" data-focus="${index}">ดูบนแผนที่</button>`:''}</article>`;
   }
 
   async function fetchAll(){
@@ -84,11 +85,11 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
       const cluster=L.markerClusterGroup({chunkedLoading:true,chunkInterval:80,chunkDelay:20,removeOutsideVisibleBounds:true,showCoverageOnHover:false,maxClusterRadius:55}); map.addLayer(cluster);
       const station=document.getElementById('vehicleLiveStation'), status=document.getElementById('vehicleLiveStatus');
-      [...new Set(rows.map(r=>text(r,'police_station')).filter(v=>v!=='-'))].sort().forEach(v=>station.add(new Option(v,v)));
+      [...new Set(rows.map(stationName).filter(v=>v!=='-'))].sort().forEach(v=>station.add(new Option(v,v)));
       [...new Set(rows.map(r=>text(r,'case_status','status')).filter(v=>v!=='-'))].sort().forEach(v=>status.add(new Option(v,v)));
       function render(){
         const q=document.getElementById('vehicleLiveSearch').value.trim().toLowerCase(); const st=station.value, ss=status.value;
-        filtered=rows.filter(r=>(!st||text(r,'police_station')===st)&&(!ss||text(r,'case_status','status')===ss)&&(!q||Object.values(r).some(v=>String(v??'').toLowerCase().includes(q))));
+        filtered=rows.filter(r=>(!st||stationName(r)===st)&&(!ss||text(r,'case_status','status')===ss)&&(!q||Object.values(r).some(v=>String(v??'').toLowerCase().includes(q))));
         const pageSize=Number(document.getElementById('vehicleLivePageSize').value); const pages=Math.max(1,Math.ceil(filtered.length/pageSize)); page=Math.min(page,pages); const start=(page-1)*pageSize; const slice=filtered.slice(start,start+pageSize);
         document.getElementById('vehicleLiveTotal').textContent=`พบ ${filtered.length.toLocaleString('th-TH')} รายการ`; document.getElementById('vehicleLiveCoords').textContent=`มีพิกัด ${filtered.filter(validPoint).length.toLocaleString('th-TH')} รายการ`;
         document.getElementById('vehicleLiveList').innerHTML=slice.length?slice.map((r,i)=>card(r,i)).join(''):'<div class="vehicle-empty">ไม่พบข้อมูลตามเงื่อนไข</div>'; document.getElementById('vehiclePage').textContent=`หน้า ${page} / ${pages}`; document.getElementById('vehiclePrev').disabled=page<=1; document.getElementById('vehicleNext').disabled=page>=pages;
