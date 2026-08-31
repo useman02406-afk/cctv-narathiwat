@@ -98,7 +98,11 @@
       }
       ['vehicleLiveSearch','vehicleLiveStation','vehicleLiveStatus','vehicleLivePageSize'].forEach(id=>document.getElementById(id).addEventListener(id==='vehicleLiveSearch'?'input':'change',()=>{page=1;render();}));
       document.getElementById('vehiclePrev').onclick=()=>{page--;render();}; document.getElementById('vehicleNext').onclick=()=>{page++;render();};
-      const shell=section.querySelector('.vehicle-map-shell'), full=section.querySelector('.vehicle-map-full'); full.onclick=()=>{shell.classList.toggle('is-full'); full.textContent=shell.classList.contains('is-full')?'× ปิดแผนที่เต็มจอ':'⛶ แผนที่เต็มจอ'; setTimeout(()=>map.invalidateSize({pan:false}),80);};
+      const shell=section.querySelector('.vehicle-map-shell'), full=section.querySelector('.vehicle-map-full');
+      const setFullscreen=active=>{shell.classList.toggle('is-full',active);document.documentElement.classList.toggle('vehicle-map-open',active);document.body.classList.toggle('vehicle-map-open',active);full.textContent=active?'× ปิดแผนที่เต็มจอ':'⛶ แผนที่เต็มจอ';full.setAttribute('aria-pressed',String(active));requestAnimationFrame(()=>requestAnimationFrame(()=>map.invalidateSize({pan:false})));};
+      full.addEventListener('click',()=>setFullscreen(!shell.classList.contains('is-full')));
+      document.addEventListener('keydown',event=>{if(event.key==='Escape'&&shell.classList.contains('is-full'))setFullscreen(false);});
+      window.addEventListener('resize',()=>{if(shell.classList.contains('is-full'))map.invalidateSize({pan:false});},{passive:true});
       render(); setTimeout(()=>map.invalidateSize({pan:false}),120);
     }catch(error){document.getElementById('vehicleLiveTotal').textContent='โหลดข้อมูลไม่สำเร็จ'; document.getElementById('vehicleLiveList').innerHTML=`<div class="vehicle-empty">${esc(error.message||error)}</div>`;}
   }
