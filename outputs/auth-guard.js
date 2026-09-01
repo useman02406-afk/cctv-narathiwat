@@ -129,13 +129,13 @@
     if (!document.querySelector('link[data-command-shell]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = new window.URL('command-shell.css?v=1', location.href).href;
+      style.href = new window.URL('command-shell.css?v=2', location.href).href;
       style.dataset.commandShell = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('script[data-command-shell]')) {
       const script = document.createElement('script');
-      script.src = new window.URL('command-shell.js?v=1', location.href).href;
+      script.src = new window.URL('command-shell.js?v=2', location.href).href;
       script.defer = true;
       script.dataset.commandShell = 'true';
       document.head.appendChild(script);

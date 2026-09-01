@@ -6,7 +6,7 @@
   if (!page || ['login.html','password-reset.html'].includes(page) || document.querySelector('.home-sidebar')) return;
   const sections = [
     ['ศูนย์บัญชาการ',[
-      ['home.html','fa-chart-line','ภาพรวมศูนย์'],['camera-center.html','fa-video','กล้อง CCTV'],['investigations.html','fa-shield-halved','เหตุความมั่นคง'],['critical-infrastructure.html','fa-building','พื้นที่เศรษฐกิจ']
+      ['home.html','fa-chart-line','ภาพรวมศูนย์'],['station-overview.html','fa-building-shield','ภาพรวมราย สภ.'],['camera-center.html','fa-video','กล้อง CCTV'],['investigations.html','fa-shield-halved','เหตุความมั่นคง'],['critical-infrastructure.html','fa-building','พื้นที่เศรษฐกิจ']
     ]],
     ['ข้อมูลปฏิบัติการ',[
       ['risk-persons.html','fa-user-shield','ข้อมูลบุคคล'],['vehicle-alerts.html','fa-car-on','รถแจ้งเตือน'],['vehicle-sightings.html','fa-binoculars','บันทึกพบรถ'],['risk-areas.html','fa-triangle-exclamation','พื้นที่เสี่ยง']

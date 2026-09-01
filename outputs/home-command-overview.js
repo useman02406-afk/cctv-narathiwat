@@ -26,7 +26,7 @@
       document.getElementById('homeCommandTimeline').textContent=Number(timelineCount.count||0).toLocaleString('th-TH');
       const stationSelect=document.getElementById('homeCommandStation');
       [...new Set([...incidentRows,...vehicleRows].map(stationOf))].sort((a,b)=>a.localeCompare(b,'th')).forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=name;stationSelect.append(option)});
-      const render=()=>{
+      const stationShortcut=document.createElement('a');stationShortcut.className='home-command-action';stationShortcut.href='station-overview.html';stationShortcut.innerHTML='<i class="fa-solid fa-building-shield"></i>ภาพรวมราย สภ.';section.querySelector('.home-command-actions').append(stationShortcut);const render=()=>{
         const station=stationSelect.value;
         const incidentList=incidentRows.filter(row=>station==='__all__'||stationOf(row)===station).slice(0,6);
         const vehicleList=vehicleRows.filter(row=>station==='__all__'||stationOf(row)===station).slice(0,6);
