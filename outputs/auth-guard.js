@@ -124,10 +124,28 @@
       document.head.appendChild(script);
     }
   }
+  function loadCommandShell() {
+    if (/\/(login|password-reset)\.html$/i.test(location.pathname)) return;
+    if (!document.querySelector('link[data-command-shell]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = new URL('command-shell.css?v=1', location.href).href;
+      style.dataset.commandShell = 'true';
+      document.head.appendChild(style);
+    }
+    if (!document.querySelector('script[data-command-shell]')) {
+      const script = document.createElement('script');
+      script.src = new URL('command-shell.js?v=1', location.href).href;
+      script.defer = true;
+      script.dataset.commandShell = 'true';
+      document.head.appendChild(script);
+    }
+  }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadVehicleMapEnhancement, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); }, { once: true });
   } else {
     loadVehicleMapEnhancement();
+    loadCommandShell();
   }
   let localSignOutInProgress = false;
   client.auth.onAuthStateChange((event) => {
