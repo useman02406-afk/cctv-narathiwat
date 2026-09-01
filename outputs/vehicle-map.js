@@ -78,6 +78,7 @@
     if(!main) throw new Error('ไม่พบพื้นที่แสดงผลหลัก');
     const section=document.createElement('section'); section.className='vehicle-live-panel';
     section.innerHTML=`<header class="vehicle-live-head"><h2>🚘 แผนที่และรายการพบรถ</h2><p>แสดงรถแจ้งเตือนและบันทึกพบรถ พร้อมพิกัดและรายละเอียดจริง</p></header><div class="vehicle-live-tools"><input id="vehicleLiveSearch" placeholder="ค้นหาทะเบียน ยี่ห้อ รุ่น สถานที่ หรือรายละเอียด"><select id="vehicleLiveStation"><option value="">ทุก สภ.</option></select><select id="vehicleLiveStatus"><option value="">ทุกสถานะ</option></select><select id="vehicleLivePageSize"><option>25</option><option selected>50</option><option>100</option></select></div><div class="vehicle-live-stats"><span class="vehicle-live-stat" id="vehicleLiveTotal">กำลังโหลด…</span><span class="vehicle-live-stat" id="vehicleLiveCoords"></span></div><div class="vehicle-live-grid"><div class="vehicle-map-shell"><div id="vehicleLiveMap" class="vehicle-map"></div><button type="button" class="vehicle-map-full">⛶ แผนที่เต็มจอ</button></div><div id="vehicleLiveList" class="vehicle-list"></div></div><div class="vehicle-pages"><button id="vehiclePrev">ก่อนหน้า</button><b id="vehiclePage"></b><button id="vehicleNext">ถัดไป</button></div>`;
+    const stationSummary=document.createElement('div');stationSummary.className='vehicle-station-summary';stationSummary.setAttribute('aria-label','สรุปข้อมูลแยกรายโรงพัก');section.querySelector('.vehicle-live-stats').after(stationSummary);
     main.prepend(section);
     try{
       await ensureLeaflet(); const rows=await fetchAll(); let page=1; let filtered=[]; let markers=[];
@@ -85,19 +86,23 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
       const cluster=L.markerClusterGroup({chunkedLoading:true,chunkInterval:80,chunkDelay:20,removeOutsideVisibleBounds:true,showCoverageOnHover:false,maxClusterRadius:55}); map.addLayer(cluster);
       const station=document.getElementById('vehicleLiveStation'), status=document.getElementById('vehicleLiveStatus');
-      [...new Set(rows.map(stationName).filter(v=>v!=='-'))].sort().forEach(v=>station.add(new Option(v,v)));
+      const stationCounts=rows.reduce((counts,row)=>{const name=stationName(row);counts.set(name,(counts.get(name)||0)+1);return counts;},new Map());
+      [...stationCounts.keys()].sort().forEach(v=>station.add(new Option(v==='-'?'ไม่ระบุ สภ.':v,v)));
+      stationSummary.innerHTML=`<button type="button" data-station=""><span>ทุก สภ.</span><b>${rows.length.toLocaleString('th-TH')}</b></button>`+[...stationCounts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'th')).map(([name,count])=>`<button type="button" data-station="${esc(name)}"><span>${esc(name==='-'?'ไม่ระบุ สภ.':name)}</span><b>${count.toLocaleString('th-TH')}</b></button>`).join('');
       [...new Set(rows.map(r=>text(r,'case_status','status')).filter(v=>v!=='-'))].sort().forEach(v=>status.add(new Option(v,v)));
       function render(){
         const q=document.getElementById('vehicleLiveSearch').value.trim().toLowerCase(); const st=station.value, ss=status.value;
         filtered=rows.filter(r=>(!st||stationName(r)===st)&&(!ss||text(r,'case_status','status')===ss)&&(!q||Object.values(r).some(v=>String(v??'').toLowerCase().includes(q))));
         const pageSize=Number(document.getElementById('vehicleLivePageSize').value); const pages=Math.max(1,Math.ceil(filtered.length/pageSize)); page=Math.min(page,pages); const start=(page-1)*pageSize; const slice=filtered.slice(start,start+pageSize);
         document.getElementById('vehicleLiveTotal').textContent=`พบ ${filtered.length.toLocaleString('th-TH')} รายการ`; document.getElementById('vehicleLiveCoords').textContent=`มีพิกัด ${filtered.filter(validPoint).length.toLocaleString('th-TH')} รายการ`;
+        stationSummary.querySelectorAll('[data-station]').forEach(button=>button.classList.toggle('is-active',button.dataset.station===st));
         document.getElementById('vehicleLiveList').innerHTML=slice.length?slice.map((r,i)=>card(r,i)).join(''):'<div class="vehicle-empty">ไม่พบข้อมูลตามเงื่อนไข</div>'; document.getElementById('vehiclePage').textContent=`หน้า ${page} / ${pages}`; document.getElementById('vehiclePrev').disabled=page<=1; document.getElementById('vehicleNext').disabled=page>=pages;
         cluster.clearLayers(); markers=[]; const markersByIndex=new Map(); slice.forEach((row,index)=>{if(!validPoint(row)) return; const marker=L.marker([latitude(row),longitude(row)]).bindPopup(popup(row),{maxWidth:340}); markers.push(marker); markersByIndex.set(index,marker); cluster.addLayer(marker);});
         if(markers.length){const bounds=cluster.getBounds(); if(bounds.isValid()) map.fitBounds(bounds.pad(.12),{maxZoom:15,animate:false});}
         document.querySelectorAll('[data-focus]').forEach(btn=>btn.onclick=()=>{const marker=markersByIndex.get(Number(btn.dataset.focus)); if(marker){cluster.zoomToShowLayer(marker,()=>marker.openPopup());}});
       }
       ['vehicleLiveSearch','vehicleLiveStation','vehicleLiveStatus','vehicleLivePageSize'].forEach(id=>document.getElementById(id).addEventListener(id==='vehicleLiveSearch'?'input':'change',()=>{page=1;render();}));
+      stationSummary.addEventListener('click',event=>{const button=event.target.closest('[data-station]');if(!button)return;station.value=button.dataset.station;page=1;render();});
       document.getElementById('vehiclePrev').onclick=()=>{page--;render();}; document.getElementById('vehicleNext').onclick=()=>{page++;render();};
       const shell=section.querySelector('.vehicle-map-shell'), full=section.querySelector('.vehicle-map-full');
       const setFullscreen=active=>{shell.classList.toggle('is-full',active);document.documentElement.classList.toggle('vehicle-map-open',active);document.body.classList.toggle('vehicle-map-open',active);full.textContent=active?'× ปิดแผนที่เต็มจอ':'⛶ แผนที่เต็มจอ';full.setAttribute('aria-pressed',String(active));requestAnimationFrame(()=>requestAnimationFrame(()=>map.invalidateSize({pan:false})));};
