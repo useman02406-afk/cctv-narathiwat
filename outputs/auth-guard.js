@@ -151,18 +151,13 @@
     const style=document.createElement('link');style.rel='stylesheet';style.href=new window.URL('home-command-overview.css?v=2',location.href).href;document.head.appendChild(style);
     const script=document.createElement('script');script.src=new window.URL('home-command-overview.js?v=3',location.href).href;script.defer=true;document.head.appendChild(script);
   }
-  function loadVehicleSightingsStation() {
-    if (!/\/vehicle-sightings\.html$/i.test(location.pathname)) return;
-    const script=document.createElement('script');script.src=new window.URL('vehicle-sightings-station.js?v=1',location.href).href;script.defer=true;document.head.appendChild(script);
-  }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); loadCaseCommandCenter(); loadHomeCommandOverview(); loadVehicleSightingsStation(); }, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); loadCaseCommandCenter(); loadHomeCommandOverview(); }, { once: true });
   } else {
     loadVehicleMapEnhancement();
     loadCommandShell();
     loadCaseCommandCenter();
     loadHomeCommandOverview();
-    loadVehicleSightingsStation();
   }
   let localSignOutInProgress = false;
   client.auth.onAuthStateChange((event) => {

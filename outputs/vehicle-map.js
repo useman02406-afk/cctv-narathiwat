@@ -88,6 +88,8 @@
       const station=document.getElementById('vehicleLiveStation'), status=document.getElementById('vehicleLiveStatus');
       const stationCounts=rows.reduce((counts,row)=>{const name=stationName(row);counts.set(name,(counts.get(name)||0)+1);return counts;},new Map());
       [...stationCounts.keys()].sort().forEach(v=>station.add(new Option(v==='-'?'ไม่ระบุ สภ.':v,v)));
+      const requestedStation=new URLSearchParams(location.search).get('station')||'';
+      if(requestedStation&&stationCounts.has(requestedStation))station.value=requestedStation;
       stationSummary.innerHTML=`<button type="button" data-station=""><span>ทุก สภ.</span><b>${rows.length.toLocaleString('th-TH')}</b></button>`+[...stationCounts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'th')).map(([name,count])=>`<button type="button" data-station="${esc(name)}"><span>${esc(name==='-'?'ไม่ระบุ สภ.':name)}</span><b>${count.toLocaleString('th-TH')}</b></button>`).join('');
       [...new Set(rows.map(r=>text(r,'case_status','status')).filter(v=>v!=='-'))].sort().forEach(v=>status.add(new Option(v,v)));
       function render(){
