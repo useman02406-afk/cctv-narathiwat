@@ -202,7 +202,7 @@ async function loadAdministrativeBoundaries(){
           const stationTotals=items.reduce((out,item)=>{const name=stationOf(item);out[name]=(out[name]||0)+1;return out},{});
           const stations=Object.keys(stationTotals).sort((a,b)=>a.localeCompare(b,'th'));
           stationSelect.innerHTML='<option value="">ทุก สภ.</option>'+stations.map(name=>`<option value="${esc(name)}">${esc(name)} (${stationTotals[name].toLocaleString()} กล้อง)</option>`).join('');
-          stationSelect.dataset.ready='true';
+          stationSelect.dataset.ready='true';const requestedStation=new URLSearchParams(location.search).get('station')||'';if(requestedStation&&stations.includes(requestedStation))stationSelect.value=requestedStation;
         }
         const visible=visibleItems(),query=$('search').value.trim();
         const hasFilter=Boolean(query||$('type').value||$('owner').value||$('status').value||$('station')?.value);

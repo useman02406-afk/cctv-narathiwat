@@ -62,7 +62,7 @@
     ];
     const $ = id => document.getElementById(id);
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = '', sessionRef;
+    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = new URLSearchParams(location.search).get('station') || '', sessionRef;
     const stationOf = row => {
       const match = /(?:^|\n)station:\s*(.+?)(?:\n|$)/i.exec(String(row.details || ''));
       return match ? match[1].trim() : 'ไม่ระบุ สภ.';
