@@ -112,13 +112,13 @@
     if (!document.querySelector('link[data-vehicle-map]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = new URL('vehicle-map.css', location.href).href;
+      style.href = new window.URL('vehicle-map.css', location.href).href;
       style.dataset.vehicleMap = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('script[data-vehicle-map]')) {
       const script = document.createElement('script');
-      script.src = new URL('vehicle-map.js', location.href).href;
+      script.src = new window.URL('vehicle-map.js', location.href).href;
       script.defer = true;
       script.dataset.vehicleMap = 'true';
       document.head.appendChild(script);
@@ -129,13 +129,13 @@
     if (!document.querySelector('link[data-command-shell]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = new URL('command-shell.css?v=1', location.href).href;
+      style.href = new window.URL('command-shell.css?v=1', location.href).href;
       style.dataset.commandShell = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('script[data-command-shell]')) {
       const script = document.createElement('script');
-      script.src = new URL('command-shell.js?v=1', location.href).href;
+      script.src = new window.URL('command-shell.js?v=1', location.href).href;
       script.defer = true;
       script.dataset.commandShell = 'true';
       document.head.appendChild(script);
@@ -143,8 +143,8 @@
   }
   function loadCaseCommandCenter() {
     if (!/\/case-timeline\.html$/i.test(location.pathname)) return;
-    const style = document.createElement('link');style.rel='stylesheet';style.href=new URL('case-command-center.css?v=1',location.href).href;document.head.appendChild(style);
-    const script = document.createElement('script');script.src=new URL('case-command-center.js?v=1',location.href).href;script.defer=true;document.head.appendChild(script);
+    const style = document.createElement('link');style.rel='stylesheet';style.href=new window.URL('case-command-center.css?v=1',location.href).href;document.head.appendChild(style);
+    const script = document.createElement('script');script.src=new window.URL('case-command-center.js?v=1',location.href).href;script.defer=true;document.head.appendChild(script);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); loadCaseCommandCenter(); }, { once: true });
