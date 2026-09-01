@@ -143,8 +143,8 @@
   }
   function loadCaseCommandCenter() {
     if (!/\/case-timeline\.html$/i.test(location.pathname)) return;
-    const style = document.createElement('link');style.rel='stylesheet';style.href=new window.URL('case-command-center.css?v=1',location.href).href;document.head.appendChild(style);
-    const script = document.createElement('script');script.src=new window.URL('case-command-center.js?v=1',location.href).href;script.defer=true;document.head.appendChild(script);
+    const style = document.createElement('link');style.rel='stylesheet';style.href=new window.URL('case-command-center.css?v=2',location.href).href;document.head.appendChild(style);
+    const script = document.createElement('script');script.src=new window.URL('case-command-center.js?v=2',location.href).href;script.defer=true;document.head.appendChild(script);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); loadCaseCommandCenter(); }, { once: true });
