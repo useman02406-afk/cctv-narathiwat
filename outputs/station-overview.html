@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth-guard.js?v=8"></script>
   <link rel="stylesheet" href="station-overview.css?v=1">
-  <script defer src="station-overview.js?v=3"></script>
+  <script defer src="station-overview.js?v=4"></script>
 </head>
 <body>
   <header class="station-head"><div><h1><i class="fa-solid fa-building-shield"></i> ภาพรวมข้อมูลราย สภ.</h1><p>รวมข้อมูลปฏิบัติการจากทุกโมดูล แยกตามหน่วยรับผิดชอบ</p></div><a href="home.html"><i class="fa-solid fa-arrow-left"></i> กลับศูนย์บัญชาการ</a></header>
@@ -19,7 +19,7 @@
     <section class="station-summary" id="stationSummary"><article><span>จำนวน สภ.</span><b>–</b></article><article><span>กล้อง CCTV</span><b>–</b></article><article><span>พื้นที่เศรษฐกิจ</span><b>–</b></article><article><span>รถแจ้งเตือน</span><b>–</b></article></section>
     <section class="station-panel">
       <div class="station-toolbar"><div><h2>ตารางสรุปหน่วย</h2><p id="stationNotice">กำลังโหลดข้อมูลจากฐานข้อมูล…</p></div><label><i class="fa-solid fa-magnifying-glass"></i><input id="stationSearch" placeholder="ค้นหาชื่อ สภ."></label></div>
-      <div class="station-table-wrap"><table><thead><tr><th>สภ. / หน่วย</th><th>กล้อง</th><th>พื้นที่เศรษฐกิจ</th><th>รถแจ้งเตือน</th><th>บันทึกพบรถ</th><th>เปิดข้อมูล</th></tr></thead><tbody id="stationRows"><tr><td colspan="6" class="station-empty">กำลังประมวลผล…</td></tr></tbody></table></div>
+      <div class="station-table-wrap"><table><thead><tr><th>สภ. / หน่วย</th><th>กล้อง</th><th>พื้นที่เศรษฐกิจ</th><th>รถแจ้งเตือน</th><th>พบแล้ว / ได้คืน</th><th>เปิดข้อมูล</th></tr></thead><tbody id="stationRows"><tr><td colspan="6" class="station-empty">กำลังประมวลผล…</td></tr></tbody></table></div>
     </section>
   </main>
 </body>
