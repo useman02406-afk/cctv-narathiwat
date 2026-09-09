@@ -2,6 +2,7 @@
   'use strict';
   const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
   const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+  const isCommandCenterV2 = /\/command-center-v2\.html$/i.test(location.pathname);
   // Some legacy modules were created without a viewport declaration. Add one
   // centrally so every protected screen uses the device width on phones.
   if (!document.querySelector('meta[name="viewport"]')) {
@@ -10,7 +11,7 @@
     viewport.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
     document.head.appendChild(viewport);
   }
-  if (!document.getElementById('jis-ui-theme')) {
+  if (!isCommandCenterV2 && !document.getElementById('jis-ui-theme')) {
     const theme = document.createElement('link');
     theme.id = 'jis-ui-theme';
     theme.rel = 'stylesheet';
@@ -29,6 +30,7 @@
   // shared theme to the end of <head> once parsing finishes keeps its
   // responsive command-center rules consistent across every module.
   const prioritizeTheme = () => {
+    if (isCommandCenterV2) return;
     const theme = document.getElementById('jis-ui-theme');
     if (theme) document.head.appendChild(theme);
   };
@@ -125,7 +127,7 @@
     }
   }
   function loadCommandShell() {
-    if (/\/(login|password-reset)\.html$/i.test(location.pathname)) return;
+    if (/\/(login|password-reset|command-center-v2)\.html$/i.test(location.pathname)) return;
     if (!document.querySelector('link[data-command-shell]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
