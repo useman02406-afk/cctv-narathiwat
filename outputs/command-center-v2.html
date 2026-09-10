@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="command-center-v2-enhancements.css?v=5">
+  <link rel="stylesheet" href="command-center-v2-enhancements.css?v=6">
 </head>
 <body>
   <header class="topbar">
@@ -36,6 +36,24 @@
         <button data-view="risk"><i class="fa-solid fa-fire-flame-curved"></i><span>พื้นที่เสี่ยง</span></button>
         <button data-view="reports"><i class="fa-solid fa-chart-column"></i><span>ศูนย์รายงาน</span></button>
       </nav>
+      <details class="module-drawer">
+        <summary><i class="fa-solid fa-layer-group"></i><span>13 โมดูลปฏิบัติการ</span></summary>
+        <div>
+          <a href="home.html"><i class="fa-solid fa-chart-line"></i>ภาพรวมศูนย์</a>
+          <a href="station-overview.html"><i class="fa-solid fa-building-shield"></i>ภาพรวมราย สภ.</a>
+          <a href="camera-center.html"><i class="fa-solid fa-video"></i>จัดการกล้อง CCTV</a>
+          <a href="investigations.html"><i class="fa-solid fa-shield-halved"></i>บันทึกเหตุการณ์</a>
+          <a href="critical-infrastructure.html"><i class="fa-solid fa-building"></i>พื้นที่เศรษฐกิจ</a>
+          <a href="risk-persons.html"><i class="fa-solid fa-user-shield"></i>ข้อมูลบุคคล</a>
+          <a href="vehicle-alerts.html"><i class="fa-solid fa-car-on"></i>รถแจ้งเตือน</a>
+          <a href="vehicle-sightings.html"><i class="fa-solid fa-binoculars"></i>บันทึกพบรถ</a>
+          <a href="risk-areas.html"><i class="fa-solid fa-triangle-exclamation"></i>พื้นที่เสี่ยง</a>
+          <a href="mission-planner.html"><i class="fa-solid fa-location-crosshairs"></i>วิเคราะห์พื้นที่</a>
+          <a href="home-search.html"><i class="fa-solid fa-house-chimney"></i>ค้นหาบ้าน</a>
+          <a href="case-timeline.html"><i class="fa-solid fa-route"></i>ไทม์ไลน์สืบสวน</a>
+          <a href="reports.html"><i class="fa-solid fa-file-lines"></i>ศูนย์รายงาน</a>
+        </div>
+      </details>
       <div class="sidebar-foot"><a href="admin-console.html"><i class="fa-solid fa-gear"></i><span>จัดการระบบ</span></a><a href="account-settings.html"><i class="fa-solid fa-user-gear"></i><span>ตั้งค่าบัญชี</span></a></div>
     </aside>
 
@@ -83,7 +101,7 @@
   <div class="command-palette" id="commandPalette" aria-hidden="true"><div><label><i class="fa-solid fa-magnifying-glass"></i><input id="paletteInput" placeholder="พิมพ์เพื่อค้นหาเมนู..."><kbd>ESC</kbd></label><div id="paletteResults"></div></div></div>
   <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span>พร้อมใช้งาน</span></div>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="auth-guard.js?v=12"></script>
+  <script src="auth-guard.js?v=13"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="command-center-v2-enhancements.js?v=7"></script>
 </body>

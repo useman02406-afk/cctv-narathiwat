@@ -3,20 +3,6 @@
   const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
   const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
   const isCommandCenterV2 = /\/command-center-v2\.html$/i.test(location.pathname);
-  const legacyPage = location.pathname.split('/').pop().toLowerCase();
-  const commandCenterViews = {
-    'home.html':'dashboard', 'station-overview.html':'dashboard',
-    'camera-locations-map.html':'map', 'camera-center.html':'live',
-    'camera-record-browser.html':'playback', 'investigations.html':'timeline',
-    'case-timeline.html':'timeline', 'vehicle-alerts.html':'vehicles',
-    'vehicle-sightings.html':'vehicles', 'risk-persons.html':'people',
-    'risk-areas.html':'risk', 'mission-planner.html':'risk',
-    'reports.html':'reports'
-  };
-  if (commandCenterViews[legacyPage]) {
-    location.replace(new window.URL(`command-center-v2.html#${commandCenterViews[legacyPage]}`, location.href).href);
-    return;
-  }
   // Some legacy modules were created without a viewport declaration. Add one
   // centrally so every protected screen uses the device width on phones.
   if (!document.querySelector('meta[name="viewport"]')) {
@@ -47,6 +33,17 @@
     if (isCommandCenterV2) return;
     const theme = document.getElementById('jis-ui-theme');
     if (theme) document.head.appendChild(theme);
+    if (!/\/(login|password-reset)\.html$/i.test(location.pathname)) {
+      let commandTheme = document.getElementById('legacy-command-theme');
+      if (!commandTheme) {
+        commandTheme = document.createElement('link');
+        commandTheme.id = 'legacy-command-theme';
+        commandTheme.rel = 'stylesheet';
+        commandTheme.href = new window.URL('legacy-command-theme.css?v=1', location.href).href;
+      }
+      document.head.appendChild(commandTheme);
+      document.body.classList.add('legacy-command-ui');
+    }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', prioritizeTheme, { once: true });
   else prioritizeTheme();
@@ -145,13 +142,13 @@
     if (!document.querySelector('link[data-command-shell]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = new window.URL('command-shell.css?v=3', location.href).href;
+      style.href = new window.URL('command-shell.css?v=4', location.href).href;
       style.dataset.commandShell = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('script[data-command-shell]')) {
       const script = document.createElement('script');
-      script.src = new window.URL('command-shell.js?v=3', location.href).href;
+      script.src = new window.URL('command-shell.js?v=4', location.href).href;
       script.defer = true;
       script.dataset.commandShell = 'true';
       document.head.appendChild(script);

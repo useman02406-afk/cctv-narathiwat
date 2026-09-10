@@ -3,19 +3,19 @@
   if (window.__commandShellInstalled) return;
   window.__commandShellInstalled = true;
   const page = location.pathname.split('/').pop().toLowerCase();
-  if (!page || ['login.html','password-reset.html'].includes(page) || document.querySelector('.home-sidebar')) return;
+  if (!page || ['login.html','password-reset.html','command-center-v2.html'].includes(page)) return;
   const sections = [
     ['ศูนย์บัญชาการ',[
-      ['command-center-v2.html#dashboard','fa-chart-line','ภาพรวมศูนย์'],['station-overview.html','fa-building-shield','ภาพรวมราย สภ.'],['command-center-v2.html#live','fa-video','กล้อง CCTV'],['command-center-v2.html#timeline','fa-shield-halved','เหตุความมั่นคง'],['critical-infrastructure.html','fa-building','พื้นที่เศรษฐกิจ']
+      ['home.html','fa-chart-line','ภาพรวมศูนย์'],['station-overview.html','fa-building-shield','ภาพรวมราย สภ.'],['camera-center.html','fa-video','กล้อง CCTV'],['investigations.html','fa-shield-halved','เหตุความมั่นคง'],['critical-infrastructure.html','fa-building','พื้นที่เศรษฐกิจ']
     ]],
     ['ข้อมูลปฏิบัติการ',[
-      ['command-center-v2.html#people','fa-user-shield','ข้อมูลบุคคล'],['command-center-v2.html#vehicles','fa-car-on','รถแจ้งเตือน'],['command-center-v2.html#vehicles','fa-binoculars','บันทึกพบรถ'],['command-center-v2.html#risk','fa-triangle-exclamation','พื้นที่เสี่ยง']
+      ['risk-persons.html','fa-user-shield','ข้อมูลบุคคล'],['vehicle-alerts.html','fa-car-on','รถแจ้งเตือน'],['vehicle-sightings.html','fa-binoculars','บันทึกพบรถ'],['risk-areas.html','fa-triangle-exclamation','พื้นที่เสี่ยง']
     ]],
     ['วิเคราะห์และรายงาน',[
-      ['command-center-v2.html#risk','fa-location-crosshairs','วิเคราะห์พื้นที่'],['home-search.html','fa-house-chimney','ค้นหาบ้าน'],['command-center-v2.html#timeline','fa-route','ไทม์ไลน์สืบสวน'],['command-center-v2.html#reports','fa-file-lines','ศูนย์รายงาน']
+      ['mission-planner.html','fa-location-crosshairs','วิเคราะห์พื้นที่'],['home-search.html','fa-house-chimney','ค้นหาบ้าน'],['case-timeline.html','fa-route','ไทม์ไลน์สืบสวน'],['reports.html','fa-file-lines','ศูนย์รายงาน']
     ]]
   ];
-  const nav = sections.map(([label,items])=>`<div class="command-shell-label">${label}</div>${items.map(([href,icon,text])=>`<a href="${href}"${page===href?' class="is-active" aria-current="page"':''}><i class="fa-solid ${icon}" aria-hidden="true"></i><span>${text}</span></a>`).join('')}`).join('');
+  const nav = `<a href="command-center-v2.html" class="command-center-link"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Command Center ใหม่</span></a>`+sections.map(([label,items])=>`<div class="command-shell-label">${label}</div>${items.map(([href,icon,text])=>`<a href="${href}"${page===href?' class="is-active" aria-current="page"':''}><i class="fa-solid ${icon}" aria-hidden="true"></i><span>${text}</span></a>`).join('')}`).join('');
   const shell = document.createElement('aside');
   shell.className = 'command-shell';
   shell.setAttribute('aria-label','เมนูศูนย์บัญชาการ');
