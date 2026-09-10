@@ -3,6 +3,20 @@
   const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
   const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
   const isCommandCenterV2 = /\/command-center-v2\.html$/i.test(location.pathname);
+  const legacyPage = location.pathname.split('/').pop().toLowerCase();
+  const commandCenterViews = {
+    'home.html':'dashboard', 'station-overview.html':'dashboard',
+    'camera-locations-map.html':'map', 'camera-center.html':'live',
+    'camera-record-browser.html':'playback', 'investigations.html':'timeline',
+    'case-timeline.html':'timeline', 'vehicle-alerts.html':'vehicles',
+    'vehicle-sightings.html':'vehicles', 'risk-persons.html':'people',
+    'risk-areas.html':'risk', 'mission-planner.html':'risk',
+    'reports.html':'reports'
+  };
+  if (commandCenterViews[legacyPage]) {
+    location.replace(new window.URL(`command-center-v2.html#${commandCenterViews[legacyPage]}`, location.href).href);
+    return;
+  }
   // Some legacy modules were created without a viewport declaration. Add one
   // centrally so every protected screen uses the device width on phones.
   if (!document.querySelector('meta[name="viewport"]')) {
@@ -131,13 +145,13 @@
     if (!document.querySelector('link[data-command-shell]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = new window.URL('command-shell.css?v=2', location.href).href;
+      style.href = new window.URL('command-shell.css?v=3', location.href).href;
       style.dataset.commandShell = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('script[data-command-shell]')) {
       const script = document.createElement('script');
-      script.src = new window.URL('command-shell.js?v=2', location.href).href;
+      script.src = new window.URL('command-shell.js?v=3', location.href).href;
       script.defer = true;
       script.dataset.commandShell = 'true';
       document.head.appendChild(script);
