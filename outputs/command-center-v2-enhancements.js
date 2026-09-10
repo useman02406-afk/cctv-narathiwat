@@ -3,7 +3,7 @@
   const routes=[['dashboard','หน้าหลัก','fa-house'],['map','แผนที่กล้อง CCTV','fa-map-location-dot'],['live','ดูภาพสด','fa-video'],['playback','ค้นวิดีโอย้อนหลัง','fa-clock-rotate-left'],['timeline','Timeline สืบสวนคดี','fa-route'],['vehicles','ค้นหารถและทะเบียน','fa-car-side'],['people','ฐานข้อมูลบุคคล','fa-user-group'],['risk','พื้นที่เสี่ยง Heatmap','fa-fire-flame-curved'],['reports','รายงานและสถิติ','fa-chart-column']];
   const $=(s,p=document)=>p.querySelector(s), $$=(s,p=document)=>[...p.querySelectorAll(s)];
   let maps={};
-  function showView(name,push=true){if(!views[name])return;$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));$$('#mainNav button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$('#eyebrow').textContent=views[name][0];$('#viewTitle').textContent=views[name][1];document.title=`${views[name][1]} | CCTV Command Center`;$('.sidebar').classList.remove('open');if(push)history.replaceState(null,'',`#${name}`);setTimeout(()=>{Object.values(maps).forEach(m=>m.invalidateSize())},100);window.scrollTo({top:0,behavior:'smooth'})}
+  function showView(name,push=true){if(!views[name])return;$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));$$('#mainNav button').forEach(b=>{const active=b.dataset.view===name;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false')});$('#eyebrow').textContent=views[name][0];$('#viewTitle').textContent=views[name][1];document.title=`${views[name][1]} | CCTV Command Center`;$('.sidebar').classList.remove('open');localStorage.setItem('cctv-command-view',name);if(push)history.replaceState(null,'',`#${name}`);setTimeout(()=>{Object.values(maps).forEach(m=>m.invalidateSize())},100);window.scrollTo({top:0,behavior:'smooth'})}
   $$('[data-view]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();showView(el.dataset.view)}));
   $('.mobile-menu').addEventListener('click',()=>$('.sidebar').classList.add('open'));$('.mobile-close').addEventListener('click',()=>$('.sidebar').classList.remove('open'));
   const clock=()=>{$('#headerClock').textContent=new Intl.DateTimeFormat('th-TH',{dateStyle:'short',timeStyle:'medium',hour12:false}).format(new Date())};clock();setInterval(clock,1000);
@@ -29,5 +29,8 @@
   function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   async function hydrate(event){try{const client=(event?.detail||window.cctvSession)?.client;if(!client)return;const result=await client.from('incidents').select('*').order('created_at',{ascending:false}).limit(5);if(result.error||!result.data?.length)return;$('[data-count="incidents"]').textContent=result.data.length;renderEvents(result.data.map((r,i)=>{const d=new Date(r.created_at||Date.now());return [d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),r.title||r.incident_type||'เหตุการณ์จากระบบ',r.location||r.area||'ไม่ระบุพื้นที่',i===0?'fa-triangle-exclamation':'fa-bell',i<2?'urgent':'']}))}catch(err){console.warn('Live data unavailable',err)}}
   window.addEventListener('cctv-auth-ready',hydrate,{once:true});if(window.cctvSession)hydrate({detail:window.cctvSession});
-  showView(location.hash.slice(1)||'dashboard',false);
+  window.addEventListener('hashchange',()=>showView(location.hash.slice(1)||'dashboard',false));
+  document.addEventListener('keydown',event=>{if(!event.altKey||!/^[1-9]$/.test(event.key))return;event.preventDefault();showView(routes[Number(event.key)-1][0])});
+  const initialView=location.hash.slice(1)||localStorage.getItem('cctv-command-view')||'dashboard';
+  showView(initialView,false);
 })();
