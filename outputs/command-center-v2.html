@@ -10,13 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="command-center-v2-enhancements.css?v=4">
+  <link rel="stylesheet" href="command-center-v2-enhancements.css?v=5">
 </head>
 <body>
   <header class="topbar">
     <div class="brand-mark" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
     <div class="brand-copy"><b>CCTV COMMAND CENTER</b><strong>สถานีตำรวจภูธรเมืองนราธิวาส</strong><small>MUANG NARATHIWAT POLICE STATION</small></div>
     <div class="city-banner" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="weather"><i class="fa-solid fa-cloud-sun"></i><span>32°C<small>นราธิวาส</small></span></div>
     <div class="system-state"><span class="live-dot"></span><b>ระบบปฏิบัติการ</b><small id="headerClock">--:--:--</small></div>
     <button class="profile" type="button"><span>ผกก.สภ.เมือง</span><i class="fa-solid fa-user-shield"></i></button>
   </header>
@@ -63,7 +64,7 @@
 
       <section class="view" id="view-map"><div class="filter-row"><div class="segmented"><button class="active">ทั้งหมด</button><button><i class="status green"></i>ออนไลน์</button><button><i class="status red"></i>ออฟไลน์</button><button><i class="status amber"></i>เตือน</button></div><a class="primary" href="camera-locations-map.html">เปิดระบบแผนที่เต็ม <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div><article class="panel full-map"><div id="mainMap" class="map"></div><aside class="camera-popup"><div class="popup-title"><b>CCTV-021</b><span>ออนไลน์</span></div><div class="camera-feed street-scene"><i class="fa-solid fa-play"></i><em>LIVE</em></div><strong>ถนนพิชิตบำรุง</strong><small>แยกหน้าตลาดเทศบาล • PTZ</small><div><button class="primary">ดูภาพสด</button><button>ดูย้อนหลัง</button></div></aside></article></section>
 
-      <section class="view" id="view-live"><div class="filter-row"><label class="field"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="ค้นหากล้อง..."></label><div class="segmented layouts"><button>1</button><button>4</button><button class="active">9</button><button>16</button></div><a class="primary" href="camera-center.html">ศูนย์กล้องเต็ม</a></div><div class="live-grid" id="liveGrid"></div></section>
+      <section class="view" id="view-live"><div class="filter-row"><label class="field"><i class="fa-solid fa-magnifying-glass"></i><input id="cameraSearch" placeholder="ค้นหากล้อง..."></label><div class="segmented layouts"><button data-layout="1">1</button><button data-layout="4">4</button><button class="active" data-layout="9">9</button><button data-layout="16">16</button></div><a class="primary" href="camera-center.html">ศูนย์กล้องเต็ม</a></div><div class="live-grid layout-9" id="liveGrid"></div></section>
 
       <section class="view" id="view-playback"><div class="playback-grid"><article class="panel camera-list"><div class="panel-head"><div><i class="fa-solid fa-camera"></i><b>เลือกกล้อง</b></div></div><div id="cameraList"></div></article><article class="panel player-panel"><div class="player-meta"><b>CCTV-021 • ถนนพิชิตบำรุง</b><time>04/09/2569 19:44:03</time></div><div class="video-stage street-scene"><button><i class="fa-solid fa-play"></i></button><span>CCTV-021</span></div><div class="transport"><button><i class="fa-solid fa-backward-step"></i></button><button><i class="fa-solid fa-play"></i></button><button><i class="fa-solid fa-forward-step"></i></button><b>1x</b><input type="range" value="58"></div><div class="timeline-track"><i style="left:18%"></i><i style="left:43%"></i><i style="left:72%"></i><span style="left:58%"></span></div><div class="time-labels"><span>18:00</span><span>19:00</span><span>20:00</span><span>21:00</span><span>22:00</span></div></article><article class="panel playback-info"><div class="panel-head"><div><i class="fa-solid fa-circle-info"></i><b>ข้อมูลกล้อง</b></div></div><dl><dt>ประเภท</dt><dd>PTZ</dd><dt>ตำแหน่ง</dt><dd>ถนนพิชิตบำรุง</dd><dt>IP</dt><dd>192.168.1.21</dd><dt>NVR</dt><dd>NVR-01</dd><dt>เก็บข้อมูล</dt><dd>30 วัน</dd></dl><h3>เหตุการณ์ใกล้เคียง</h3><ul class="activity"><li class="red">19:44 พบรถต้องสงสัย</li><li class="amber">19:37 ผ่านพื้นที่บุคคล</li><li>19:21 ตรวจพบความเคลื่อนไหว</li></ul><a class="primary full" href="camera-record-browser.html">เปิดระบบ Playback</a></article></div></section>
 
@@ -84,6 +85,6 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="auth-guard.js?v=11"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="command-center-v2-enhancements.js?v=4"></script>
+  <script src="command-center-v2-enhancements.js?v=5"></script>
 </body>
 </html>
