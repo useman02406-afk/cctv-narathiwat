@@ -45,6 +45,12 @@ $cameraCenter = Get-Content (Join-Path $OutputRoot 'camera-center.html') -Raw -E
 foreach ($tab in @('camera-locations-map.html', 'camera-management.html', 'camera-categories.html', 'camera-maintenance.html', 'camera-inspections.html', 'camera-data-quality.html', 'camera-duplicate-review.html')) {
   if ($cameraCenter -notmatch [regex]::Escape($tab)) { $failed.Add("Missing camera-center tab: $tab") }
 }
+if ($cameraCenter -notmatch 'data-admin-only') { $failed.Add('Camera category administration tab is not marked ADMIN-only') }
+if ($cameraCenter -notmatch 'enforceAdminTabs') { $failed.Add('Camera center does not enforce ADMIN-only category navigation') }
+$cameraCategories = Get-Content (Join-Path $OutputRoot 'camera-categories.html') -Raw -Encoding utf8
+if ($cameraCategories -notmatch "if\s*\(\s*!admin\(\)\s*\).*location\.replace") {
+  $failed.Add('Camera categories page does not redirect non-ADMIN users')
+}
 
 if (Get-Command node -ErrorAction SilentlyContinue) {
   foreach ($js in Get-ChildItem -Path $OutputRoot -Filter '*.js' -File) {

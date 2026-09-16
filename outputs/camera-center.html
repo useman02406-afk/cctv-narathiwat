@@ -19,7 +19,7 @@
       <button class="tab active" data-src="camera-locations-map.html"><i class="fa-solid fa-map-location-dot"></i> ข้อมูลและจุดติดตั้ง</button>
       <button class="tab" data-src="camera-management.html"><i class="fa-solid fa-sliders"></i> จัดการข้อมูลกล้อง</button>
       <button class="tab" data-src="camera-duplicate-review.html"><i class="fa-solid fa-copy"></i> ตรวจข้อมูลซ้ำ</button>
-      <button class="tab" data-src="camera-categories.html"><i class="fa-solid fa-tags"></i> จัดการหมวดหมู่กล้อง</button>
+      <button class="tab" data-src="camera-categories.html" data-admin-only><i class="fa-solid fa-tags"></i> จัดการหมวดหมู่กล้อง</button>
       <button class="tab" data-src="camera-maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> แจ้งซ่อมและบำรุงรักษา</button>
       <button class="tab" data-src="camera-inspections.html"><i class="fa-solid fa-clipboard-check"></i> บันทึกตรวจสภาพกล้อง</button>
     </nav>
@@ -67,6 +67,8 @@
       document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>openTab(btn)));
       document.getElementById('refresh').addEventListener('click',()=>location.reload());
       const requested=location.hash.slice(1),[rawRequestedSrc,...requestedQuery]=requested.split('?'),requestedSrc=rawRequestedSrc==='camera-record-browser.html'?'camera-management.html':rawRequestedSrc==='camera-data-quality.html'?'camera-duplicate-review.html':rawRequestedSrc;const selected=[...document.querySelectorAll('.tab')].find(x=>x.dataset.src===requestedSrc)||document.querySelector('.tab.active');if(selected)openTab(selected,requestedQuery.join('?'));
+      const enforceAdminTabs=event=>{const session=event?.detail||window.cctvSession;if(!session||session.profile?.role==='ADMIN')return;const restricted=document.querySelector('[data-admin-only]');if(!restricted)return;restricted.hidden=true;restricted.setAttribute('aria-hidden','true');restricted.tabIndex=-1;if(frame.src.includes('camera-categories.html')||location.hash.includes('camera-categories.html'))openTab(document.querySelector('[data-src="camera-locations-map.html"]'))};
+      if(window.cctvSession)enforceAdminTabs({detail:window.cctvSession});else window.addEventListener('cctv-auth-ready',enforceAdminTabs,{once:true});
     })();
   </script>
 </body>
