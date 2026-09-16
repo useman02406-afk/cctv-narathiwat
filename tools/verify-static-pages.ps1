@@ -95,6 +95,10 @@ foreach ($accessibilityMarker in @('aria-expanded', "event.key !== 'Tab'", "docu
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
 if ($login -notmatch "location\.replace\('home\.html'\)") { $failed.Add('Login does not route to the legacy home page') }
 
+$accountSettings = Get-Content (Join-Path $OutputRoot 'account-settings.html') -Raw -Encoding utf8
+if ($accountSettings -notmatch 'auth\.signInWithPassword\(') { $failed.Add('Password change flow does not re-authenticate the current password') }
+if ($accountSettings -match 'currentPassword\s*:') { $failed.Add('Password change flow uses unsupported currentPassword attribute') }
+
 $authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
 if ($authGuard -match 'loadCommandShell|command-center-v2\.html#') { $failed.Add('Legacy modules still contain redesigned command-center routing') }
 if ($authGuard -notmatch 'runtime-health\.js') { $failed.Add('Runtime health monitor is not loaded by auth guard') }
