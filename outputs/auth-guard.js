@@ -54,7 +54,7 @@
   if (!document.getElementById('smart-alert-script')) {
     const alertScript = document.createElement('script');
     alertScript.id = 'smart-alert-script';
-    alertScript.src = 'smart-alert.js';
+    alertScript.src = 'smart-alert.js?v=3';
     document.head.appendChild(alertScript);
   }
   // Several older pages contain inline styles after this guard. Moving the

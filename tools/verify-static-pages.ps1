@@ -29,6 +29,8 @@ foreach ($file in $htmlFiles) {
   $text = [System.Text.Encoding]::UTF8.GetString($bytes)
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
+  if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
+  if ($text -match 'auth-guard\.js\?v=(?:1[0-5]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {

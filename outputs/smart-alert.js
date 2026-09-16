@@ -65,7 +65,7 @@
     return nativeConfirm(message);
   };
   function actionLabel(method) { return method === 'POST' ? 'เพิ่มข้อมูลสำเร็จ' : method === 'DELETE' ? 'ลบข้อมูลสำเร็จ' : 'บันทึกการแก้ไขสำเร็จ'; }
-  function moduleName() { return document.querySelector('h1')?.textContent?.trim() || document.title.replace(/\s*[|—-].*$/, '') || 'ระบบ CCTV POLICE9'; }
+  function moduleName() { return document.querySelector('h1')?.textContent?.trim() || document.title.replace(/\s*[|—-].*$/, '') || 'ศูนย์ CCTV ภ.จว.นราธิวาส'; }
   function bindMutationAlerts() {
     if (fetchBound) return;
     fetchBound = true;
