@@ -24,18 +24,21 @@
   function showSweet(title, message = '', type = 'success', options = {}) {
     return loadSweetAlert().then((Swal) => {
       if (!Swal) return fallback(title, message);
-      return Swal.fire({
+      const isToast = options.toast ?? true;
+      const config = {
         icon: type,
         title,
         text: message,
-        toast: options.toast ?? true,
+        toast: isToast,
         position: options.position || 'top-end',
         showConfirmButton: options.confirm ?? false,
         timer: options.timer ?? 3000,
         timerProgressBar: options.progress ?? true,
-        allowOutsideClick: true,
-        didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
-      });
+        ...(isToast
+          ? { didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); } }
+          : { allowOutsideClick: true })
+      };
+      return Swal.fire(config);
     });
   }
   window.smartAlert = (title, message = '', type = 'success', duration = 3000) => {
