@@ -52,8 +52,8 @@ node tools/verify-deployment.mjs https://useman02406-afk.github.io/cctv-narathiw
 
 - [Production readiness](PRODUCTION-READINESS.md)
 - [UAT checklist](UAT-CHECKLIST.md)
+- [QA report](QA-REPORT.md)
 
 ## ขอบเขตต้นแบบ
 
 ข้อมูลในระบบใช้สำหรับทดสอบและนำเสนอขั้นตอนทำงาน การเปิดใช้งานภาคสนามต้องได้รับอนุมัติจากหน่วยงาน รวมถึงการตรวจ PDPA, สิทธิ์ตามหน้าที่, การเชื่อมระบบภายนอก, การสำรองและกู้คืนข้อมูล และการทดสอบบนอุปกรณ์จริงของหน่วยงาน
-
