@@ -118,7 +118,7 @@
     }
     if (!document.querySelector('script[data-vehicle-map]')) {
       const script = document.createElement('script');
-      script.src = new window.URL('vehicle-map.js', location.href).href;
+      script.src = new window.URL('vehicle-map.js?v=3', location.href).href;
       script.defer = true;
       script.dataset.vehicleMap = 'true';
       document.head.appendChild(script);
