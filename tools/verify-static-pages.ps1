@@ -10,6 +10,8 @@ $required = @(
   'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
   'mission-planner.html', 'home-search.html', 'reports.html',
+  'station-overview.html', 'case-timeline.html',
+  'module-navigation.css', 'module-navigation.js',
   'auth-guard.js', 'smart-alert.js', 'runtime-health.js'
 )
 
@@ -60,6 +62,22 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
       }
     }
   }
+}
+
+$dashboardHome = Get-Content (Join-Path $OutputRoot 'home.html') -Raw -Encoding utf8
+$moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
+$primaryModules = @(
+  'home.html', 'station-overview.html', 'camera-center.html', 'investigations.html',
+  'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
+  'vehicle-alerts.html', 'mission-planner.html', 'home-search.html',
+  'case-timeline.html', 'reports.html'
+)
+foreach ($module in $primaryModules) {
+  if ($dashboardHome -notmatch [regex]::Escape($module)) { $failed.Add("Home navigation is missing module: $module") }
+  if ($moduleNavigation -notmatch [regex]::Escape($module)) { $failed.Add("Module switcher is missing module: $module") }
+}
+if (([regex]::Matches($moduleNavigation, "\['[^']+','fa-[^']+','[^']+\.html'")).Count -ne 12) {
+  $failed.Add('Module switcher must contain exactly 12 primary modules')
 }
 
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
