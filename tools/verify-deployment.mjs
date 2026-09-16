@@ -1,26 +1,50 @@
-const site = process.env.CCTV_SITE_URL || 'https://useman02406-afk.github.io/cctv-narathiwat/outputs';
+const site = (process.argv[2] || process.env.CCTV_SITE_URL || 'https://useman02406-afk.github.io/cctv-narathiwat/outputs').replace(/\/$/, '');
 const supabase = 'https://rbahodbdbxfvftfxeipe.supabase.co';
 const publishableKey = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
 const pages = [
   'login.html', 'home.html', 'camera-center.html', 'camera-locations-map.html',
+  'station-overview.html',
   'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
-  'mission-planner.html', 'home-search.html', 'reports.html', 'auth-guard.js?v=14'
+  'mission-planner.html', 'home-search.html', 'case-timeline.html', 'reports.html',
+  'module-navigation.css?v=1', 'module-navigation.js?v=1',
+  'global-module-menu.css?v=1', 'global-module-menu.js?v=1',
+  'auth-guard.js?v=16', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
 ];
 const expectedContent = new Map([
   ['login.html', "location.replace('home.html')"],
-  ['auth-guard.js?v=14', 'runtime-health.js?v=1'],
+  ['home.html', 'โมดูลระบบ 12 หมวด'],
+  ['auth-guard.js?v=16', 'global-module-menu.js?v=1'],
+  ['global-module-menu.js?v=1', "['ศูนย์รายงาน','reports.html'"],
+  ['module-navigation.js?v=1', "['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"],
   ['camera-locations-map.html', 'const markerLimit=visible.length'],
   ['home-search.html', 'loadMapOverview']
 ]);
 
 const failures = [];
 const timeout = ms => AbortSignal.timeout(ms);
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function fetchReleaseResource(page) {
+  let lastResponse;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    lastResponse = await fetch(`${site}/${page}`, {
+      signal: timeout(20_000),
+      redirect: 'follow',
+      cache: 'no-store',
+      headers: { 'cache-control': 'no-cache' }
+    });
+    const body = await lastResponse.text();
+    const expected = expectedContent.get(page);
+    if (lastResponse.ok && body.length >= 100 && (!expected || body.includes(expected))) return { response: lastResponse, body };
+    if (attempt < 3) await wait(5_000 * attempt);
+    else return { response: lastResponse, body };
+  }
+}
 
 for (const page of pages) {
   try {
-    const response = await fetch(`${site}/${page}`, { signal: timeout(20_000), redirect: 'follow' });
-    const body = await response.text();
+    const { response, body } = await fetchReleaseResource(page);
     if (!response.ok) failures.push(`${page}: HTTP ${response.status}`);
     if (body.length < 100) failures.push(`${page}: response is unexpectedly small`);
     if (/404: File not found|There isn't a GitHub Pages site here/i.test(body)) failures.push(`${page}: GitHub Pages error body`);
@@ -29,6 +53,23 @@ for (const page of pages) {
   } catch (error) {
     failures.push(`${page}: ${error.message}`);
   }
+}
+
+try {
+  const home = await fetch(`${site}/home.html`, { signal: timeout(20_000), cache: 'no-store' }).then(response => response.text());
+  const requiredModules = [
+    'home.html', 'station-overview.html', 'camera-center.html', 'investigations.html',
+    'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
+    'vehicle-alerts.html', 'mission-planner.html', 'home-search.html',
+    'case-timeline.html', 'reports.html'
+  ];
+  requiredModules.forEach(module => {
+    if (!home.includes(`href="${module}"`)) failures.push(`home.html: missing primary module link ${module}`);
+  });
+  if (!home.includes('auth-guard.js?v=16')) failures.push('home.html: stale auth guard cache version');
+  if (home.includes('CCTV POLICE9')) failures.push('home.html: legacy product name remains');
+} catch (error) {
+  failures.push(`home release contract: ${error.message}`);
 }
 
 const headers = { apikey: publishableKey, Authorization: `Bearer ${publishableKey}` };
@@ -63,4 +104,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PASS: ${pages.length} deployed resources, Supabase Auth, and ${protectedTables.length} anonymous RLS probes.`);
+console.log(`PASS: ${pages.length} deployed resources, 12-module release contract, Supabase Auth, and ${protectedTables.length} anonymous RLS probes.`);
