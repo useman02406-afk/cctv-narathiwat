@@ -124,23 +124,6 @@
       document.head.appendChild(script);
     }
   }
-  function loadCommandShell() {
-    if (/\/(login|password-reset)\.html$/i.test(location.pathname)) return;
-    if (!document.querySelector('link[data-command-shell]')) {
-      const style = document.createElement('link');
-      style.rel = 'stylesheet';
-      style.href = new window.URL('command-shell.css?v=3', location.href).href;
-      style.dataset.commandShell = 'true';
-      document.head.appendChild(style);
-    }
-    if (!document.querySelector('script[data-command-shell]')) {
-      const script = document.createElement('script');
-      script.src = new window.URL('command-shell.js?v=3', location.href).href;
-      script.defer = true;
-      script.dataset.commandShell = 'true';
-      document.head.appendChild(script);
-    }
-  }
   function loadCaseCommandCenter() {
     if (!/\/case-timeline\.html$/i.test(location.pathname)) return;
     const style = document.createElement('link');style.rel='stylesheet';style.href=new window.URL('case-command-center.css?v=2',location.href).href;document.head.appendChild(style);
@@ -152,10 +135,9 @@
     const script=document.createElement('script');script.src=new window.URL('home-command-overview.js?v=3',location.href).href;script.defer=true;document.head.appendChild(script);
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCommandShell(); loadCaseCommandCenter(); loadHomeCommandOverview(); }, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { loadVehicleMapEnhancement(); loadCaseCommandCenter(); loadHomeCommandOverview(); }, { once: true });
   } else {
     loadVehicleMapEnhancement();
-    loadCommandShell();
     loadCaseCommandCenter();
     loadHomeCommandOverview();
   }
