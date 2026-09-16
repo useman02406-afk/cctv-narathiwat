@@ -13,7 +13,7 @@ const pages = [
 ];
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
-  ['home.html', ['โมดูลระบบ 12 หมวด', 'แผนที่สถานการณ์กลาง', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home']],
+  ['home.html', ['แผนที่สถานการณ์กลาง', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home', 'สืบสวนและภารกิจ']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
@@ -68,6 +68,9 @@ try {
   ];
   requiredModules.forEach(module => {
     if (!home.includes(`href="${module}"`)) failures.push(`home.html: missing primary module link ${module}`);
+  });
+  ['module-switcher', 'moduleTabs', 'moduleDetailTitle', 'module-navigation.js'].forEach(retired => {
+    if (home.includes(retired)) failures.push(`home.html: duplicate module switcher remains (${retired})`);
   });
   if (!home.includes('auth-guard.js?v=17')) failures.push('home.html: stale auth guard cache version');
   if (home.includes('CCTV POLICE9')) failures.push('home.html: legacy product name remains');

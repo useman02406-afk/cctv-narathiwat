@@ -78,6 +78,9 @@ $homeLayoutContracts = @('command-map-frame', 'แผนที่สถานก
 foreach ($contract in $homeLayoutContracts) {
   if ($dashboardHome -notmatch [regex]::Escape($contract)) { $failed.Add("Home command-map structure is missing: $contract") }
 }
+foreach ($retiredHomeSwitcher in @('module-switcher', 'moduleTabs', 'moduleDetailTitle', 'module-navigation.js')) {
+  if ($dashboardHome -match [regex]::Escape($retiredHomeSwitcher)) { $failed.Add("Duplicate home module switcher remains: $retiredHomeSwitcher") }
+}
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(
   'home.html', 'station-overview.html', 'camera-center.html', 'investigations.html',
