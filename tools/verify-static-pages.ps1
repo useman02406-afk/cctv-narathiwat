@@ -12,6 +12,7 @@ $required = @(
   'mission-planner.html', 'home-search.html', 'reports.html',
   'station-overview.html', 'case-timeline.html',
   'module-navigation.css', 'module-navigation.js',
+  'global-module-menu.css', 'global-module-menu.js',
   'auth-guard.js', 'smart-alert.js', 'runtime-health.js'
 )
 
@@ -78,6 +79,10 @@ foreach ($module in $primaryModules) {
 }
 if (([regex]::Matches($moduleNavigation, "\['[^']+','fa-[^']+','[^']+\.html'")).Count -ne 12) {
   $failed.Add('Module switcher must contain exactly 12 primary modules')
+}
+$globalModuleMenu = Get-Content (Join-Path $OutputRoot 'global-module-menu.js') -Raw -Encoding utf8
+foreach ($module in $primaryModules) {
+  if ($globalModuleMenu -notmatch [regex]::Escape($module)) { $failed.Add("Global module menu is missing module: $module") }
 }
 
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8

@@ -35,6 +35,20 @@
     theme.href = 'jis-ui-theme.css';
     document.head.appendChild(theme);
   }
+  if (!document.getElementById('global-module-menu-style')) {
+    const moduleMenuStyle = document.createElement('link');
+    moduleMenuStyle.id = 'global-module-menu-style';
+    moduleMenuStyle.rel = 'stylesheet';
+    moduleMenuStyle.href = new window.URL('global-module-menu.css?v=1', location.href).href;
+    document.head.appendChild(moduleMenuStyle);
+  }
+  if (!document.getElementById('global-module-menu-script')) {
+    const moduleMenuScript = document.createElement('script');
+    moduleMenuScript.id = 'global-module-menu-script';
+    moduleMenuScript.src = new window.URL('global-module-menu.js?v=1', location.href).href;
+    moduleMenuScript.defer = true;
+    document.head.appendChild(moduleMenuScript);
+  }
   // Smart Alerts are available on every protected module. The shared script
   // also records successful CRUD operations in the notification centre.
   if (!document.getElementById('smart-alert-script')) {
