@@ -1,5 +1,7 @@
 # CCTV Narathiwat production readiness
 
+สถานะล่าสุด: automated release gates ผ่านแล้ว ส่วนการรับรอง OFFICER/VIEWER, อุปกรณ์จริง, PDPA และการกู้คืนข้อมูลยังต้องให้หน่วยงานดำเนินการตาม [UAT checklist](UAT-CHECKLIST.md)
+
 ## Automated gates
 
 - `tools/verify-static-pages.ps1` validates all required modules, UTF-8, local asset links, external and inline JavaScript syntax, legacy routing, and runtime monitoring.
