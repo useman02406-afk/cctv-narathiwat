@@ -16,6 +16,7 @@ const expectedContent = new Map([
   ['home.html', ['โมดูลระบบ 12 หมวด']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
+  ['reports.html', ['dateFrom', 'reportData', "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
   ['auth-guard.js?v=17', ['global-module-menu.js?v=2', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls']],
   ['global-module-menu.js?v=2', ["['ศูนย์รายงาน','reports.html'"]],
   ['module-navigation.js?v=1', ["['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"]],

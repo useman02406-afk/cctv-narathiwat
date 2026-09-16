@@ -105,6 +105,11 @@ $accountSettings = Get-Content (Join-Path $OutputRoot 'account-settings.html') -
 if ($accountSettings -notmatch 'auth\.signInWithPassword\(') { $failed.Add('Password change flow does not re-authenticate the current password') }
 if ($accountSettings -match 'currentPassword\s*:') { $failed.Add('Password change flow uses unsupported currentPassword attribute') }
 
+$reports = Get-Content (Join-Path $OutputRoot 'reports.html') -Raw -Encoding utf8
+foreach ($reportContract in @('dateFrom', 'dateTo', 'reportData', 'thisMonth', "camera-center.html#camera-locations-map.html", "risk:'risk-areas.html'", "people:'risk-persons.html'", "vehicle:'vehicle-alerts.html'")) {
+  if ($reports -notmatch [regex]::Escape($reportContract)) { $failed.Add("Report filter/export contract is missing: $reportContract") }
+}
+
 $authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
 if ($authGuard -match 'loadCommandShell|command-center-v2\.html#') { $failed.Add('Legacy modules still contain redesigned command-center routing') }
 if ($authGuard -notmatch 'runtime-health\.js') { $failed.Add('Runtime health monitor is not loaded by auth guard') }
