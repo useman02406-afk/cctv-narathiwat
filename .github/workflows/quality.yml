@@ -15,10 +15,11 @@ jobs:
   static-quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
       - name: Verify static application
         shell: pwsh
         run: ./tools/verify-static-pages.ps1
@@ -28,10 +29,11 @@ jobs:
     needs: static-quality
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
       - name: Wait for GitHub Pages publication
         if: github.event_name == 'push'
         run: sleep 45
