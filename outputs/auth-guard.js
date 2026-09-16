@@ -2,6 +2,24 @@
   'use strict';
   const URL = 'https://rbahodbdbxfvftfxeipe.supabase.co';
   const KEY = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
+  if (!document.querySelector('meta[name="referrer"]')) {
+    const referrer = document.createElement('meta');
+    referrer.name = 'referrer';
+    referrer.content = 'strict-origin-when-cross-origin';
+    document.head.appendChild(referrer);
+  }
+  if (!document.querySelector('meta[name="robots"]')) {
+    const robots = document.createElement('meta');
+    robots.name = 'robots';
+    robots.content = 'noindex,nofollow,noarchive';
+    document.head.appendChild(robots);
+  }
+  if (!document.querySelector('script[data-runtime-health]')) {
+    const healthScript = document.createElement('script');
+    healthScript.src = new window.URL('runtime-health.js?v=1', location.href).href;
+    healthScript.dataset.runtimeHealth = 'true';
+    document.head.appendChild(healthScript);
+  }
   // Some legacy modules were created without a viewport declaration. Add one
   // centrally so every protected screen uses the device width on phones.
   if (!document.querySelector('meta[name="viewport"]')) {
@@ -146,6 +164,25 @@
     if (event !== 'SIGNED_OUT' || localSignOutInProgress || location.pathname.toLowerCase().endsWith('/login.html')) return;
     location.replace('login.html?error=session');
   });
+
+  function installIdleTimeout() {
+    const timeoutMs = 30 * 60 * 1000;
+    let timer = 0;
+    let lastReset = 0;
+    const expire = async () => {
+      localSignOutInProgress = true;
+      try { await client.auth.signOut({ scope: 'local' }); } finally { location.replace('login.html?error=idle'); }
+    };
+    const reset = () => {
+      const now = Date.now();
+      if (now - lastReset < 15_000) return;
+      lastReset = now;
+      clearTimeout(timer);
+      timer = setTimeout(expire, timeoutMs);
+    };
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(type => addEventListener(type, reset, { passive: true }));
+    reset();
+  }
 
   function showAuthLoading() {
     if (isDashboard || document.getElementById('auth-loading')) return;
@@ -625,6 +662,7 @@
       }
     });
     window.cctvSession = { user: session.user, profile, client };
+    installIdleTimeout();
     applyRolePermissions(window.cctvSession);
     window.dispatchEvent(new CustomEvent('cctv-auth-ready', { detail: window.cctvSession }));
     hideAuthLoading();

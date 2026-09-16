@@ -1,0 +1,39 @@
+name: Production quality checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '15 23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify static application
+        shell: pwsh
+        run: ./tools/verify-static-pages.ps1
+
+  deployed-smoke-test:
+    if: github.event_name != 'pull_request'
+    needs: static-quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for GitHub Pages publication
+        if: github.event_name == 'push'
+        run: sleep 45
+      - name: Verify deployed pages and anonymous RLS
+        run: node tools/verify-deployment.mjs

@@ -7,7 +7,10 @@ $OutputRoot = (Resolve-Path $OutputRoot).Path
 $required = @(
   'login.html', 'home.html', 'camera-center.html',
   'camera-management.html', 'camera-data-quality.html', 'admin-console.html',
-  'auth-guard.js', 'smart-alert.js'
+  'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
+  'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
+  'mission-planner.html', 'home-search.html', 'reports.html',
+  'auth-guard.js', 'smart-alert.js', 'runtime-health.js'
 )
 
 $failed = [System.Collections.Generic.List[string]]::new()
@@ -23,6 +26,14 @@ foreach ($file in $htmlFiles) {
   $text = [System.Text.Encoding]::UTF8.GetString($bytes)
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
+
+  $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  foreach ($reference in $references) {
+    $target = $reference.Groups[1].Value
+    if ($target -match '^(?:https?:|data:|mailto:|javascript:|/|\$\{)') { continue }
+    $resolved = Join-Path $file.DirectoryName $target
+    if (-not (Test-Path -LiteralPath $resolved)) { $failed.Add("Broken local reference: $($file.Name) -> $target") }
+  }
 }
 
 $cameraCenter = Get-Content (Join-Path $OutputRoot 'camera-center.html') -Raw -Encoding utf8
@@ -31,8 +42,8 @@ foreach ($tab in @('camera-locations-map.html', 'camera-management.html', 'camer
 }
 
 if (Get-Command node -ErrorAction SilentlyContinue) {
-  foreach ($js in @('auth-guard.js', 'smart-alert.js')) {
-    & node --check (Join-Path $OutputRoot $js)
+  foreach ($js in Get-ChildItem -Path $OutputRoot -Filter '*.js' -File) {
+    & node --check $js.FullName
     if ($LASTEXITCODE -ne 0) { $failed.Add("Invalid JavaScript syntax: $js") }
   }
   foreach ($file in $htmlFiles) {
@@ -50,6 +61,13 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
     }
   }
 }
+
+$login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
+if ($login -notmatch "location\.replace\('home\.html'\)") { $failed.Add('Login does not route to the legacy home page') }
+
+$authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
+if ($authGuard -match 'loadCommandShell|command-center-v2\.html#') { $failed.Add('Legacy modules still contain redesigned command-center routing') }
+if ($authGuard -notmatch 'runtime-health\.js') { $failed.Add('Runtime health monitor is not loaded by auth guard') }
 
 if ($failed.Count) {
   $failed | ForEach-Object { Write-Error $_ }

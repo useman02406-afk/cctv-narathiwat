@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
+  <meta name="robots" content="noindex,nofollow,noarchive">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>เข้าสู่ระบบ | ศูนย์ CCTV สภ.เมืองนราธิวาส</title>
@@ -117,6 +118,7 @@
       <p class="note">รหัสผ่านถูกจัดเก็บโดย Supabase Auth เท่านั้น และจะไม่แสดงหรือบันทึกไว้ในข้อมูลโปรไฟล์</p>
     </section>
   </main>
+  <script src="runtime-health.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="smart-alert.js"></script>
   <script>
@@ -165,9 +167,10 @@
         else localStorage.removeItem(registrationCooldownKey);
       };
 
-      if (new URLSearchParams(location.search).get('error')) {
-        loginMessage('บัญชีอยู่ระหว่างรอผู้ดูแลระบบอนุมัติ หรือยังไม่ได้รับอนุญาตให้ใช้งาน');
-      }
+      const loginError = new URLSearchParams(location.search).get('error');
+      if (loginError === 'idle') loginMessage('ออกจากระบบอัตโนมัติ เนื่องจากไม่มีการใช้งานเกิน 30 นาที');
+      else if (loginError === 'session') loginMessage('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+      else if (loginError) loginMessage('บัญชีอยู่ระหว่างรอผู้ดูแลระบบอนุมัติ หรือยังไม่ได้รับอนุญาตให้ใช้งาน');
       $('showRegister').addEventListener('click', () => showRegister(true));
       $('backToLogin').addEventListener('click', () => showRegister(false));
       restoreRegistrationCooldown();
