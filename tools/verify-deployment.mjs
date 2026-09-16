@@ -13,7 +13,7 @@ const pages = [
 ];
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
-  ['home.html', ['โมดูลระบบ 12 หมวด']],
+  ['home.html', ['โมดูลระบบ 12 หมวด', 'แผนที่สถานการณ์กลาง', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
