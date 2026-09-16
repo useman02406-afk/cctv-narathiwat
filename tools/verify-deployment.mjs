@@ -2,7 +2,7 @@ const site = (process.argv[2] || process.env.CCTV_SITE_URL || 'https://useman024
 const supabase = 'https://rbahodbdbxfvftfxeipe.supabase.co';
 const publishableKey = 'sb_publishable_s0s17pRAf8q75VOjl5TtZQ_tB1gd8b4';
 const pages = [
-  'login.html', 'home.html', 'camera-center.html', 'camera-locations-map.html',
+  'login.html', 'home.html', 'camera-center.html', 'camera-categories.html', 'camera-locations-map.html',
   'station-overview.html',
   'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
@@ -12,13 +12,15 @@ const pages = [
   'auth-guard.js?v=17', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
 ];
 const expectedContent = new Map([
-  ['login.html', "location.replace('home.html')"],
-  ['home.html', 'โมดูลระบบ 12 หมวด'],
-  ['auth-guard.js?v=17', 'global-module-menu.js?v=2'],
-  ['global-module-menu.js?v=2', "['ศูนย์รายงาน','reports.html'"],
-  ['module-navigation.js?v=1', "['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"],
-  ['camera-locations-map.html', 'const markerLimit=visible.length'],
-  ['home-search.html', 'loadMapOverview']
+  ['login.html', ["location.replace('home.html')"]],
+  ['home.html', ['โมดูลระบบ 12 หมวด']],
+  ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
+  ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
+  ['auth-guard.js?v=17', ['global-module-menu.js?v=2', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls']],
+  ['global-module-menu.js?v=2', ["['ศูนย์รายงาน','reports.html'"]],
+  ['module-navigation.js?v=1', ["['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"]],
+  ['camera-locations-map.html', ['const markerLimit=visible.length']],
+  ['home-search.html', ['loadMapOverview']]
 ]);
 
 const failures = [];
@@ -35,8 +37,8 @@ async function fetchReleaseResource(page) {
       headers: { 'cache-control': 'no-cache' }
     });
     const body = await lastResponse.text();
-    const expected = expectedContent.get(page);
-    if (lastResponse.ok && body.length >= 100 && (!expected || body.includes(expected))) return { response: lastResponse, body };
+    const expected = expectedContent.get(page) || [];
+    if (lastResponse.ok && body.length >= 100 && expected.every(marker => body.includes(marker))) return { response: lastResponse, body };
     if (attempt < 3) await wait(5_000 * attempt);
     else return { response: lastResponse, body };
   }
@@ -48,8 +50,8 @@ for (const page of pages) {
     if (!response.ok) failures.push(`${page}: HTTP ${response.status}`);
     if (body.length < 100) failures.push(`${page}: response is unexpectedly small`);
     if (/404: File not found|There isn't a GitHub Pages site here/i.test(body)) failures.push(`${page}: GitHub Pages error body`);
-    const expected = expectedContent.get(page);
-    if (expected && !body.includes(expected)) failures.push(`${page}: expected release marker is missing`);
+    const expected = expectedContent.get(page) || [];
+    expected.filter(marker => !body.includes(marker)).forEach(marker => failures.push(`${page}: expected release marker is missing (${marker})`));
   } catch (error) {
     failures.push(`${page}: ${error.message}`);
   }

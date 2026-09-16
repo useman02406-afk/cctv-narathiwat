@@ -108,6 +108,22 @@ if ($accountSettings -match 'currentPassword\s*:') { $failed.Add('Password chang
 $authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
 if ($authGuard -match 'loadCommandShell|command-center-v2\.html#') { $failed.Add('Legacy modules still contain redesigned command-center routing') }
 if ($authGuard -notmatch 'runtime-health\.js') { $failed.Add('Runtime health monitor is not loaded by auth guard') }
+foreach ($securityContract in @(
+  '30 * 60 * 1000',
+  "login.html?error=idle",
+  '!profile.active',
+  'applyRolePermissions',
+  'hideMutationControls',
+  "['ADMIN', 'OFFICER'].includes"
+)) {
+  if ($authGuard -notmatch [regex]::Escape($securityContract)) {
+    $failed.Add("Authentication and role security contract is missing: $securityContract")
+  }
+}
+$adminConsole = Get-Content (Join-Path $OutputRoot 'admin-console.html') -Raw -Encoding utf8
+if ($adminConsole -notmatch "profile\.role\s*!==\s*'ADMIN'.*location\.replace\('home\.html'\)") {
+  $failed.Add('Admin console does not redirect non-ADMIN users')
+}
 
 if ($failed.Count) {
   $failed | ForEach-Object { Write-Error $_ }
