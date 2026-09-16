@@ -3,7 +3,7 @@
 ## Automated gates
 
 - `tools/verify-static-pages.ps1` validates all required modules, UTF-8, local asset links, external and inline JavaScript syntax, legacy routing, and runtime monitoring.
-- `tools/verify-deployment.mjs` verifies deployed pages, Supabase Auth availability, and that anonymous users cannot read `profiles` or `cctv_locations`.
+- `tools/verify-deployment.mjs` verifies 22 deployed resources, the 12-module release contract, current cache markers, Supabase Auth availability, and anonymous RLS protection across 12 operational tables.
 - `.github/workflows/quality.yml` runs static checks on every push and pull request, then checks the deployed system after pushes and once daily.
 
 ## Release checklist

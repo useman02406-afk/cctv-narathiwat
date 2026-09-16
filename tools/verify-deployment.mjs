@@ -8,14 +8,14 @@ const pages = [
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
   'mission-planner.html', 'home-search.html', 'case-timeline.html', 'reports.html',
   'module-navigation.css?v=1', 'module-navigation.js?v=1',
-  'global-module-menu.css?v=1', 'global-module-menu.js?v=1',
-  'auth-guard.js?v=16', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
+  'global-module-menu.css?v=2', 'global-module-menu.js?v=2',
+  'auth-guard.js?v=17', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
 ];
 const expectedContent = new Map([
   ['login.html', "location.replace('home.html')"],
   ['home.html', 'โมดูลระบบ 12 หมวด'],
-  ['auth-guard.js?v=16', 'global-module-menu.js?v=1'],
-  ['global-module-menu.js?v=1', "['ศูนย์รายงาน','reports.html'"],
+  ['auth-guard.js?v=17', 'global-module-menu.js?v=2'],
+  ['global-module-menu.js?v=2', "['ศูนย์รายงาน','reports.html'"],
   ['module-navigation.js?v=1', "['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"],
   ['camera-locations-map.html', 'const markerLimit=visible.length'],
   ['home-search.html', 'loadMapOverview']
@@ -66,7 +66,7 @@ try {
   requiredModules.forEach(module => {
     if (!home.includes(`href="${module}"`)) failures.push(`home.html: missing primary module link ${module}`);
   });
-  if (!home.includes('auth-guard.js?v=16')) failures.push('home.html: stale auth guard cache version');
+  if (!home.includes('auth-guard.js?v=17')) failures.push('home.html: stale auth guard cache version');
   if (home.includes('CCTV POLICE9')) failures.push('home.html: legacy product name remains');
 } catch (error) {
   failures.push(`home release contract: ${error.message}`);

@@ -30,11 +30,38 @@
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'cctv-module-menu-title');
     overlay.innerHTML = `<section class="cctv-module-dialog"><header><div><h2 id="cctv-module-menu-title">โมดูลระบบ 12 หมวด</h2><p>เลือกเพื่อเปิดโมดูล พร้อมดูคำอธิบายหน้าที่โดยย่อ</p></div><button class="cctv-module-close" type="button" aria-label="ปิดเมนู">×</button></header><nav class="cctv-module-grid">${modules.map((item,index)=>`<a class="cctv-module-card${current===item[1]?' current':''}" href="${item[1]}"><span class="cctv-module-number">${index+1}</span><span><strong>${item[0]}</strong><small>${item[2]}</small></span></a>`).join('')}</nav><div class="cctv-module-foot"><i class="fa-solid fa-lock"></i> ระบบส่วนตัวสำหรับผู้ได้รับอนุญาต · ข้อมูลต้นแบบสำหรับการทดสอบและนำเสนอ</div></section>`;
-    const close = () => { overlay.classList.remove('open'); launcher.focus(); };
-    launcher.addEventListener('click', () => { overlay.classList.add('open'); overlay.querySelector('.cctv-module-close').focus(); });
+    const focusable = () => [...overlay.querySelectorAll('a[href],button:not([disabled])')];
+    const close = () => {
+      overlay.classList.remove('open');
+      document.body.style.removeProperty('overflow');
+      launcher.setAttribute('aria-expanded', 'false');
+      launcher.focus();
+    };
+    launcher.setAttribute('aria-expanded', 'false');
+    launcher.addEventListener('click', () => {
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      launcher.setAttribute('aria-expanded', 'true');
+      overlay.querySelector('.cctv-module-close').focus();
+    });
     overlay.querySelector('.cctv-module-close').addEventListener('click', close);
     overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape' && overlay.classList.contains('open')) close(); });
+    document.addEventListener('keydown', event => {
+      if (!overlay.classList.contains('open')) return;
+      if (event.key === 'Escape') return close();
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
     document.body.append(launcher, overlay);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, { once: true });

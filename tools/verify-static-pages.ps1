@@ -30,7 +30,7 @@ foreach ($file in $htmlFiles) {
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
   if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
-  if ($text -match 'auth-guard\.js\?v=(?:1[0-5]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
+  if ($text -match 'auth-guard\.js\?v=(?:1[0-6]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {
@@ -85,6 +85,11 @@ if (([regex]::Matches($moduleNavigation, "\['[^']+','fa-[^']+','[^']+\.html'")).
 $globalModuleMenu = Get-Content (Join-Path $OutputRoot 'global-module-menu.js') -Raw -Encoding utf8
 foreach ($module in $primaryModules) {
   if ($globalModuleMenu -notmatch [regex]::Escape($module)) { $failed.Add("Global module menu is missing module: $module") }
+}
+foreach ($accessibilityMarker in @('aria-expanded', "event.key !== 'Tab'", "document.body.style.overflow = 'hidden'")) {
+  if ($globalModuleMenu -notmatch [regex]::Escape($accessibilityMarker)) {
+    $failed.Add("Global module menu accessibility contract is missing: $accessibilityMarker")
+  }
 }
 
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
