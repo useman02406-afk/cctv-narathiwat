@@ -8,8 +8,8 @@ const pages = [
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
   'mission-planner.html', 'home-search.html', 'case-timeline.html', 'reports.html',
   'module-navigation.css?v=1', 'module-navigation.js?v=1',
-  'global-module-menu.css?v=2', 'global-module-menu.js?v=2',
-  'auth-guard.js?v=17', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
+  'global-module-menu.css?v=3', 'global-module-menu.js?v=3',
+  'auth-guard.js?v=18', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
 ];
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
@@ -17,8 +17,8 @@ const expectedContent = new Map([
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
-  ['auth-guard.js?v=17', ['global-module-menu.js?v=2', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls']],
-  ['global-module-menu.js?v=2', ["['ศูนย์รายงาน','reports.html'"]],
+  ['auth-guard.js?v=18', ['global-module-menu.js?v=3', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls']],
+  ['global-module-menu.js?v=3', ["['ศูนย์รายงาน','reports.html'", "page === 'home.html'"]],
   ['module-navigation.js?v=1', ["['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"]],
   ['camera-locations-map.html', ['const markerLimit=visible.length']],
   ['home-search.html', ['loadMapOverview']]
@@ -72,7 +72,7 @@ try {
   ['module-switcher', 'moduleTabs', 'moduleDetailTitle', 'module-navigation.js'].forEach(retired => {
     if (home.includes(retired)) failures.push(`home.html: duplicate module switcher remains (${retired})`);
   });
-  if (!home.includes('auth-guard.js?v=17')) failures.push('home.html: stale auth guard cache version');
+  if (!home.includes('auth-guard.js?v=18')) failures.push('home.html: stale auth guard cache version');
   if (home.includes('CCTV POLICE9')) failures.push('home.html: legacy product name remains');
 } catch (error) {
   failures.push(`home release contract: ${error.message}`);

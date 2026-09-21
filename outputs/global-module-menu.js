@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  if (window.top !== window.self || document.getElementById('cctv-module-launcher')) return;
+  const page = location.pathname.split('/').pop().toLowerCase() || 'home.html';
+  if (window.top !== window.self || page === 'home.html' || document.getElementById('cctv-module-launcher')) return;
   const modules = [
     ['ภาพรวมศูนย์','home.html','กล้อง สถานี เหตุเฝ้าระวัง รถ และสถานการณ์ล่าสุด'],
     ['ภาพรวม สภ.','station-overview.html','สถานะกล้องและผลการปฏิบัติงานราย สภ.'],

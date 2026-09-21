@@ -39,13 +39,13 @@
     const moduleMenuStyle = document.createElement('link');
     moduleMenuStyle.id = 'global-module-menu-style';
     moduleMenuStyle.rel = 'stylesheet';
-    moduleMenuStyle.href = new window.URL('global-module-menu.css?v=2', location.href).href;
+    moduleMenuStyle.href = new window.URL('global-module-menu.css?v=3', location.href).href;
     document.head.appendChild(moduleMenuStyle);
   }
   if (!document.getElementById('global-module-menu-script')) {
     const moduleMenuScript = document.createElement('script');
     moduleMenuScript.id = 'global-module-menu-script';
-    moduleMenuScript.src = new window.URL('global-module-menu.js?v=2', location.href).href;
+    moduleMenuScript.src = new window.URL('global-module-menu.js?v=3', location.href).href;
     moduleMenuScript.defer = true;
     document.head.appendChild(moduleMenuScript);
   }

@@ -30,7 +30,7 @@ foreach ($file in $htmlFiles) {
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
   if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
-  if ($text -match 'auth-guard\.js\?v=(?:1[0-6]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
+  if ($text -match 'auth-guard\.js\?v=(?:1[0-7]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {
@@ -104,6 +104,7 @@ foreach ($accessibilityMarker in @('aria-expanded', "event.key !== 'Tab'", "docu
     $failed.Add("Global module menu accessibility contract is missing: $accessibilityMarker")
   }
 }
+if ($globalModuleMenu -notmatch "page === 'home\.html'") { $failed.Add('Global module menu is not disabled on the dashboard') }
 
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
 if ($login -notmatch "location\.replace\('home\.html'\)") { $failed.Add('Login does not route to the legacy home page') }
