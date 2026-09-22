@@ -74,17 +74,20 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
 }
 
 $dashboardHome = Get-Content (Join-Path $OutputRoot 'home.html') -Raw -Encoding utf8
-$homeLayoutContracts = @('command-map-frame', 'แผนที่สถานการณ์กลาง', 'camera-locations-map.html?v=20260916-command-home', 'ศูนย์บัญชาการ', 'กล้องและเฝ้าระวัง', 'สืบสวนและภารกิจ', 'วิเคราะห์และรายงาน', 'อื่นๆ / ไม่ระบุ')
+$homeLayoutContracts = @('command-map-frame', 'commandMapTitle', 'camera-locations-map.html?v=20260916-command-home', 'commandAlertFeed', 'onlineCount', 'securityTodayCount', 'home-nav grouped', 'case-timeline.html', 'economicLegend')
 foreach ($contract in $homeLayoutContracts) {
   if ($dashboardHome -notmatch [regex]::Escape($contract)) { $failed.Add("Home command-map structure is missing: $contract") }
 }
 foreach ($retiredHomeSwitcher in @('module-switcher', 'moduleTabs', 'moduleDetailTitle', 'module-navigation.js')) {
   if ($dashboardHome -match [regex]::Escape($retiredHomeSwitcher)) { $failed.Add("Duplicate home module switcher remains: $retiredHomeSwitcher") }
 }
+$timeline = Get-Content (Join-Path $OutputRoot 'case-timeline.html') -Raw -Encoding utf8
+foreach ($timelineContract in @('timelineList', 'map', 'playRange', 'detail', 'route-line', 'case-timeline-command.js')) {
+  if ($timeline -notmatch [regex]::Escape($timelineContract)) { $failed.Add("Investigation timeline contract is missing: $timelineContract") }
+}
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(
-  'home.html', 'station-overview.html', 'camera-center.html', 'investigations.html',
-  'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
+  'camera-center.html', 'investigations.html', 'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
   'vehicle-alerts.html', 'mission-planner.html', 'home-search.html',
   'case-timeline.html', 'reports.html'
 )
@@ -92,8 +95,8 @@ foreach ($module in $primaryModules) {
   if ($dashboardHome -notmatch [regex]::Escape($module)) { $failed.Add("Home navigation is missing module: $module") }
   if ($moduleNavigation -notmatch [regex]::Escape($module)) { $failed.Add("Module switcher is missing module: $module") }
 }
-if (([regex]::Matches($moduleNavigation, "\['[^']+','fa-[^']+','[^']+\.html'")).Count -ne 12) {
-  $failed.Add('Module switcher must contain exactly 12 primary modules')
+if ($primaryModules.Count -ne 10) {
+  $failed.Add('Command Center must define exactly 10 primary modules')
 }
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
 if ($login -notmatch "location\.replace\('home\.html'\)") { $failed.Add('Login does not route to the legacy home page') }

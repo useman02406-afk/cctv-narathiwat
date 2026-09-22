@@ -2,6 +2,8 @@
 
 เว็บแอปต้นแบบสำหรับรวบรวม ติดตาม และวิเคราะห์ข้อมูลกล้อง CCTV เหตุการณ์ พื้นที่ บุคคล รถ และภารกิจในพื้นที่จังหวัดนราธิวาส
 
+เอกสารออกแบบระบบ 10 โมดูลและเกณฑ์นำไปใช้งานจริง: [SYSTEM-DESIGN-CCTV-COMMAND-CENTER.md](SYSTEM-DESIGN-CCTV-COMMAND-CENTER.md)
+
 ## เปิดใช้งาน
 
 - ระบบ: <https://useman02406-afk.github.io/cctv-narathiwat/outputs/login.html>
