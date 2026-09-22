@@ -51,7 +51,7 @@
     <section class="summary"><article class="stat"><span><i class="fa-solid fa-video"></i> กล้อง CCTV</span><b id="cameraCount">–</b></article><article class="stat"><span><i class="fa-solid fa-building"></i> พื้นที่เศรษฐกิจ</span><b id="economicCount">–</b></article><article class="stat"><span><i class="fa-solid fa-clipboard-list"></i> บันทึกเหตุการณ์</span><b id="incidentCount">–</b></article><article class="stat"><span><i class="fa-solid fa-triangle-exclamation"></i> พื้นที่เสี่ยง / เฝ้าระวัง</span><b id="riskCount">–</b></article></section>
     <section class="visual-grid" aria-label="กราฟสรุปภาพรวม">
       <article class="chart-panel"><h2><i class="fa-solid fa-chart-column"></i> กล้องตามโครงการ</h2><p class="chart-caption">จำนวนกล้องตามหน่วยงานเจ้าของโครงการ</p><div class="bar-chart" id="ownerChart"><span class="chart-caption">กำลังโหลดกราฟ…</span></div></article>
-      <article class="chart-panel"><h2><i class="fa-solid fa-building-circle-check"></i> พื้นที่เศรษฐกิจ 7 ประเภท</h2><p class="chart-caption">สรุปจำนวนจุดตามหมวดสถานที่สำคัญ</p><div class="donut-layout dashboard-donut-body"><div class="donut" id="economicDonut"><div class="donut-label"><b id="economicTotal">–</b><span>จุดทั้งหมด</span></div></div><div class="legend" id="economicLegend"><span class="chart-caption">กำลังโหลด…</span></div></div></article>
+      <article class="chart-panel"><h2><i class="fa-solid fa-building-circle-check"></i> พื้นที่เศรษฐกิจตามประเภท</h2><p class="chart-caption">สรุปจำนวนจุดตามหมวดสถานที่สำคัญ</p><div class="donut-layout dashboard-donut-body"><div class="donut" id="economicDonut"><div class="donut-label"><b id="economicTotal">–</b><span>จุดทั้งหมด</span></div></div><div class="legend" id="economicLegend"><span class="chart-caption">กำลังโหลด…</span></div></div></article>
     </section>
     <section class="two dashboard-details">
       <article class="panel station-panel"><h2><i class="fa-solid fa-building-shield"></i> สรุปสถานะกล้องตาม สภ. / โครงการ</h2><div class="station-filter"><label for="stationSelect"><i class="fa-solid fa-filter"></i> เลือก สภ.</label><select id="stationSelect" aria-label="เลือก สภ. เพื่อดูสถานะกล้อง"><option value="__all__">ทุก สภ.</option></select><label for="projectSelect"><i class="fa-solid fa-video"></i> เลือกโครงการ</label><select id="projectSelect" aria-label="เลือกโครงการกล้องเพื่อดูสถานะ"><option value="__all__">ทุกโครงการ</option><option value="กล้อง กอ.รมน. (6 เมืองหลัก)">กล้อง กอ.รมน. (6 เมืองหลัก)</option><option value="กล้องมหาดไทย (สป.มท.)">กล้องมหาดไทย (สป.มท.)</option><option value="กล้อง ผบช.ภ.9">กล้อง ผบช.ภ.9</option><option value="กล้องเอกชน">กล้องเอกชน</option></select></div><div class="station-chart"><div class="donut station-donut" id="stationDonut"><div class="donut-label"><b id="stationTotal">–</b><span id="stationDonutLabel">กล้องทั้งหมด</span></div></div><div class="legend" id="stationLegend"><span class="chart-caption">กำลังโหลด…</span></div></div></article>
@@ -370,9 +370,9 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
   </script>
   <script>
     (() => {
-      const ECONOMIC_TYPES = ['สถานีบริการน้ำมัน', 'สถานบันเทิง', 'ธนาคาร', 'ATM', 'ร้านสะดวกซื้อ', 'ห้างสรรพสินค้า', 'ร้านทอง'];
+      const ECONOMIC_TYPES = ['สถานีบริการน้ำมัน', 'สถานบันเทิง', 'ธนาคาร', 'ATM', 'ร้านสะดวกซื้อ', 'ห้างสรรพสินค้า', 'ร้านทอง', 'อื่นๆ / ไม่ระบุ'];
       const INCIDENT_TYPES = ['ระเบิด', 'ยิง', 'เผา', 'ก่อกวน', 'อาญาทั่วไป', 'อื่นๆ'];
-      const ECONOMIC_COLORS = ['#f59e0b', '#a855f7', '#2563eb', '#06b6d4', '#22c55e', '#ec4899', '#f97316'];
+      const ECONOMIC_COLORS = ['#f59e0b', '#a855f7', '#2563eb', '#06b6d4', '#22c55e', '#ec4899', '#f97316', '#94a3b8'];
       const INCIDENT_COLORS = ['#ef4444', '#b91c1c', '#f97316', '#8b5cf6', '#168ce4', '#94a3b8'];
 
       const allRows = async (client, table) => {
@@ -447,7 +447,10 @@ const card=(icon,title,count,detail,href)=>{const display=typeof count==='number
         try {
           const [economicRows, incidentRows] = await Promise.all([allRows(client, 'economic_data'), allRows(client, 'incidents')]);
           const economicCounts = Object.fromEntries(ECONOMIC_TYPES.map(type => [type, 0]));
-          economicRows.forEach(row => { const type = economicType(row); if (type) economicCounts[type] += 1; });
+          economicRows.filter(row => String(row?.type || '').trim() !== 'จุดตรวจ').forEach(row => {
+            const type = economicType(row) || 'อื่นๆ / ไม่ระบุ';
+            economicCounts[type] += 1;
+          });
           const incidentCounts = Object.fromEntries(INCIDENT_TYPES.map(type => [type, 0]));
           incidentRows.forEach(row => { incidentCounts[incidentType(row)] += 1; });
           renderDonut('economicDonut', 'economicTotal', 'economicLegend', ECONOMIC_TYPES, economicCounts, ECONOMIC_COLORS, 'จุด');

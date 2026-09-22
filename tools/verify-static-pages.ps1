@@ -74,7 +74,7 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
 }
 
 $dashboardHome = Get-Content (Join-Path $OutputRoot 'home.html') -Raw -Encoding utf8
-$homeLayoutContracts = @('command-map-frame', 'แผนที่สถานการณ์กลาง', 'camera-locations-map.html?v=20260916-command-home', 'ศูนย์บัญชาการ', 'กล้องและเฝ้าระวัง', 'สืบสวนและภารกิจ', 'วิเคราะห์และรายงาน')
+$homeLayoutContracts = @('command-map-frame', 'แผนที่สถานการณ์กลาง', 'camera-locations-map.html?v=20260916-command-home', 'ศูนย์บัญชาการ', 'กล้องและเฝ้าระวัง', 'สืบสวนและภารกิจ', 'วิเคราะห์และรายงาน', 'อื่นๆ / ไม่ระบุ')
 foreach ($contract in $homeLayoutContracts) {
   if ($dashboardHome -notmatch [regex]::Escape($contract)) { $failed.Add("Home command-map structure is missing: $contract") }
 }
