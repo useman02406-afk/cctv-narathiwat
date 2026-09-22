@@ -13,7 +13,7 @@ $required = @(
   'station-overview.html', 'case-timeline.html',
   'module-navigation.css', 'module-navigation.js',
   'global-module-menu.css', 'global-module-menu.js',
-  'auth-guard.js', 'smart-alert.js', 'runtime-health.js'
+  'auth-guard.js', 'smart-alert.js', 'runtime-health.js', 'module-operations.js'
 )
 
 $failed = [System.Collections.Generic.List[string]]::new()
@@ -30,7 +30,7 @@ foreach ($file in $htmlFiles) {
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
   if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
-  if ($text -match 'auth-guard\.js\?v=(?:1[0-8]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
+  if (($text -match 'auth-guard\.js') -and ($text -notmatch 'auth-guard\.js\?v=21')) { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {
@@ -98,6 +98,12 @@ $timelineScript = Get-Content (Join-Path $OutputRoot 'case-timeline-command.js')
 foreach ($timelineScriptContract in @('.update(payload)', '.eq("id", editId)', '.delete()', '.eq("id", id)', 'function exportCsv()', 'window.print()', 'function distanceMeters(', 'function drawCameras()', '.from("cctv_locations")')) {
   if ($timelineScript -notmatch [regex]::Escape($timelineScriptContract)) { $failed.Add("Investigation timeline action is missing: $timelineScriptContract") }
 }
+$moduleOperations = Get-Content (Join-Path $OutputRoot 'module-operations.js') -Raw -Encoding utf8
+foreach ($operationContract in @('critical-infrastructure.html', 'risk-persons.html', 'downloadCsv(table)', 'window.print()', 'location.reload()', 'cctv-auth-ready')) {
+  if ($moduleOperations -notmatch [regex]::Escape($operationContract)) { $failed.Add("Shared module operation is missing: $operationContract") }
+}
+$authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
+if ($authGuard -notmatch [regex]::Escape('module-operations.js?v=1')) { $failed.Add('Auth guard does not load shared module operations') }
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(
   'camera-center.html', 'investigations.html', 'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',

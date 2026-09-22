@@ -20,6 +20,13 @@
     healthScript.dataset.runtimeHealth = 'true';
     document.head.appendChild(healthScript);
   }
+  if (!document.querySelector('script[data-module-operations]')) {
+    const operationsScript = document.createElement('script');
+    operationsScript.src = new window.URL('module-operations.js?v=1', location.href).href;
+    operationsScript.dataset.moduleOperations = 'true';
+    operationsScript.defer = true;
+    document.head.appendChild(operationsScript);
+  }
   // Some legacy modules were created without a viewport declaration. Add one
   // centrally so every protected screen uses the device width on phones.
   if (!document.querySelector('meta[name="viewport"]')) {

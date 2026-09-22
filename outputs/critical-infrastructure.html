@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="auth-guard.js?v=20"></script>
+  <script src="auth-guard.js?v=21"></script>
   <script src="smart-alert.js?v=3"></script>
   <script src="marker-system.js"></script>
   <style>
@@ -41,7 +41,7 @@
     <section class="summary" id="summary"></section>
     <div class="notice" id="notice">กำลังโหลดข้อมูล…</div>
     <div id="map" class="map"></div>
-    <section class="econ-history"><table><thead><tr><th>ประเภท</th><th>ชื่อสถานที่</th><th>พิกัด</th><th>อำเภอ</th><th>จังหวัด</th><th>สภ.</th><th>CCTV</th><th>ผู้บันทึก</th><th>บันทึกเมื่อ</th></tr></thead><tbody id="historyRows"></tbody></table><div id="historyEmpty" style="padding:18px;color:#64748b" hidden>ไม่พบรายการตามเงื่อนไขที่เลือก</div></section>
+    <section class="econ-history"><table><thead><tr><th>ประเภท</th><th>ชื่อสถานที่</th><th>พิกัด</th><th>อำเภอ</th><th>จังหวัด</th><th>สภ.</th><th>CCTV</th><th>ผู้บันทึก</th><th>บันทึกเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="historyRows"></tbody></table><div id="historyEmpty" style="padding:18px;color:#64748b" hidden>ไม่พบรายการตามเงื่อนไขที่เลือก</div></section>
   </main>
   <div class="econ-modal-backdrop" id="economicModal" hidden>
     <form class="econ-modal" id="economicForm" data-sweet-confirm data-sweet-title="ยืนยันการเพิ่มพื้นที่เศรษฐกิจ" data-sweet-message="ตรวจสอบประเภทสถานที่ พิกัด และรายละเอียดก่อนบันทึก" data-sweet-confirm-text="บันทึกข้อมูล" role="dialog" aria-modal="true" aria-labelledby="economicFormTitle">
@@ -62,7 +62,8 @@
     ];
     const $ = id => document.getElementById(id);
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = new URLSearchParams(location.search).get('station') || '', sessionRef;
+    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = new URLSearchParams(location.search).get('station') || '', sessionRef, editId = null;
+    const canManage = () => ['ADMIN','OFFICER'].includes(String(sessionRef?.profile?.role || '').toUpperCase());
     const stationOf = row => {
       const match = /(?:^|\n)station:\s*(.+?)(?:\n|$)/i.exec(String(row.details || ''));
       return match ? match[1].trim() : 'ไม่ระบุ สภ.';
@@ -89,23 +90,66 @@
       $('historyRows').innerHTML = result.map(row => {
         const area = areaOf(row);
         const coordinates = Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lng)) ? `${Number(row.lat).toFixed(6)}, ${Number(row.lng).toFixed(6)}` : '-';
-        return `<tr><td>${safe(row.type)}</td><td>${safe(row.name || '-')}</td><td>${coordinates}</td><td>${safe(area.district || '-')}</td><td>${safe(area.province || '-')}</td><td>${safe(stationOf(row))}</td><td>${safe(row.cctv || '-')}</td><td>${safe(row.recorder || '-')}</td><td>${safe(row.timestamp || '-')}</td></tr>`;
+        const actions = canManage() ? `<button class="econ-cancel" style="padding:5px 8px" data-econ-edit="${safe(row.id)}">แก้ไข</button> <button class="econ-cancel" style="padding:5px 8px;color:#b91c1c" data-econ-delete="${safe(row.id)}">ลบ</button>` : '–';
+        return `<tr><td>${safe(row.type)}</td><td>${safe(row.name || '-')}</td><td>${coordinates}</td><td>${safe(area.district || '-')}</td><td>${safe(area.province || '-')}</td><td>${safe(stationOf(row))}</td><td>${safe(row.cctv || '-')}</td><td>${safe(row.recorder || '-')}</td><td>${safe(row.timestamp || '-')}</td><td>${actions}</td></tr>`;
       }).join('');
       $('historyEmpty').hidden = result.length !== 0;
+      document.querySelectorAll('[data-econ-edit]').forEach(button => button.onclick = () => openEconomicEdit(button.dataset.econEdit));
+      document.querySelectorAll('[data-econ-delete]').forEach(button => button.onclick = () => removeEconomic(button.dataset.econDelete));
+    }
+
+    function fillEconomicForm(row) {
+      const area = areaOf(row);
+      $('formType').value = row.type || '';
+      $('formName').value = row.name || '';
+      $('formLat').value = row.lat ?? '';
+      $('formLng').value = row.lng ?? '';
+      $('formCctv').value = row.cctv || 'มี (บางส่วน)';
+      $('formStation').value = stationOf(row) === 'ไม่ระบุ สภ.' ? '' : stationOf(row);
+      $('formDistrict').value = area.district || '';
+      $('formProvince').value = area.province || 'นราธิวาส';
+      $('formRecorder').value = row.recorder || sessionRef?.profile?.full_name || '';
+      $('formDetails').value = String(row.details || '').split('\n').filter(line => !/^(station|district|province):/i.test(line)).join('\n').trim();
+    }
+
+    function openEconomicEdit(id) {
+      if (!canManage()) return;
+      const row = rows.find(item => String(item.id) === String(id));
+      if (!row) return;
+      editId = row.id;
+      fillEconomicForm(row);
+      $('economicFormTitle').textContent = 'แก้ไขพื้นที่เศรษฐกิจ';
+      $('economicModal').hidden = false;
+      document.body.classList.add('econ-modal-open');
+      window.setTimeout(() => $('formName').focus(), 0);
+    }
+
+    async function removeEconomic(id) {
+      if (!canManage()) return;
+      const row = rows.find(item => String(item.id) === String(id));
+      if (!row || !confirm(`ลบพื้นที่เศรษฐกิจ “${row.name || row.type}” หรือไม่?`)) return;
+      const {error} = await sessionRef.client.from('economic_data').delete().eq('id', row.id);
+      if (error) return smartAlert('ลบข้อมูลไม่สำเร็จ', error.message, 'error');
+      smartAlert('ลบข้อมูลสำเร็จ', 'นำรายการออกจากพื้นที่เศรษฐกิจแล้ว', 'success');
+      await loadRows();
     }
 
     function configureForm() {
-      const canEdit = ['ADMIN','OFFICER'].includes(String(sessionRef?.profile?.role || '').toUpperCase());
+      const canEdit = canManage();
       const modal = $('economicModal'), form = $('economicForm');
       let lastFocus = null;
       const closeModal = ({reset = true} = {}) => {
         modal.hidden = true;
         document.body.classList.remove('econ-modal-open');
-        if (reset) { form.reset(); $('formProvince').value = 'นราธิวาส'; }
+        if (reset) { form.reset(); $('formProvince').value = 'นราธิวาส'; editId = null; $('economicFormTitle').textContent = 'เพิ่มพื้นที่เศรษฐกิจ'; }
         lastFocus?.focus?.();
       };
       const openModal = () => {
         lastFocus = document.activeElement;
+        editId = null;
+        form.reset();
+        $('formProvince').value = 'นราธิวาส';
+        $('economicFormTitle').textContent = 'เพิ่มพื้นที่เศรษฐกิจ';
         modal.hidden = false;
         document.body.classList.add('econ-modal-open');
         window.setTimeout(() => $('formName').focus(), 0);
@@ -127,9 +171,14 @@
         const saveButton = $('saveEconomic');
         saveButton.disabled = true; saveButton.textContent = 'กำลังบันทึก…';
         try {
-          const {error} = await sessionRef.client.from('economic_data').insert(payload);
+          const request = editId
+            ? sessionRef.client.from('economic_data').update(payload).eq('id', editId)
+            : sessionRef.client.from('economic_data').insert(payload);
+          const {error} = await request;
           if (error) { smartAlert('บันทึกข้อมูลไม่สำเร็จ', error.message, 'error'); return; }
+          const message = editId ? 'แก้ไขพื้นที่เศรษฐกิจแล้ว' : 'เพิ่มพื้นที่เศรษฐกิจแล้ว';
           closeModal();
+          smartAlert('บันทึกสำเร็จ', message, 'success');
           await loadRows();
         } finally {
           saveButton.disabled = false; saveButton.textContent = 'บันทึกข้อมูล';
