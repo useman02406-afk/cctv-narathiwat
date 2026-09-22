@@ -30,7 +30,7 @@ foreach ($file in $htmlFiles) {
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
   if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
-  if (($text -match 'auth-guard\.js') -and ($text -notmatch 'auth-guard\.js\?v=22')) { $failed.Add("Stale auth guard cache version: $($file.Name)") }
+  if (($text -match 'auth-guard\.js') -and ($text -notmatch 'auth-guard\.js\?v=23')) { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {
@@ -107,6 +107,10 @@ if ($authGuard -notmatch [regex]::Escape('module-operations.js?v=1')) { $failed.
 $reports = Get-Content (Join-Path $OutputRoot 'reports.html') -Raw -Encoding utf8
 foreach ($reportContract in @("'vehicle_sightings'", "'case_timeline_entries'", "role==='ADMIN'", 'canExport(config)')) {
   if ($reports -notmatch [regex]::Escape($reportContract)) { $failed.Add("Report center contract is missing: $reportContract") }
+}
+$homePage = Get-Content (Join-Path $OutputRoot 'home.html') -Raw -Encoding utf8
+foreach ($scopeContract in @('function scoped(query,table)', "table==='cctv_locations'", "table==='vehicle_alerts'", "table==='incidents'")) {
+  if ($homePage -notmatch [regex]::Escape($scopeContract)) { $failed.Add("Home command scope is missing: $scopeContract") }
 }
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(

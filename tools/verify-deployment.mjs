@@ -10,7 +10,7 @@ const pages = [
   'case-timeline-command.js?v=2',
   'module-navigation.css?v=1', 'module-navigation.js?v=1',
   'global-module-menu.css?v=3', 'global-module-menu.js?v=3',
-  'auth-guard.js?v=22', 'smart-alert.js?v=3', 'runtime-health.js?v=1', 'module-operations.js?v=1'
+  'auth-guard.js?v=23', 'smart-alert.js?v=3', 'runtime-health.js?v=1', 'module-operations.js?v=1'
 ];
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
@@ -20,7 +20,7 @@ const expectedContent = new Map([
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "'risk_areas','risk'", "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'", "'vehicle_sightings'", "'case_timeline_entries'", "role==='ADMIN'", 'canExport(config)']],
-  ['auth-guard.js?v=22', ['parent.CCTV_SUPABASE', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls', 'module-operations.js?v=1', "eq('area', 'สภ.เมืองนราธิวาส')"]],
+  ['auth-guard.js?v=23', ['parent.CCTV_SUPABASE', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls', 'module-operations.js?v=1', "eq('area', 'สภ.เมืองนราธิวาส')", 'home-command-overview.js?v=4']],
   ['module-operations.js?v=1', ['critical-infrastructure.html', 'risk-persons.html', 'downloadCsv(table)', 'window.print()', 'location.reload()', 'cctv-auth-ready']],
   ['global-module-menu.js?v=3', ["['ศูนย์รายงาน','reports.html'", "page === 'home.html'"]],
   ['module-navigation.js?v=1', ["['ไทม์ไลน์สืบสวน','fa-timeline','case-timeline.html'"]],
@@ -75,7 +75,7 @@ try {
   ['module-switcher', 'moduleTabs', 'moduleDetailTitle', 'module-navigation.js'].forEach(retired => {
     if (home.includes(retired)) failures.push(`home.html: duplicate module switcher remains (${retired})`);
   });
-  if (!home.includes('auth-guard.js?v=22')) failures.push('home.html: stale auth guard cache version');
+  if (!home.includes('auth-guard.js?v=23')) failures.push('home.html: stale auth guard cache version');
   if (home.includes('CCTV POLICE9')) failures.push('home.html: legacy product name remains');
 } catch (error) {
   failures.push(`home release contract: ${error.message}`);

@@ -15,8 +15,8 @@
     try{
       const db=await waitClient();
       const [incidents,vehicles,caseCount,timelineCount]=await Promise.all([
-        db.from('incidents').select('*').order('occurred_at',{ascending:false}).limit(250),
-        db.from('vehicle_alerts').select('*').eq('status','ใช้งาน').order('reported_at',{ascending:false}).limit(500),
+        db.from('incidents').select('*').in('district',['เมือง','เมืองนราธิวาส','มืองนราธิวาส','อ.เมืองนราธิวาส']).order('occurred_at',{ascending:false}).limit(250),
+        db.from('vehicle_alerts').select('*').eq('police_station','สภ.เมืองนราธิวาส').eq('status','ใช้งาน').order('reported_at',{ascending:false}).limit(500),
         db.from('incidents').select('id',{count:'exact',head:true}),
         db.from('case_timeline_entries').select('id',{count:'exact',head:true})
       ]);
