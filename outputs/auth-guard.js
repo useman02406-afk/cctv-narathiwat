@@ -287,7 +287,7 @@
     const check = async () => {
       if (!navigator.onLine) return show('ออฟไลน์อยู่ — ยังตรวจสอบฐานข้อมูลไม่ได้');
       try {
-        const result = await session.client.from('cctv_locations').select('id', { count: 'estimated', head: true });
+        const result = await session.client.from('cctv_locations').select('id', { count: 'estimated', head: true }).eq('area', 'สภ.เมืองนราธิวาส');
         if (result.error) throw result.error;
         clear();
         return { ok: true, count: result.count ?? null };
@@ -572,7 +572,7 @@
     }
     const rows = [];
     for (let from = 0; ; from += 500) {
-      const result = await session.client.from('cctv_locations').select('uid,camera_name,name,ownership_category').order('id').range(from, from + 499);
+      const result = await session.client.from('cctv_locations').select('uid,camera_name,name,ownership_category').eq('area', 'สภ.เมืองนราธิวาส').order('id').range(from, from + 499);
       if (result.error) return;
       rows.push(...(result.data || []));
       if ((result.data || []).length < 500) break;
@@ -605,6 +605,7 @@
       const result = await session.client
         .from('cctv_locations')
         .select('id,uid,camera_name,name,area')
+        .eq('area', 'สภ.เมืองนราธิวาส')
         .order('id')
         .range(from, from + 499);
       if (result.error) return;

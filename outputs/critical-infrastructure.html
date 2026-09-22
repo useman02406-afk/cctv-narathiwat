@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="auth-guard.js?v=21"></script>
+  <script src="auth-guard.js?v=22"></script>
   <script src="smart-alert.js?v=3"></script>
   <script src="marker-system.js"></script>
   <style>
@@ -62,7 +62,7 @@
     ];
     const $ = id => document.getElementById(id);
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = new URLSearchParams(location.search).get('station') || '', sessionRef, editId = null;
+    let map, rows = [], active = new Set(types.map(type => type.name)), layer, activeStation = new URLSearchParams(location.search).get('station') || 'สภ.เมืองนราธิวาส', sessionRef, editId = null;
     const canManage = () => ['ADMIN','OFFICER'].includes(String(sessionRef?.profile?.role || '').toUpperCase());
     const stationOf = row => {
       const match = /(?:^|\n)station:\s*(.+?)(?:\n|$)/i.exec(String(row.details || ''));

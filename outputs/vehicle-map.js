@@ -48,7 +48,7 @@
   async function fetchAll(){
     const all=[]; const size=1000;
     for(let from=0;;from+=size){
-      const {data,error}=await db.from('vehicle_alerts').select('*').order('reported_at',{ascending:false}).range(from,from+size-1);
+      const {data,error}=await db.from('vehicle_alerts').select('*').eq('police_station','สภ.เมืองนราธิวาส').order('reported_at',{ascending:false}).range(from,from+size-1);
       if(error) throw error; all.push(...(data||[])); if(!data||data.length<size) break;
     }
     return all;

@@ -271,6 +271,7 @@
       db
         .from("incidents")
         .select("*")
+        .in("district", ["เมือง", "เมืองนราธิวาส", "มืองนราธิวาส", "อ.เมืองนราธิวาส"])
         .order("updated_at", { ascending: false })
         .limit(200),
       db
@@ -281,6 +282,7 @@
       db
         .from("cctv_locations")
         .select("id,uid,camera_name,name,area,lat,lng,status")
+        .eq("area", "สภ.เมืองนราธิวาส")
         .limit(5000),
     ]);
     if (a.error || b.error || c.error) {
