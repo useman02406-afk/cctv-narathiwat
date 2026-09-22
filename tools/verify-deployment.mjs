@@ -7,13 +7,16 @@ const pages = [
   'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
   'mission-planner.html', 'home-search.html', 'case-timeline.html', 'reports.html',
+  'case-timeline-command.js?v=1',
   'module-navigation.css?v=1', 'module-navigation.js?v=1',
   'global-module-menu.css?v=3', 'global-module-menu.js?v=3',
   'auth-guard.js?v=19', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
 ];
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
-  ['home.html', ['แผนที่สถานการณ์กลาง', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home', 'สืบสวนและภารกิจ']],
+  ['home.html', ['commandMapTitle', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home', 'commandAlertFeed', 'onlineCount']],
+  ['case-timeline.html', ['timelineList', 'playRange', 'case-timeline-command.js?v=1']],
+  ['case-timeline-command.js?v=1', ['case_timeline_entries', 'function draw()', 'function select(id)']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "'risk_areas','risk'", "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
@@ -61,8 +64,7 @@ for (const page of pages) {
 try {
   const home = await fetch(`${site}/home.html`, { signal: timeout(20_000), cache: 'no-store' }).then(response => response.text());
   const requiredModules = [
-    'home.html', 'station-overview.html', 'camera-center.html', 'investigations.html',
-    'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
+    'camera-center.html', 'investigations.html', 'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',
     'vehicle-alerts.html', 'mission-planner.html', 'home-search.html',
     'case-timeline.html', 'reports.html'
   ];
@@ -110,4 +112,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PASS: ${pages.length} deployed resources, 12-module release contract, Supabase Auth, and ${protectedTables.length} anonymous RLS probes.`);
+console.log(`PASS: ${pages.length} deployed resources, 10-module Command Center contract, Supabase Auth, and ${protectedTables.length} anonymous RLS probes.`);
