@@ -149,9 +149,9 @@
     }
   }
   function loadCaseCommandCenter() {
-    if (!/\/case-timeline\.html$/i.test(location.pathname)) return;
-    const style = document.createElement('link');style.rel='stylesheet';style.href=new window.URL('case-command-center.css?v=2',location.href).href;document.head.appendChild(style);
-    const script = document.createElement('script');script.src=new window.URL('case-command-center.js?v=2',location.href).href;script.defer=true;document.head.appendChild(script);
+    // case-timeline.html now owns its complete three-column command workspace.
+    // Keep this compatibility hook intentionally empty so the retired enhancer
+    // cannot inject a second timeline, map, and evidence panel.
   }
   function loadHomeCommandOverview() {
     if (!/\/home\.html$/i.test(location.pathname)) return;
