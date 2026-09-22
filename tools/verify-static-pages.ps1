@@ -30,7 +30,7 @@ foreach ($file in $htmlFiles) {
   if ($text.Contains([char]0xfffd)) { $failed.Add("Invalid UTF-8 character: $($file.Name)") }
   if ($text -notmatch '<meta\s+charset="utf-8"') { $failed.Add("Missing UTF-8 meta tag: $($file.Name)") }
   if ($text -match 'CCTV POLICE9') { $failed.Add("Legacy product name remains: $($file.Name)") }
-  if ($text -match 'auth-guard\.js\?v=(?:1[0-7]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
+  if ($text -match 'auth-guard\.js\?v=(?:1[0-8]|\d)\b') { $failed.Add("Stale auth guard cache version: $($file.Name)") }
 
   $references = [regex]::Matches($text, '(?:src|href)=["'']([^"''#?]+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   foreach ($reference in $references) {
@@ -95,17 +95,6 @@ foreach ($module in $primaryModules) {
 if (([regex]::Matches($moduleNavigation, "\['[^']+','fa-[^']+','[^']+\.html'")).Count -ne 12) {
   $failed.Add('Module switcher must contain exactly 12 primary modules')
 }
-$globalModuleMenu = Get-Content (Join-Path $OutputRoot 'global-module-menu.js') -Raw -Encoding utf8
-foreach ($module in $primaryModules) {
-  if ($globalModuleMenu -notmatch [regex]::Escape($module)) { $failed.Add("Global module menu is missing module: $module") }
-}
-foreach ($accessibilityMarker in @('aria-expanded', "event.key !== 'Tab'", "document.body.style.overflow = 'hidden'")) {
-  if ($globalModuleMenu -notmatch [regex]::Escape($accessibilityMarker)) {
-    $failed.Add("Global module menu accessibility contract is missing: $accessibilityMarker")
-  }
-}
-if ($globalModuleMenu -notmatch "page === 'home\.html'") { $failed.Add('Global module menu is not disabled on the dashboard') }
-
 $login = Get-Content (Join-Path $OutputRoot 'login.html') -Raw -Encoding utf8
 if ($login -notmatch "location\.replace\('home\.html'\)") { $failed.Add('Login does not route to the legacy home page') }
 
@@ -117,10 +106,13 @@ $reports = Get-Content (Join-Path $OutputRoot 'reports.html') -Raw -Encoding utf
 foreach ($reportContract in @('dateFrom', 'dateTo', 'reportData', 'thisMonth', "camera-center.html#camera-locations-map.html", "risk:'risk-areas.html'", "people:'risk-persons.html'", "vehicle:'vehicle-alerts.html'")) {
   if ($reports -notmatch [regex]::Escape($reportContract)) { $failed.Add("Report filter/export contract is missing: $reportContract") }
 }
+if ($reports -notmatch "'risk_areas','risk'") { $failed.Add('Reports page is not connected to the risk_areas table') }
 
 $authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
 if ($authGuard -match 'loadCommandShell|command-center-v2\.html#') { $failed.Add('Legacy modules still contain redesigned command-center routing') }
 if ($authGuard -notmatch 'runtime-health\.js') { $failed.Add('Runtime health monitor is not loaded by auth guard') }
+if ($authGuard -match 'global-module-menu\.(?:js|css)') { $failed.Add('Retired global 12-module menu is still injected by auth guard') }
+if ($authGuard -notmatch 'parent\.CCTV_SUPABASE') { $failed.Add('Embedded modules do not reuse the parent Supabase client') }
 foreach ($securityContract in @(
   '30 * 60 * 1000',
   "login.html?error=idle",
@@ -136,6 +128,9 @@ foreach ($securityContract in @(
 $adminConsole = Get-Content (Join-Path $OutputRoot 'admin-console.html') -Raw -Encoding utf8
 if ($adminConsole -notmatch "profile\.role\s*!==\s*'ADMIN'.*location\.replace\('home\.html'\)") {
   $failed.Add('Admin console does not redirect non-ADMIN users')
+}
+if ($adminConsole -notmatch "system_audit_logs'[\s\S]*?\.limit\(100\)") {
+  $failed.Add('Admin audit timeline is not capped at 100 recent rows')
 }
 
 if ($failed.Count) {
