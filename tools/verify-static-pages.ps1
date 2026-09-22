@@ -85,6 +85,15 @@ $timeline = Get-Content (Join-Path $OutputRoot 'case-timeline.html') -Raw -Encod
 foreach ($timelineContract in @('timelineList', 'map', 'playRange', 'detail', 'route-line', 'exportCsv', 'printReport', 'case-timeline-command.js')) {
   if ($timeline -notmatch [regex]::Escape($timelineContract)) { $failed.Add("Investigation timeline contract is missing: $timelineContract") }
 }
+if ($timeline -match [regex]::Escape('</script>@media print{')) {
+  $failed.Add('Investigation timeline print CSS is rendered as page text')
+}
+if ($timeline -notmatch [regex]::Escape('</script><style>@media print{')) {
+  $failed.Add('Investigation timeline print CSS is not inside a style element')
+}
+if (([regex]::Matches($timeline, '<style>').Count -ne 1) -or ([regex]::Matches($timeline, '</style>').Count -ne 1)) {
+  $failed.Add('Investigation timeline must contain one balanced style element')
+}
 $timelineScript = Get-Content (Join-Path $OutputRoot 'case-timeline-command.js') -Raw -Encoding utf8
 foreach ($timelineScriptContract in @(".update(payload).eq('id',editId)", ".delete().eq('id',id)", 'function exportCsv()', 'window.print()')) {
   if ($timelineScript -notmatch [regex]::Escape($timelineScriptContract)) { $failed.Add("Investigation timeline action is missing: $timelineScriptContract") }

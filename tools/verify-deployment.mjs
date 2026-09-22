@@ -15,7 +15,7 @@ const pages = [
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
   ['home.html', ['commandMapTitle', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home', 'commandAlertFeed', 'onlineCount']],
-  ['case-timeline.html', ['timelineList', 'playRange', 'exportCsv', 'printReport', 'case-timeline-command.js?v=1']],
+  ['case-timeline.html', ['timelineList', 'playRange', 'exportCsv', 'printReport', '</script><style>@media print{', 'case-timeline-command.js?v=1']],
   ['case-timeline-command.js?v=1', ['case_timeline_entries', 'function draw()', 'function select(id)', 'function exportCsv()', ".update(payload).eq('id',editId)"]],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
