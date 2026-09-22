@@ -104,6 +104,10 @@ foreach ($operationContract in @('critical-infrastructure.html', 'risk-persons.h
 }
 $authGuard = Get-Content (Join-Path $OutputRoot 'auth-guard.js') -Raw -Encoding utf8
 if ($authGuard -notmatch [regex]::Escape('module-operations.js?v=1')) { $failed.Add('Auth guard does not load shared module operations') }
+$reports = Get-Content (Join-Path $OutputRoot 'reports.html') -Raw -Encoding utf8
+foreach ($reportContract in @("'vehicle_sightings'", "'case_timeline_entries'", "role==='ADMIN'", 'canExport(config)')) {
+  if ($reports -notmatch [regex]::Escape($reportContract)) { $failed.Add("Report center contract is missing: $reportContract") }
+}
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(
   'camera-center.html', 'investigations.html', 'critical-infrastructure.html', 'risk-areas.html', 'risk-persons.html',

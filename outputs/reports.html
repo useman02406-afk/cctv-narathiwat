@@ -22,26 +22,29 @@
   </main>
   <script>
   (()=>{
-    let db,sets={}; const $=id=>document.getElementById(id);
+    let db,sets={},role=''; const $=id=>document.getElementById(id);
     const csv=value=>'"'+String(value??'').replaceAll('"','""')+'"';
     const configs=[
       ['cameras','กล้อง CCTV','fa-video','cctv_locations','cctv','id,uid,camera_name,name,camera_type,ownership_category,project,area,lat,lng,status,created_at,updated_at','created_at'],
-      ['economic','พื้นที่เศรษฐกิจ','fa-building-columns','economic_data','economy','id,name,type,risk_level,score,cctv',''],
+      ['economic','พื้นที่เศรษฐกิจ','fa-building-columns','economic_data','economy','id,name,type,risk_level,score,cctv,timestamp','timestamp'],
       ['incidents','บันทึกเหตุการณ์','fa-triangle-exclamation','incidents','security','id,case_no,incident_category,incident_subcategory,incident_type,location,status,occurred_at','occurred_at'],
       ['riskareas','จุดเสี่ยง / พื้นที่เฝ้าระวัง','fa-draw-polygon','risk_areas','risk','id,name,area_code,risk_category,risk_level,zone_kind,status,updated_at','updated_at'],
-      ['riskpeople','บุคคลที่มีประวัติอาชญากรรม','fa-user-shield','risk_person_records','people','id,risk_category,first_name,last_name,latitude,longitude,created_at','created_at'],
+      ['riskpeople','บุคคลที่มีประวัติอาชญากรรม','fa-user-shield','risk_person_records','people','id,risk_category,first_name,last_name,latitude,longitude,created_at','created_at',true],
       ['vehicles','รถแจ้งเตือน','fa-car-burst','vehicle_alerts','vehicle','id,plate_number,province,vehicle_type,alert_type,status,last_location,reported_at','reported_at'],
+      ['sightings','บันทึกการพบรถ','fa-binoculars','vehicle_sightings','vehicle','id,vehicle_alert_id,seen_at,source,location,latitude,longitude,observation,action_taken,updated_at','seen_at'],
+      ['timeline','ไทม์ไลน์สืบสวน','fa-timeline','case_timeline_entries','timeline','id,incident_id,entry_at,entry_type,detail,next_action,visibility,updated_at','entry_at'],
       ['maintenance','แจ้งซ่อมกล้อง','fa-screwdriver-wrench','camera_maintenance_tickets','cctv','id,issue_type,priority,status,reported_at','reported_at'],
       ['inspections','ตรวจสภาพกล้อง','fa-clipboard-check','camera_inspections','cctv','id,connectivity,image_quality,power_status,inspected_at','inspected_at'],
     ];
     function download(name,data){if(!data.length){alert('ยังไม่มีข้อมูลสำหรับส่งออก');return}const fields=Object.keys(data[0]);const text='\ufeff'+[fields.join(','),...data.map(row=>fields.map(field=>csv(row[field])).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download=name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)}
     function reportData(key){const config=configs.find(row=>row[0]===key),field=config?.[6],from=$('dateFrom').value,to=$('dateTo').value;if(!field||(!from&&!to))return sets[key]||[];const start=from?new Date(from+'T00:00:00'):null,end=to?new Date(to+'T23:59:59.999'):null;return (sets[key]||[]).filter(row=>{const value=row[field];if(!value)return false;const date=new Date(value);return !Number.isNaN(date.getTime())&&(!start||date>=start)&&(!end||date<=end)})}
     function count(key){return reportData(key).length.toLocaleString('th-TH')}
+    function canExport(config){return !config?.[7]||role==='ADMIN'}
     function mapLink(view){
       const links={
         cctv:'camera-center.html#camera-locations-map.html', economy:'critical-infrastructure.html',
         security:'investigations.html', risk:'risk-areas.html', people:'risk-persons.html',
-        vehicle:'vehicle-alerts.html', alerts:'home.html'
+        vehicle:'vehicle-alerts.html', timeline:'case-timeline.html', alerts:'home.html'
       };
       return links[view]||'home.html';
     }
@@ -49,7 +52,7 @@
       const total=configs.reduce((sum,[key])=>sum+reportData(key).length,0);
       const openLink=view=>`<a class="btn map" href="${mapLink(view)}"><i class="fa-solid fa-map"></i> แผนที่</a>`;
       $('cards').innerHTML=configs.map(([key,label,icon])=>`<article class="card"><div class="icon"><i class="fa-solid ${icon}"></i></div><h2>${label}</h2><div class="count">${count(key)}</div><div class="muted">รายการในระบบ</div></article>`).join('');
-      $('rows').innerHTML=configs.map(([key,label,,,view])=>`<tr><td>${label}</td><td>${count(key)}</td><td><button class="btn" data-export="${key}">CSV</button> ${openLink(view)}</td></tr>`).join('');
+      $('rows').innerHTML=configs.map(config=>{const [key,label,,,view]=config;const exportButton=canExport(config)?`<button class="btn" data-export="${key}">CSV</button>`:'<span class="muted">จำกัดสิทธิ์ ADMIN</span>';return `<tr><td>${label}</td><td>${count(key)}</td><td>${exportButton} ${openLink(view)}</td></tr>`}).join('');
       document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>download('report-'+button.dataset.export,reportData(button.dataset.export)));
       $('exportAll').onclick=()=>download('command-center-summary',configs.map(([key,label])=>({module:label,total:reportData(key).length,date_from:$('dateFrom').value||'ทั้งหมด',date_to:$('dateTo').value||'ทั้งหมด',exported_at:new Date().toISOString()})));
       const range=$('dateFrom').value||$('dateTo').value?` · ช่วง ${$('dateFrom').value||'เริ่มต้น'} ถึง ${$('dateTo').value||'ปัจจุบัน'}`:' · ทุกช่วงเวลา';
@@ -76,7 +79,7 @@
       draw();
       if(failed.length){$('notice').textContent='สรุปข้อมูลส่วนที่อ่านได้แล้ว · ยังโหลดไม่ได้: '+failed.join(', ');$('notice').className='notice error'}
     }
-    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return;if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){alert('บัญชีนี้ไม่มีสิทธิ์เข้าถึงศูนย์รายงาน');location.replace('home.html');return}db=session.client;$('user').textContent=`${session.profile.full_name||session.user.email} · ${session.profile.role}`;$('print').onclick=()=>window.print();$('applyDates').onclick=draw;$('allDates').onclick=()=>{$('dateFrom').value='';$('dateTo').value='';draw()};$('thisMonth').onclick=()=>{const now=new Date(),pad=value=>String(value).padStart(2,'0');$('dateFrom').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;$('dateTo').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;draw()};load()}
+    function start(event){const session=event?.detail||window.cctvSession;if(!session?.client)return;if(!['ADMIN','OFFICER','VIEWER'].includes(session.profile?.role)){alert('บัญชีนี้ไม่มีสิทธิ์เข้าถึงศูนย์รายงาน');location.replace('home.html');return}db=session.client;role=String(session.profile.role||'').toUpperCase();$('user').textContent=`${session.profile.full_name||session.user.email} · ${session.profile.role}`;$('print').onclick=()=>window.print();$('applyDates').onclick=draw;$('allDates').onclick=()=>{$('dateFrom').value='';$('dateTo').value='';draw()};$('thisMonth').onclick=()=>{const now=new Date(),pad=value=>String(value).padStart(2,'0');$('dateFrom').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;$('dateTo').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;draw()};load()}
     window.addEventListener('cctv-auth-ready',start,{once:true});if(window.cctvSession)start();
   })();
   </script>

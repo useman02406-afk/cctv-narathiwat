@@ -19,7 +19,7 @@ const expectedContent = new Map([
   ['case-timeline-command.js?v=2', ['case_timeline_entries', 'function draw()', 'function select(id)', 'function exportCsv()', '.update(payload)', '.eq("id", editId)', 'function distanceMeters(', 'function drawCameras()', '.from("cctv_locations")']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
-  ['reports.html', ['dateFrom', 'reportData', "'risk_areas','risk'", "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],
+  ['reports.html', ['dateFrom', 'reportData', "'risk_areas','risk'", "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'", "'vehicle_sightings'", "'case_timeline_entries'", "role==='ADMIN'", 'canExport(config)']],
   ['auth-guard.js?v=21', ['parent.CCTV_SUPABASE', '30 * 60 * 1000', 'login.html?error=idle', '!profile.active', 'hideMutationControls', 'module-operations.js?v=1']],
   ['module-operations.js?v=1', ['critical-infrastructure.html', 'risk-persons.html', 'downloadCsv(table)', 'window.print()', 'location.reload()', 'cctv-auth-ready']],
   ['global-module-menu.js?v=3', ["['ศูนย์รายงาน','reports.html'", "page === 'home.html'"]],
