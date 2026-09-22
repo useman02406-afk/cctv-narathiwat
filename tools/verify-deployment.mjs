@@ -7,7 +7,7 @@ const pages = [
   'investigations.html', 'critical-infrastructure.html', 'risk-areas.html',
   'risk-persons.html', 'vehicle-alerts.html', 'vehicle-sightings.html',
   'mission-planner.html', 'home-search.html', 'case-timeline.html', 'reports.html',
-  'case-timeline-command.js?v=1',
+  'case-timeline-command.js?v=2',
   'module-navigation.css?v=1', 'module-navigation.js?v=1',
   'global-module-menu.css?v=3', 'global-module-menu.js?v=3',
   'auth-guard.js?v=20', 'smart-alert.js?v=3', 'runtime-health.js?v=1'
@@ -15,8 +15,8 @@ const pages = [
 const expectedContent = new Map([
   ['login.html', ["location.replace('home.html')"]],
   ['home.html', ['commandMapTitle', 'command-map-frame', 'camera-locations-map.html?v=20260916-command-home', 'commandAlertFeed', 'onlineCount']],
-  ['case-timeline.html', ['timelineList', 'playRange', 'exportCsv', 'printReport', '</script><style>@media print{', 'case-timeline-command.js?v=1']],
-  ['case-timeline-command.js?v=1', ['case_timeline_entries', 'function draw()', 'function select(id)', 'function exportCsv()', ".update(payload).eq('id',editId)"]],
+  ['case-timeline.html', ['timelineList', 'playRange', 'exportCsv', 'printReport', '</script><style>@media print{', 'case-timeline-command.js?v=2']],
+  ['case-timeline-command.js?v=2', ['case_timeline_entries', 'function draw()', 'function select(id)', 'function exportCsv()', '.update(payload)', '.eq("id", editId)', 'function distanceMeters(', 'function drawCameras()', '.from("cctv_locations")']],
   ['camera-center.html', ['data-admin-only', 'enforceAdminTabs']],
   ['camera-categories.html', ["if(!admin())", "location.replace(target)"]],
   ['reports.html', ['dateFrom', 'reportData', "'risk_areas','risk'", "risk:'risk-areas.html'", "vehicle:'vehicle-alerts.html'"]],

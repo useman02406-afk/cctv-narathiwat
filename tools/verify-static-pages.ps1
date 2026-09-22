@@ -95,7 +95,7 @@ if (([regex]::Matches($timeline, '<style>').Count -ne 1) -or ([regex]::Matches($
   $failed.Add('Investigation timeline must contain one balanced style element')
 }
 $timelineScript = Get-Content (Join-Path $OutputRoot 'case-timeline-command.js') -Raw -Encoding utf8
-foreach ($timelineScriptContract in @(".update(payload).eq('id',editId)", ".delete().eq('id',id)", 'function exportCsv()', 'window.print()')) {
+foreach ($timelineScriptContract in @('.update(payload)', '.eq("id", editId)', '.delete()', '.eq("id", id)', 'function exportCsv()', 'window.print()', 'function distanceMeters(', 'function drawCameras()', '.from("cctv_locations")')) {
   if ($timelineScript -notmatch [regex]::Escape($timelineScriptContract)) { $failed.Add("Investigation timeline action is missing: $timelineScriptContract") }
 }
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
