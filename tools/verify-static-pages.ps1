@@ -82,8 +82,12 @@ foreach ($retiredHomeSwitcher in @('module-switcher', 'moduleTabs', 'moduleDetai
   if ($dashboardHome -match [regex]::Escape($retiredHomeSwitcher)) { $failed.Add("Duplicate home module switcher remains: $retiredHomeSwitcher") }
 }
 $timeline = Get-Content (Join-Path $OutputRoot 'case-timeline.html') -Raw -Encoding utf8
-foreach ($timelineContract in @('timelineList', 'map', 'playRange', 'detail', 'route-line', 'case-timeline-command.js')) {
+foreach ($timelineContract in @('timelineList', 'map', 'playRange', 'detail', 'route-line', 'exportCsv', 'printReport', 'case-timeline-command.js')) {
   if ($timeline -notmatch [regex]::Escape($timelineContract)) { $failed.Add("Investigation timeline contract is missing: $timelineContract") }
+}
+$timelineScript = Get-Content (Join-Path $OutputRoot 'case-timeline-command.js') -Raw -Encoding utf8
+foreach ($timelineScriptContract in @(".update(payload).eq('id',editId)", ".delete().eq('id',id)", 'function exportCsv()', 'window.print()')) {
+  if ($timelineScript -notmatch [regex]::Escape($timelineScriptContract)) { $failed.Add("Investigation timeline action is missing: $timelineScriptContract") }
 }
 $moduleNavigation = Get-Content (Join-Path $OutputRoot 'module-navigation.js') -Raw -Encoding utf8
 $primaryModules = @(
